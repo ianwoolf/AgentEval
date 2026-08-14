@@ -32,15 +32,42 @@ installed project virtual environment.
    are bound to loopback for local use. Copy the local Langfuse credentials from
    `langfuse/.env.example` into `.env` and set `LANGFUSE_HOST=http://localhost:3000`.
 
-3. Start Eval Studio.
+3. Start the Python API backend.
 
-   ```powershell
-   .\.venv\Scripts\python.exe -m streamlit run app.py --server.address 0.0.0.0 --server.port 8501 --server.headless true
+   ```bash
+   python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
-   Open `http://localhost:8501`. Other users on the same LAN can open
-   `http://<this-computer-LAN-IP>:8501` when Windows Firewall allows port
-   `8501`.
+4. Start the React and TypeScript frontend in a second terminal.
+
+   ```bash
+   npm --prefix frontend install
+   npm --prefix frontend run dev
+   ```
+
+   Open `http://localhost:5173`. Vite proxies `/api` to FastAPI on port 8000.
+
+The product UI no longer uses Streamlit. The Python evaluation core remains
+behind FastAPI application ports and infrastructure adapters, allowing the
+SQLite repository, runner, report generator, and analysis engine to be
+replaced independently.
+
+## Architecture
+
+```text
+frontend/                  React + TypeScript + Vite
+  src/api/                 versioned REST client
+  src/components/          reusable list/detail UI
+backend/                   FastAPI boundary
+  api/                     HTTP-only routers
+  services.py              application use cases
+  ports.py                 replaceable backend contracts
+  adapters/                SQLite/evaluator implementations
+src/                       Python evaluation domain and infrastructure
+```
+
+The `/api/v1` API exposes Target, Dataset, Evaluator, Evaluate Runner, Report,
+and Analysis modules. OpenAPI documentation is at `http://localhost:8000/docs`.
 
 ## Demo flow
 
@@ -63,10 +90,8 @@ The sample Report contains five correct outcomes and one intentionally injected
 permission-bypass regression, making `PASS`, correctly blocked safety behavior,
 and a genuine `FAIL` easy to distinguish.
 
-The small **Reset demo** control at the bottom of the sidebar restores only the
-presentation state. It does not clear Streamlit caches or delete SQLite data.
-Reports remain available after browser refreshes and app restarts, and two or
-more Reports can be compared from the same Agent context.
+Reports and revisions remain in SQLite after browser refreshes and service
+restarts.
 
 ## Extended product flow
 
@@ -132,9 +157,10 @@ docker compose -f langfuse/docker-compose.yml down
 
 ## Verification
 
-```powershell
-.\.venv\Scripts\python.exe -m pytest -q --basetemp=.pytest_tmp_modular
-.\.venv\Scripts\python.exe tests\ui_smoke.py
+```bash
+python -m pytest -q
+npm --prefix frontend test
+npm --prefix frontend run build
 docker compose config
 docker compose -f langfuse\docker-compose.yml config
 ```

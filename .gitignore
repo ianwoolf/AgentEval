@@ -16,3 +16,4 @@ streamlit.*.log
 .claude
 .agents
 docs/superpowers
+frontend/node_modules/
