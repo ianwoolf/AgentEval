@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, Braces, Sparkles } from "lucide-react";
 import type { Scorer } from "./contracts";
-import { clone, publishScorer, uid } from "./domain";
+import { clone, publishScorer, validateScorerSource, uid } from "./domain";
 import { useWorkbench } from "./provider";
 import {
   Button,
@@ -45,9 +45,10 @@ export function ScorersPage() {
               draft: {
                 name: "",
                 description: "",
-                kind: "LLM_JUDGE",
-                definition:
-                  'Evaluate {{input}}, {{output}} and {{reference}}.\nReturn {"score": 0.0, "reason": "..."}.',
+                kind: "CODE",
+                definition: "",
+                repoUrl: "",
+                scriptPath: "",
                 threshold: 0.8,
                 notes: "",
               },
@@ -115,7 +116,7 @@ export function ScorersPage() {
                 {s.draft.kind === "LLM_JUDGE"
                   ? "LLM judge"
                   : s.draft.kind === "CODE"
-                    ? "Code"
+                    ? "Git script"
                     : "Rule"}
               </td>
               <td>
@@ -246,14 +247,14 @@ function ScorerEditor({
           </Field>
           <Field label="Scorer type">
             <Select
-              disabled={readonly}
+              disabled
               value={d.kind}
               onChange={(e) =>
                 patch({ kind: e.target.value as Scorer["draft"]["kind"] })
               }
             >
               <option value="LLM_JUDGE">LLM judge</option>
-              <option value="CODE">Custom code</option>
+              <option value="CODE">Git script</option>
               {readonly && <option value="RULE">Rule</option>}
             </Select>
           </Field>
@@ -266,19 +267,44 @@ function ScorerEditor({
               />
             </Field>
           </div>
-          <div className="sm:col-span-2">
-            <Field
-              label={d.kind === "CODE" ? "Code definition" : "Scoring rubric"}
-              hint="Inputs: input, output, reference. Output: score (0–1), reason. Code is never executed in this UI."
-            >
-              <Textarea
-                disabled={readonly}
-                className="min-h-40 font-mono text-xs"
-                value={d.definition}
-                onChange={(e) => patch({ definition: e.target.value })}
-              />
-            </Field>
-          </div>
+          {readonly ? (
+            <div className="sm:col-span-2">
+              <Field label="Scoring rubric">
+                <Textarea
+                  disabled
+                  className="min-h-40 font-mono text-xs"
+                  value={d.definition}
+                />
+              </Field>
+            </div>
+          ) : (
+            <>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Git repository *"
+                  hint="HTTPS or SSH Git address. This demo does not fetch repositories."
+                >
+                  <Input
+                    placeholder="https://github.com/org/scorers.git"
+                    value={d.repoUrl ?? ""}
+                    onChange={(e) => patch({ repoUrl: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Script path *"
+                  hint="Relative to the repository root, e.g. scorers/guardrail.py. Inputs: input, output, reference. Output: score (0–1), reason."
+                >
+                  <Input
+                    placeholder="scorers/guardrail.py"
+                    value={d.scriptPath ?? ""}
+                    onChange={(e) => patch({ scriptPath: e.target.value })}
+                  />
+                </Field>
+              </div>
+            </>
+          )}
           <Field label="Pass threshold (0–1)">
             <Input
               disabled={readonly}
@@ -331,7 +357,8 @@ function ScorerEditor({
                   throw new Error(
                     "Sample requires input, output and reference.",
                   );
-                if (!d.definition.trim())
+                if (!readonly) validateScorerSource(d);
+                else if (!d.definition.trim())
                   throw new Error("Add a definition first.");
                 setTestResult({
                   simulated: true,

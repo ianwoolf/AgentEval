@@ -28,6 +28,9 @@ export interface Dataset {
   versions: DatasetVersion[];
 }
 export interface EnvironmentConfig {
+  modelId: string;
+  guardrailId: string;
+  runner: { id: string; concurrency: number };
   name: string;
   description: string;
   type: "SANDBOX";
@@ -54,6 +57,8 @@ export interface ScorerConfig {
   description: string;
   kind: "LLM_JUDGE" | "CODE" | "RULE";
   definition: string;
+  repoUrl?: string;
+  scriptPath?: string;
   threshold: number;
   notes: string;
 }

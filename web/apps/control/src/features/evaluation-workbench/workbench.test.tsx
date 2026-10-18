@@ -155,6 +155,16 @@ describe("interactive workbench", () => {
     expect(
       screen.getByRole("columnheader", { name: "Detected has_issue" }),
     ).not.toBeNull();
+    expect(screen.queryByRole("tab", { name: "Configuration" })).toBeNull();
+    await user.click(
+      screen.getByRole("button", { name: /View environment configuration/ }),
+    );
+    const config = within(screen.getByRole("dialog"));
+    expect(config.getByText("demo-model-support")).not.toBeNull();
+    expect(config.getByText("guardrail-privacy")).not.toBeNull();
+    expect(config.getByText("demo-sandbox-runner")).not.toBeNull();
+    expect(config.getByText("Runner configuration")).not.toBeNull();
+    await user.click(config.getByRole("button", { name: "Close dialog" }));
     await user.click(screen.getByRole("button", { name: "#1" }));
     expect(
       screen.getByRole("heading", { name: "Sample trace & feedback" }),
@@ -163,5 +173,33 @@ describe("interactive workbench", () => {
     expect(
       screen.getByRole("heading", { name: "Scorer feedback" }),
     ).not.toBeNull();
+  });
+});
+
+it("creates a custom scorer from a Git repository and relative script path", async () => {
+  const user = userEvent.setup();
+  render(
+    <WorkbenchProvider>
+      <ScorersPage />
+      <StateProbe />
+    </WorkbenchProvider>,
+  );
+  await user.click(screen.getByRole("button", { name: "New scorer" }));
+  await user.type(screen.getByLabelText("Name *"), "Git risk scorer");
+  await user.type(
+    screen.getByLabelText("Git repository *"),
+    "https://github.com/example/scorers.git",
+  );
+  await user.type(
+    screen.getByLabelText("Script path *"),
+    "scorers/guardrail.py",
+  );
+  await user.type(screen.getByLabelText("Version notes *"), "Initial script");
+  await user.click(screen.getByRole("button", { name: "Publish v1" }));
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(readState().scorers.at(-1).versions[0]).toMatchObject({
+    kind: "CODE",
+    repoUrl: "https://github.com/example/scorers.git",
+    scriptPath: "scorers/guardrail.py",
   });
 });

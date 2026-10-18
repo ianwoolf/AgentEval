@@ -19,6 +19,9 @@ export const defaultEnvironment: EnvironmentConfig = {
   name: "",
   description: "",
   type: "SANDBOX",
+  modelId: "demo-model-support",
+  guardrailId: "guardrail-privacy",
+  runner: { id: "demo-sandbox-runner", concurrency: 1 },
   network: [],
   readOnlyPaths: ["/app", "/datasets"],
   writablePaths: ["/workspace", "/tmp"],
@@ -207,6 +210,51 @@ function EnvironmentEditor({
             />
           </Field>
         </div>
+        <Field label="Model ID">
+          <Input
+            value={config.modelId ?? ""}
+            onChange={(e) => patch({ modelId: e.target.value })}
+          />
+        </Field>
+        <Field label="Guardrail ID">
+          <Input
+            value={config.guardrailId ?? ""}
+            onChange={(e) => patch({ guardrailId: e.target.value })}
+          />
+        </Field>
+        <Field label="Runner ID">
+          <Input
+            value={config.runner?.id ?? ""}
+            onChange={(e) =>
+              patch({
+                runner: {
+                  ...(config.runner ?? { concurrency: 1 }),
+                  id: e.target.value,
+                },
+              })
+            }
+          />
+        </Field>
+        <Field label="Runner concurrency">
+          <Input
+            type="number"
+            min={1}
+            max={32}
+            value={
+              Number.isFinite(config.runner?.concurrency)
+                ? config.runner.concurrency
+                : ""
+            }
+            onChange={(e) =>
+              patch({
+                runner: {
+                  ...(config.runner ?? { id: "" }),
+                  concurrency: e.target.valueAsNumber,
+                },
+              })
+            }
+          />
+        </Field>
         {list(
           "network",
           "Network allowlist",

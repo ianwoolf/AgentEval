@@ -204,3 +204,19 @@ UI demo 为 RUNNING → COMPLETED/CANCELLED，每个 tick 同时产出样本和�
 `messages` 是必填 JSON 字段，用途 input；`has_issue` 是必填 boolean，用途 reference，true=存在风险，false=正常。`category` 是可选 metadata。输入只携带 messages，不将 ground-truth label 传给 target。通用字段编辑器的 json 类型只验证 JSON 有效性；正式 Guardrail adapter 需要额外校验 messages 数组及 role/content schema。
 
 报告输出包含 `has_issue`、`decision`（BLOCK/ALLOW）和 reason。预测与标注相同得 1 分，不同得 0 分；标准 scorer 阈值 0.8。报告显示期望标记、检测标记、误报/漏报计数。第 3 和第 5 个演示样本刻意模拟漏报和误报，实际没有调用 Guardrail。刷新页面后生效，之前在浏览器内编辑的草稿不持久化。
+
+## 报告顶部配置摘要
+
+报告移除 Configuration 标签页，改为指标上方的 Target / Environment / Dataset 三张摘要卡，点击弹框查看对应详情；完整 launch snapshot（含 scorers）在弹框中折叠展示。
+
+`EnvironmentConfig` / `EnvironmentVersion` 新增 `modelId: string`、`guardrailId: string`、`runner: {id: string, concurrency: number}`；可在环境配置编辑器中填写，保存新环境版本后供新 Eval 使用。Runner 并发数为 1–32 的整数，其余资源限制沿用 cpu、memoryMb、timeoutSeconds、commands、network 和路径字段。历史报告使用启动时深拷贝的值，不读取当前环境的最新版本。
+
+默认 modelId=`demo-model-support`、guardrailId=`guardrail-privacy`、runner.id=`demo-sandbox-runner` 均为演示标识，不代表真实可用服务。Environment 的 guardrailId 表示环境中配置的 Guardrail 服务；Target ID 表示本次被测对象，两者应分别展示。正式接口需服务端校验这些引用的存在性、项目权限及版本兼容性。
+
+### Git 仓库打分器
+
+自定义打分器的 New / Manage 表单使用 Git repository 和 Script path，替代内联 rubric / code 编辑；内置打分器仍只读。`ScorerConfig` 保留 `kind: "CODE"`，新增 `repoUrl?: string`、`scriptPath?: string`；两个字段对自定义打分器发布必填，内置打分器仍使用 `definition`。草稿允许未填完整。仓库地址支持 HTTPS / SSH；脚本路径相对于仓库根目录，不允许绝对路径、反斜杠或 `..` 路径段。
+
+发布版本及 evaluation 的 scorer 快照保存仓库地址、脚本路径、阈值和版本说明。报告的 scorer definition 展示该版本对应的仓库及脚本路径。示例仓库是演示占位地址；UI 不验证仓库存在性、不 clone、不执行脚本，Test 仍返回固定模拟分数。
+
+后续对接：scorer 创建 / 更新 / 发布接口接收上述字段；后端发布时需解析并保存不可变 `commitSha`，校验仓库访问权限及脚本存在性，在受限 runner 中执行。当前 UI 版本只冻结地址与路径，尚不能保证远程代码内容可复现。脚本契约仍为输入 `input`、`output`、`reference`，返回 `score`（0–1）及 `reason`；Git 凭证应由后端凭证引用管理，不放在仓库 URL 中。

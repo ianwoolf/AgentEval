@@ -41,6 +41,18 @@ export function publishDataset(dataset: Dataset): Dataset {
   return result;
 }
 export function validateEnvironment(config: EnvironmentConfig) {
+  if (
+    !config.modelId.trim() ||
+    !config.guardrailId.trim() ||
+    !config.runner.id.trim()
+  )
+    throw new Error("Model ID, Guardrail ID and Runner ID are required.");
+  if (
+    !Number.isInteger(config.runner.concurrency) ||
+    config.runner.concurrency < 1 ||
+    config.runner.concurrency > 32
+  )
+    throw new Error("Runner concurrency must be an integer from 1 to 32.");
   if (!config.name.trim()) throw new Error("Environment name is required.");
   if (
     !Number.isFinite(config.cpu) ||
@@ -76,12 +88,33 @@ export function validateEnvironment(config: EnvironmentConfig) {
       "Enter network hostnames, optionally with a port, without protocol or path.",
     );
 }
+export function validateScorerSource(d: Scorer["draft"]) {
+  const repo = d.repoUrl?.trim() ?? "";
+  if (
+    !/^(https?:\/\/[^\s/]+\/\S+|ssh:\/\/[^\s/]+\/\S+|[^\s@]+@[^\s:]+:\S+)$/.test(
+      repo,
+    )
+  )
+    throw new Error(
+      "Git repository must be an HTTPS or SSH repository address.",
+    );
+  const path = d.scriptPath?.trim() ?? "";
+  if (
+    !path ||
+    /[\\:\x00-\x1f]/.test(path) ||
+    path.split("/").some((part) => !part || part === "." || part === "..")
+  )
+    throw new Error(
+      "Script path must be repository-relative, without absolute paths or .. segments.",
+    );
+}
 export function publishScorer(scorer: Scorer): Scorer {
   if (scorer.source === "BUILT_IN")
     throw new Error("Built-in scorers are read-only.");
   const d = scorer.draft;
-  if (!d.name.trim() || !d.definition.trim() || !d.notes.trim())
-    throw new Error("Name, definition and version notes are required.");
+  if (!d.name.trim() || !d.notes.trim())
+    throw new Error("Name and version notes are required.");
+  validateScorerSource(d);
   if (!Number.isFinite(d.threshold) || d.threshold < 0 || d.threshold > 1)
     throw new Error("Threshold must be between 0 and 1.");
   const result = clone(scorer);
@@ -341,6 +374,9 @@ export function createFixtures(): WorkbenchState {
     description:
       "Minimal network access with evaluation-managed LLM and Guardrail routing.",
     type: "SANDBOX",
+    modelId: "demo-model-support",
+    guardrailId: "guardrail-privacy",
+    runner: { id: "demo-sandbox-runner", concurrency: 1 },
     network: [],
     readOnlyPaths: ["/app", "/datasets"],
     writablePaths: ["/workspace", "/tmp"],
@@ -363,9 +399,15 @@ export function createFixtures(): WorkbenchState {
       description:
         source === "BUILT_IN"
           ? "System-maintained evaluator."
-          : "Custom rubric for detecting conversation risks.",
+          : "Git script for detecting conversation risks.",
       kind,
-      definition,
+      definition: source === "CUSTOM" ? "" : definition,
+      ...(source === "CUSTOM"
+        ? {
+            repoUrl: "https://github.com/example/evaluation-scorers.git",
+            scriptPath: "scorers/guardrail_risk.py",
+          }
+        : {}),
       threshold: 0.8,
       notes: "Initial version",
     };
@@ -410,7 +452,7 @@ export function createFixtures(): WorkbenchState {
         "sc-tone",
         "Risk classification",
         "CUSTOM",
-        "LLM_JUDGE",
+        "CODE",
         "Compare output.has_issue with reference.has_issue for the supplied messages. Return score 1 for a match, otherwise 0, with a reason.",
       ),
     ],

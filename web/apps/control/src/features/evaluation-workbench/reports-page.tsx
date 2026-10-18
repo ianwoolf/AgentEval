@@ -1,3 +1,4 @@
+import { ReportConfig } from "./report-config";
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -26,7 +27,6 @@ import {
   Pill,
   Select,
   Table,
-  Tabs,
   download,
   textValue,
 } from "./ui";
@@ -184,7 +184,6 @@ export function ReportDetail({
   run: Evaluation;
   onBack(): void;
 }) {
-  const [tab, setTab] = useState("Samples");
   const [sample, setSample] = useState<SampleResult | null>(null);
   const [status, setStatus] = useState("ALL");
   const [query, setQuery] = useState("");
@@ -245,14 +244,9 @@ export function ReportDetail({
           Evaluation ID:{" "}
           <code className="select-all text-foreground">{run.id}</code>
         </span>
-        <span>
-          {run.snapshot.dataset.name} v{run.snapshot.dataset.version}
-        </span>
-        <span>
-          {run.snapshot.environment.name} v{run.snapshot.environment.version}
-        </span>
         <span>{new Date(run.createdAt).toLocaleString()}</span>
       </div>
+      <ReportConfig snapshot={run.snapshot} />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
           label="Pass rate"
@@ -296,152 +290,135 @@ export function ReportDetail({
           </span>
         </div>
       )}
-      <Tabs
-        items={["Samples", "Configuration"]}
-        active={tab}
-        onChange={setTab}
-      />
-      {tab === "Samples" ? (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <Input
-              className="max-w-xs"
-              aria-label="Search sample content"
-              placeholder="Search input, output or reference…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <Select
-              aria-label="Sample status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="ALL">All samples</option>
-              <option value="PASS">Passed</option>
-              <option value="FAIL">Failed</option>
-              <option value="ERROR">Errors</option>
-            </Select>
-            <Button variant="outline" onClick={() => setFull((v) => !v)}>
-              {full ? "Compact view" : "Full content"}
-            </Button>
-            <span className="ml-auto text-xs text-muted-foreground">
-              {rows.length} samples · select a sample to inspect its trace
-            </span>
-          </div>
-          {rows.length ? (
-            <Table>
-              <thead>
-                <tr>
-                  <th>Sample</th>
-                  <th>{isGuardrail ? "Conversation (messages)" : "Input"}</th>
-                  <th>{isGuardrail ? "Detected has_issue" : "Output"}</th>
-                  <th>{isGuardrail ? "Expected has_issue" : "Reference"}</th>
-                  {run.snapshot.scorers.map((s) => (
-                    <th key={s.id}>
-                      {s.name}
-                      <p className="font-normal">
-                        v{s.version} · ≥ {s.threshold}
-                      </p>
-                    </th>
-                  ))}
-                  <th>Latency</th>
-                  <th>Cost</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id} className="hover:bg-muted/25">
-                    <td>
-                      <button
-                        className="flex items-center gap-2 font-medium text-primary hover:underline"
-                        onClick={() => setSample(r)}
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <Input
+            className="max-w-xs"
+            aria-label="Search sample content"
+            placeholder="Search input, output or reference…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <Select
+            aria-label="Sample status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="ALL">All samples</option>
+            <option value="PASS">Passed</option>
+            <option value="FAIL">Failed</option>
+            <option value="ERROR">Errors</option>
+          </Select>
+          <Button variant="outline" onClick={() => setFull((v) => !v)}>
+            {full ? "Compact view" : "Full content"}
+          </Button>
+          <span className="ml-auto text-xs text-muted-foreground">
+            {rows.length} samples · select a sample to inspect its trace
+          </span>
+        </div>
+        {rows.length ? (
+          <Table>
+            <thead>
+              <tr>
+                <th>Sample</th>
+                <th>{isGuardrail ? "Conversation (messages)" : "Input"}</th>
+                <th>{isGuardrail ? "Detected has_issue" : "Output"}</th>
+                <th>{isGuardrail ? "Expected has_issue" : "Reference"}</th>
+                {run.snapshot.scorers.map((s) => (
+                  <th key={s.id}>
+                    {s.name}
+                    <p className="font-normal">
+                      v{s.version} · ≥ {s.threshold}
+                    </p>
+                  </th>
+                ))}
+                <th>Latency</th>
+                <th>Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} className="hover:bg-muted/25">
+                  <td>
+                    <button
+                      className="flex items-center gap-2 font-medium text-primary hover:underline"
+                      onClick={() => setSample(r)}
+                    >
+                      #{run.results.indexOf(r) + 1}
+                      <ChevronRight className="size-3" />
+                    </button>
+                    <div className="mt-2">
+                      <Pill tone={r.status === "PASS" ? "good" : "bad"}>
+                        {r.status}
+                      </Pill>
+                    </div>
+                  </td>
+                  {[r.input, r.output, r.reference].map((content, index) => (
+                    <td key={index} className="max-w-64 min-w-40 align-top">
+                      <div
+                        className={
+                          full
+                            ? "break-words whitespace-pre-wrap"
+                            : "line-clamp-3 break-words"
+                        }
                       >
-                        #{run.results.indexOf(r) + 1}
-                        <ChevronRight className="size-3" />
-                      </button>
-                      <div className="mt-2">
-                        <Pill tone={r.status === "PASS" ? "good" : "bad"}>
-                          {r.status}
-                        </Pill>
+                        {isGuardrail && index > 0 ? (
+                          <>
+                            <Pill
+                              tone={content.has_issue === true ? "bad" : "good"}
+                            >
+                              {String(content.has_issue)} ·{" "}
+                              {content.has_issue ? "Risk" : "Safe"}
+                            </Pill>
+                            {index === 1 && (
+                              <p className="mt-2 text-xs text-muted-foreground">
+                                {r.output.has_issue === r.reference.has_issue
+                                  ? "Correct detection"
+                                  : r.reference.has_issue
+                                    ? "False negative · missed risk"
+                                    : "False positive · false alarm"}
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          Object.entries(content)
+                            .map(
+                              ([key, value]) => `${key}: ${textValue(value)}`,
+                            )
+                            .join("\n") || "—"
+                        )}
                       </div>
                     </td>
-                    {[r.input, r.output, r.reference].map((content, index) => (
-                      <td key={index} className="max-w-64 min-w-40 align-top">
-                        <div
-                          className={
-                            full
-                              ? "break-words whitespace-pre-wrap"
-                              : "line-clamp-3 break-words"
-                          }
+                  ))}
+                  {run.snapshot.scorers.map((s) => {
+                    const score = r.scores.find((v) => v.scorerId === s.id);
+                    return (
+                      <td key={s.id}>
+                        <button
+                          title={score?.reason}
+                          onClick={() => setSample(r)}
                         >
-                          {isGuardrail && index > 0 ? (
-                            <>
-                              <Pill
-                                tone={
-                                  content.has_issue === true ? "bad" : "good"
-                                }
-                              >
-                                {String(content.has_issue)} ·{" "}
-                                {content.has_issue ? "Risk" : "Safe"}
-                              </Pill>
-                              {index === 1 && (
-                                <p className="mt-2 text-xs text-muted-foreground">
-                                  {r.output.has_issue === r.reference.has_issue
-                                    ? "Correct detection"
-                                    : r.reference.has_issue
-                                      ? "False negative · missed risk"
-                                      : "False positive · false alarm"}
-                                </p>
-                              )}
-                            </>
-                          ) : (
-                            Object.entries(content)
-                              .map(
-                                ([key, value]) => `${key}: ${textValue(value)}`,
-                              )
-                              .join("\n") || "—"
-                          )}
-                        </div>
+                          <Pill tone={score?.passed ? "good" : "bad"}>
+                            {score?.value.toFixed(2) ?? "—"}
+                          </Pill>
+                        </button>
                       </td>
-                    ))}
-                    {run.snapshot.scorers.map((s) => {
-                      const score = r.scores.find((v) => v.scorerId === s.id);
-                      return (
-                        <td key={s.id}>
-                          <button
-                            title={score?.reason}
-                            onClick={() => setSample(r)}
-                          >
-                            <Pill tone={score?.passed ? "good" : "bad"}>
-                              {score?.value.toFixed(2) ?? "—"}
-                            </Pill>
-                          </button>
-                        </td>
-                      );
-                    })}
-                    <td>{r.latencyMs} ms</td>
-                    <td>${r.costUsd.toFixed(4)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            <Empty>
-              {run.status === "RUNNING" && !run.results.length
-                ? "Waiting for simulated sample results…"
-                : "No samples match these filters."}
-            </Empty>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Immutable launch snapshot. Editing a dataset, environment or scorer
-            does not change this report.
-          </p>
-          <JsonPreview value={run.snapshot} />
-        </div>
-      )}
+                    );
+                  })}
+                  <td>{r.latencyMs} ms</td>
+                  <td>${r.costUsd.toFixed(4)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          <Empty>
+            {run.status === "RUNNING" && !run.results.length
+              ? "Waiting for simulated sample results…"
+              : "No samples match these filters."}
+          </Empty>
+        )}
+      </div>
       <Sheet
         open={sample !== null}
         onOpenChange={(open) => {
@@ -510,7 +487,9 @@ export function ReportDetail({
                           Scorer definition
                         </summary>
                         <pre className="mt-2 whitespace-pre-wrap text-xs">
-                          {s.definition}
+                          {s.repoUrl
+                            ? `Repository: ${s.repoUrl}\nScript: ${s.scriptPath}`
+                            : s.definition}
                         </pre>
                       </details>
                     </div>

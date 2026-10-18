@@ -71,6 +71,12 @@ describe("evaluation snapshots", () => {
     });
     state.datasets[0]!.versions[0]!.rows[0]!.messages = "changed";
     state.environments[0]!.versions[0]!.network = ["changed"];
+    state.environments[0]!.versions[0]!.modelId = "changed-model";
+    state.environments[0]!.versions[0]!.guardrailId = "changed-guardrail";
+    state.environments[0]!.versions[0]!.runner.concurrency = 8;
+    expect(run.snapshot.environment.modelId).toBe("demo-model-support");
+    expect(run.snapshot.environment.guardrailId).toBe("guardrail-privacy");
+    expect(run.snapshot.environment.runner.concurrency).toBe(1);
     expect(run.snapshot.dataset.rows[0]!.messages).not.toBe("changed");
     expect(run.snapshot.environment.network).not.toEqual(["changed"]);
     expect(state.datasets[0]).not.toHaveProperty("targetId");
@@ -166,5 +172,29 @@ describe("guardrail conversation fixtures", () => {
         (r) => r.reference.has_issue === false && r.output.has_issue === true,
       ),
     ).toBe(true);
+  });
+});
+
+describe("Git scorer source", () => {
+  it("requires a repository and a safe repository-relative script path", () => {
+    const scorer = createFixtures().scorers[2]!;
+    scorer.draft.repoUrl = "https://github.com/example/scorers.git";
+    for (const scriptPath of [
+      "",
+      "/score.py",
+      "../score.py",
+      "scripts/../../score.py",
+      "C:\\score.py",
+    ]) {
+      scorer.draft.scriptPath = scriptPath;
+      expect(() => publishScorer(scorer)).toThrow(/relative/i);
+    }
+    scorer.draft.scriptPath = "scorers/guardrail.py";
+    scorer.draft.repoUrl = "";
+    expect(() => publishScorer(scorer)).toThrow(/repository/i);
+    scorer.draft.repoUrl = "git@github.com:example/scorers.git";
+    const published = publishScorer(scorer);
+    scorer.draft.scriptPath = "other.py";
+    expect(published.versions.at(-1)?.scriptPath).toBe("scorers/guardrail.py");
   });
 });
