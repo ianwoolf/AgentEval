@@ -77,6 +77,8 @@ this project's Evaluation layout remains mounted; refreshing, leaving that layou
 or switching projects resets the fixtures. Save a dataset draft before leaving its
 editor. Published versions and evaluation snapshots remain immutable in-session.
 
+For a fresh machine, start with the [development handoff](docs/evaluation/development-handoff.md).
+
 See [UI and backend integration handoff](docs/evaluation/ui-integration.md) for
 contracts, proposed v2 endpoints, version/concurrency rules, execution events,
 backend responsibilities, limitations and a walkthrough. These proposed APIs are
