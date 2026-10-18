@@ -54,7 +54,7 @@ export function EvaluationTraceDetail({ traceId }: { traceId: string }) {
         action={
           <Button asChild variant='outline'>
             <Link to='/$projectId/evaluation/overview' params={{ projectId }}>
-              Back to Overview
+              Back to Dashboard
             </Link>
           </Button>
         }
@@ -109,7 +109,7 @@ export function EvaluationTraceDetail({ traceId }: { traceId: string }) {
 
       <EvaluationSection
         title='Evaluator scores'
-        description='An evaluator scores a trace only while it is enabled. Disable one on the Overview and newly captured traces show "Not scored" here.'
+        description='An evaluator scores a trace only while it is enabled. Disable one on the Dashboard and newly captured traces show "Not scored" here.'
       >
         <div className='grid gap-3 md:grid-cols-2'>
           {state.evaluators.map((evaluator) => (

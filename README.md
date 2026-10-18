@@ -57,19 +57,31 @@ API on port `8000`, and runs TALI on port `18082`.
 
 ## TALI evaluation demo
 
-The sidebar exposes the fixture-backed Evaluation demo through the unified
-`Eval` entry at `/individual/evaluation/catalog`, with `Overview` available at
-`/individual/evaluation/overview`. The catalog and its in-app links provide
-access to the supporting Agent, Test Case, Evaluation, and Settings pages.
-Opening a catalog target presents its revision, Dataset, Evaluation, and Result
-in one continuous workspace with a single context-aware primary action. An
-Admin approves all-passing evaluations or rejects evaluations with findings;
-rejected Target revisions are returned to a Developer for changes and rerun.
+Open `/individual/evaluation/catalog` for the interactive evaluation workbench.
+The Evaluation sidebar contains **Eval, Datasets, Environments, Scorers, Reports**;
+**Dashboard** is the first item under Observer.
 
-This demo uses an in-memory store and deterministic simulation. Edits reset
-when the page reloads. The API-backed evaluation store remains available for
-the ongoing persistence integration, including the real SQLite API and demo
-fallback behavior.
+- Datasets have independent objectives, metadata, typed fields, CSV/JSON/JSONL
+  import with mapping/validation, editable records, and published versions.
+- Sandbox configurations expose network, filesystem, process and resource limits,
+  plus the intended LLM/Guardrail interception paths.
+- Built-in and custom scorers can be selected for an evaluation; custom scorers
+  support drafts, simulated tests, version upgrades and enabling/disabling.
+- Eval combines a Prompt/Guardrail target, dataset version, sandbox configuration
+  and scorers. Reports support Evaluation ID/target filters, sample feedback,
+  traces, configuration snapshots and JSON export.
+
+This is **pure UI simulation**: no sandbox is launched, no traffic is intercepted,
+no scorer code runs, and no model provider is contacted. Changes live only while
+this project's Evaluation layout remains mounted; refreshing, leaving that layout,
+or switching projects resets the fixtures. Save a dataset draft before leaving its
+editor. Published versions and evaluation snapshots remain immutable in-session.
+
+See [UI and backend integration handoff](docs/evaluation/ui-integration.md) for
+contracts, proposed v2 endpoints, version/concurrency rules, execution events,
+backend responsibilities, limitations and a walkthrough. These proposed APIs are
+not implemented by this demo. Legacy detail pages and Dashboard/Traces retain
+their separate fixture store; the Python API remains available for future wiring.
 
 ## CLI
 

@@ -10,17 +10,17 @@ function visibleLabels(groupLabel: string, role: ProjectRole) {
 }
 
 describe("Evaluation navigation", () => {
-  it("keeps the Evaluation section consolidated under Eval and moves the merged Overview to Observer", () => {
+  it("groups evaluation resources under Evaluation and places Dashboard first in Observer", () => {
     expect(
       projectNavGroups
         .find((group) => group.label === "Evaluation")
         ?.items.map((item) => item.label),
-    ).toEqual(["Eval"]);
+    ).toEqual(["Eval", "Datasets", "Environments", "Scorers", "Reports"]);
     expect(
       projectNavGroups
         .find((group) => group.label === "Observer")
         ?.items.map((item) => item.label),
-    ).toEqual(["Traces", "Overview", "Cost"]);
+    ).toEqual(["Dashboard", "Traces", "Cost"]);
   });
 
   it("keeps the Eval active state scoped to the catalog", () => {
@@ -57,17 +57,17 @@ describe("Role-based navigation whitelist", () => {
       "Audit Logs",
     ]);
     expect(visibleLabels("Observer", "compliance")).toEqual([
+      "Dashboard",
       "Traces",
-      "Overview",
     ]);
   });
 
   it("gives ADA and ISS risk-assessment, behavior, and traceability surfaces", () => {
     for (const role of ["ada", "iss"] as const) {
       expect(visibleLabels("Agentic", role)).toEqual(["Skills", "MCP Servers"]);
-      expect(visibleLabels("Evaluation", role)).toEqual(["Eval"]);
+      expect(visibleLabels("Evaluation", role)).toEqual(["Eval", "Datasets", "Environments", "Scorers", "Reports"]);
       expect(visibleLabels("Security", role)).toEqual(["Audit Logs"]);
-      expect(visibleLabels("Observer", role)).toEqual(["Traces", "Overview"]);
+      expect(visibleLabels("Observer", role)).toEqual(["Dashboard", "Traces"]);
     }
   });
 
@@ -80,12 +80,12 @@ describe("Role-based navigation whitelist", () => {
       "Knowledge Base",
       "Memory",
     ]);
-    expect(visibleLabels("Evaluation", "frt")).toEqual(["Eval"]);
+    expect(visibleLabels("Evaluation", "frt")).toEqual(["Eval", "Datasets", "Environments", "Scorers", "Reports"]);
     expect(visibleLabels("Security", "frt")).toEqual([
       "Access Policies",
       "Runtime Policies",
       "Audit Logs",
     ]);
-    expect(visibleLabels("Observer", "frt")).toEqual(["Traces", "Overview"]);
+    expect(visibleLabels("Observer", "frt")).toEqual(["Dashboard", "Traces"]);
   });
 });

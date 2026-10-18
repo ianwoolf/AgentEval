@@ -3,6 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import {
   Boxes,
+  Database,
+  FileText,
+  Gauge,
   Bot,
   BrainCircuit,
   ChartNoAxesCombined,
@@ -76,6 +79,9 @@ type ProjectRoute =
   | "/$projectId/traces"
   | "/$projectId/evaluations"
   | "/$projectId/evaluation/catalog"
+  | "/$projectId/evaluation/environments"
+  | "/$projectId/evaluation/scorers"
+  | "/$projectId/evaluation/reports"
   | "/$projectId/evaluation/targets"
   | "/$projectId/evaluation/datasets"
   | "/$projectId/evaluation/runs"
@@ -165,13 +171,17 @@ export const projectNavGroups: Array<{
     label: "Evaluation",
     items: [
       { icon: CheckCircle2, label: "Eval", to: "/$projectId/evaluation/catalog", roles: SECURITY_EVAL_ROLES },
+      { icon: Database, label: "Datasets", to: "/$projectId/evaluation/datasets", roles: SECURITY_EVAL_ROLES },
+      { icon: Boxes, label: "Environments", to: "/$projectId/evaluation/environments", roles: SECURITY_EVAL_ROLES },
+      { icon: Gauge, label: "Scorers", to: "/$projectId/evaluation/scorers", roles: SECURITY_EVAL_ROLES },
+      { icon: FileText, label: "Reports", to: "/$projectId/evaluation/reports", roles: SECURITY_EVAL_ROLES },
     ],
   },
   {
     label: "Observer",
     items: [
+      { icon: ChartNoAxesCombined, label: "Dashboard", to: "/$projectId/evaluation/overview" },
       { icon: Waypoints, label: "Traces", to: "/$projectId/traces" },
-      { icon: ChartNoAxesCombined, label: "Overview", to: "/$projectId/evaluation/overview" },
       { icon: CircleDollarSign, label: "Cost", to: "/$projectId/cost", roles: AGENT_OPERATOR_ROLES },
     ],
   },

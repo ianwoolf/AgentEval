@@ -1,15 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EvaluationLayerPageFrame } from "@/features/evaluation-layer/shared/evaluation-page-frame";
-import { EvaluationDatasetList } from "@/features/evaluation-layer/datasets/dataset-pages";
-
+import { DatasetsPage } from "@/features/evaluation-workbench/datasets-page";
 export const Route = createFileRoute("/$projectId/evaluation/datasets/")({
-  component: EvaluationDatasets,
+  component: DatasetsPage,
 });
-
-function EvaluationDatasets() {
-  return (
-    <EvaluationLayerPageFrame title="Test Case" description="Build versioned evaluation cases with deterministic mock data.">
-      <EvaluationDatasetList />
-    </EvaluationLayerPageFrame>
-  );
-}

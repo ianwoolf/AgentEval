@@ -1,3 +1,4 @@
+import { WorkbenchProvider } from "@/features/evaluation-workbench/provider";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { EvaluationLayerErrorBoundary } from "@/features/evaluation-layer/evaluation-layer-error-boundary";
 import { EvaluationLayerProvider } from "@/features/evaluation-layer/mock-provider";
@@ -11,7 +12,9 @@ function EvaluationLayerLayout() {
   return (
     <EvaluationLayerProvider projectId={projectId}>
       <EvaluationLayerErrorBoundary>
-        <Outlet />
+        <WorkbenchProvider key={projectId}>
+          <Outlet />
+        </WorkbenchProvider>
       </EvaluationLayerErrorBoundary>
     </EvaluationLayerProvider>
   );
