@@ -25,3 +25,10 @@ web/apps/*/dist/
 web/apps/*/.output/
 web/apps/*/.tanstack/
 web/.env
+
+# Independent backend repository (not a submodule).
+/evaluation-backend/
+
+# Presentation generation caches.
+/.codex-ppt/
+/output/.build/

@@ -41,16 +41,17 @@ export function ReportsPage({
   const [idQuery, setIdQuery] = useState("");
   const [targetId, setTargetId] = useState("ALL");
   const run = state.evaluations.find((e) => e.id === evaluationId);
+  if (evaluationId && run?.remote) return <LiveReport run={run} onBack={() => onSelect("")} />;
   if (evaluationId)
     return run ? (
       <ReportDetail key={run.id} run={run} onBack={() => onSelect("")} />
     ) : (
       <Frame
         title="Report unavailable"
-        description="This evaluation does not exist in the current demo session."
+        description="Loading evaluation or report unavailable."
       >
         <Empty>
-          Refreshing resets demo-created evaluations.{" "}
+          Live reports are loaded from the backend; check its connection if this message persists.{" "}
           <Button variant="link" onClick={() => onSelect("")}>
             View available reports
           </Button>
@@ -144,7 +145,7 @@ export function ReportsPage({
                       : "—"}
                   </td>
                   <td>
-                    {e.results.length}/{e.snapshot.dataset.rows.length}
+                    {e.remote?.completed ?? e.results.length}/{e.snapshot.dataset.rows.length}
                   </td>
                   <td className="text-xs text-muted-foreground">
                     {new Date(e.createdAt).toLocaleString()}
@@ -246,6 +247,20 @@ export function ReportDetail({
         </span>
         <span>{new Date(run.createdAt).toLocaleString()}</span>
       </div>
+      <div role="status" aria-live="polite" className="space-y-3 rounded-lg border bg-muted/20 p-4">
+        <div className="flex items-center justify-between gap-4 text-sm">
+          <p className="font-medium">
+            {run.status === "RUNNING" ? "Evaluation in progress" : run.status === "CANCELLED" ? "Evaluation cancelled · partial report" : "Evaluation completed"}
+          </p>
+          <span>{run.results.length} / {run.snapshot.dataset.rows.length} samples completed</span>
+        </div>
+        <progress aria-label="Evaluation progress" className="h-2 w-full accent-primary" value={run.results.length} max={run.snapshot.dataset.rows.length} />
+        <p className="text-sm text-muted-foreground">
+          {run.status === "RUNNING"
+            ? "Results update automatically as samples finish. Metrics are provisional until the evaluation completes."
+            : run.status === "CANCELLED" ? "Metrics include only the samples completed before cancellation." : "All sample results are available."}
+        </p>
+      </div>
       <ReportConfig snapshot={run.snapshot} />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
@@ -255,7 +270,7 @@ export function ReportDetail({
               ? `${Math.round((passed / run.results.length) * 100)}%`
               : "—"
           }
-          detail={`${passed} passed · ${run.results.length - passed} with findings`}
+          detail={`${passed} passed · ${run.results.length - passed} with findings${run.status === "RUNNING" ? " · provisional" : ""}`}
         />
         <Metric
           label="Samples scored"
@@ -263,7 +278,7 @@ export function ReportDetail({
           detail={
             run.status === "CANCELLED"
               ? "Cancelled · partial results"
-              : "All selected scorers per sample"
+              : run.status === "RUNNING" ? "In progress · live results" : "All selected scorers per sample"
           }
         />
         <Metric
@@ -525,4 +540,28 @@ export function ReportDetail({
       </Sheet>
     </Frame>
   );
+}
+
+function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
+  const remote = run.remote!;
+  return <Frame title={run.name} description="Live Kubernetes evaluation · Real model calls and Langfuse feedback">
+    <div className="flex items-center justify-between"><Button variant="outline" onClick={onBack}><ArrowLeft />All reports</Button><Pill>{run.status === "RUNNING" ? remote.phase : run.status}</Pill></div>
+    <div role="status" aria-live="polite" className="space-y-3 rounded-xl border bg-card p-5">
+      <h2 className="text-lg font-medium">{run.status === "RUNNING" ? "Evaluation in progress" : run.status === "FAILED" ? "Evaluation failed" : "Evaluation completed"}</h2>
+      <p>{remote.completed} samples processed{run.status === "RUNNING" ? " · Waiting for worker summary. Status refreshes every 3 seconds." : ""}</p>
+      <p className="text-sm text-muted-foreground">Scores are development mocks (fixed 1). They do not represent evaluation quality.</p>
+      {remote.error && <p role="alert" className="text-destructive">{remote.error}</p>}
+    </div>
+    <dl className="grid gap-4 rounded-xl border p-5 text-sm sm:grid-cols-2">
+      <div><dt className="text-muted-foreground">Experiment ID</dt><dd className="break-all font-mono">{remote.experiment_id}</dd></div>
+      <div><dt className="text-muted-foreground">Kubernetes Job</dt><dd className="font-mono">{run.id}</dd></div>
+      <div><dt className="text-muted-foreground">Model ID</dt><dd>{remote.model_id}</dd></div>
+      <div><dt className="text-muted-foreground">Scorers</dt><dd>{remote.scorer_ids.join(", ")}</dd></div>
+      <div><dt className="text-muted-foreground">Langfuse dataset</dt><dd>{run.snapshot.dataset.name} · UI version {run.snapshot.dataset.version}</dd></div>
+      <div><dt className="text-muted-foreground">Execution environment</dt><dd>{run.snapshot.environment.name} · Kubernetes</dd></div>
+    </dl>
+    <p className="text-sm text-muted-foreground">The backend requests glm-4.7. The provider may route legacy model names to a newer model; actual response model and token/timing data are recorded in Langfuse.</p>
+    {remote.report_url && <Button asChild><a href={remote.report_url} target="_blank" rel="noopener noreferrer">Open Langfuse report<ArrowRight /></a></Button>}
+    <Button variant="outline" onClick={() => download(`${run.id}.json`, {simulated: false, ...run})}><Download />Export run</Button>
+  </Frame>;
 }

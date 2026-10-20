@@ -1,8 +1,8 @@
 /** @vitest-environment jsdom */
 import { useState } from "react";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorkbenchProvider, useWorkbench } from "./provider";
 import { DatasetsPage } from "./datasets-page";
 import { EnvironmentsPage } from "./environments-page";
@@ -12,7 +12,18 @@ import { ReportsPage } from "./reports-page";
 vi.mock("@/hooks/use-project", () => ({
   useCurrentProjectId: () => "individual",
 }));
-afterEach(cleanup);
+const binding = {target_id: "guardrail-privacy", dataset_id: "ds-guardrail", dataset_version: 1, environment_id: "env-isolated", model_id: "glm-dev", langfuse_dataset_id: "real-dataset"};
+beforeEach(() => {
+  vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+    if (_url.endsWith("/config")) return Response.json({bindings: [binding]});
+    if (init?.method === "POST") {
+      const body = JSON.parse(init.body as string);
+      return Response.json({...body, id: "eval-live-test", created_at: new Date().toISOString(), status: "RUNNING", experiment_id: "exp-live-test", completed: 0, phase: "QUEUED"});
+    }
+    return Response.json({items: []});
+  }));
+});
+afterEach(() => {cleanup(); vi.unstubAllGlobals();});
 function StateProbe() {
   const { state } = useWorkbench();
   return <output data-testid="state">{JSON.stringify(state)}</output>;
@@ -22,6 +33,57 @@ function readState() {
 }
 
 describe("interactive workbench", () => {
+  it("runs the selected Guardrail directly and opens its live report", async () => {
+    const user = userEvent.setup();
+    function Flow() {
+      const [id, setId] = useState("");
+      return id ? <ReportsPage evaluationId={id} onSelect={setId} /> : <CreateEvalDialog targetId="guardrail-privacy" onStarted={setId} onClose={() => {}} />;
+    }
+    render(<WorkbenchProvider><Flow /></WorkbenchProvider>);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.queryByLabelText("Test target *")).toBeNull();
+    expect(screen.queryByRole("region", { name: "Target details" })).toBeNull();
+    expect(await screen.findByText(/Model: glm-dev/)).toBeTruthy();
+    await user.type(screen.getByLabelText("Evaluation name *"), "Inline safety check");
+    expect(screen.getByLabelText("Scoring mode").textContent).toContain("Mock score");
+    expect(screen.queryByRole("button", { name: "Review evaluation" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Run evaluation" }));
+    expect(await screen.findByRole("heading", { name: "Inline safety check" })).toBeTruthy();
+    expect(screen.getByText("Evaluation in progress")).toBeTruthy();
+    expect(screen.getByText(/Scores are development mocks/)).toBeTruthy();
+    const call = vi.mocked(fetch).mock.calls.find(([, init]) => init?.method === "POST")!;
+    const body = JSON.parse(call[1]!.body as string);
+    expect(body.scorer_ids).toEqual(["mock-score"]);
+    expect(body.model_id).toBe("glm-dev");
+    expect(body.dataset_id).toBe("ds-guardrail");
+    expect(body.snapshot.target.id).toBe("guardrail-privacy");
+  });
+  it("saves dataset scorer choices and exposes reverse links without rewriting versions", async () => {
+    const user = userEvent.setup();
+    function Pages() {
+      const [page, setPage] = useState("datasets");
+      return <>
+        <button onClick={() => setPage("scorers")}>Show scorer catalog</button>
+        {page === "datasets" ? <DatasetsPage /> : <ScorersPage />}
+        <StateProbe />
+      </>;
+    }
+    render(<WorkbenchProvider><Pages /></WorkbenchProvider>);
+    await user.click(screen.getByRole("button", { name: "Guardrail conversation safety" }));
+    await user.click(screen.getByRole("tab", { name: "Scorers" }));
+    await user.click(screen.getByRole("checkbox", { name: /Risk classification/ }));
+    await user.click(screen.getByRole("button", { name: "Publish version" }));
+    expect(readState().datasets[0].versions[1].scorerIds).toEqual(["sc-safety"]);
+    await user.click(screen.getByRole("checkbox", { name: /Policy compliance/ }));
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await user.click(screen.getByRole("button", { name: "Show scorer catalog" }));
+    await user.click(screen.getByRole("button", { name: "Policy compliance" }));
+    const dialog = within(screen.getByRole("dialog"));
+    await user.click(dialog.getByRole("tab", { name: "Datasets" }));
+    expect(dialog.getByText("Guardrail conversation safety")).toBeTruthy();
+    expect(dialog.getByText("v1 · v2")).toBeTruthy();
+    expect(dialog.queryByText(/Draft ·/)).toBeNull();
+  });
   it("creates, imports and publishes an independent dataset", async () => {
     const user = userEvent.setup();
     render(
@@ -105,28 +167,20 @@ describe("interactive workbench", () => {
       ),
     ).toEqual([0.8, 0.9]);
   });
-  it("requires scorers and captures the selected target in a new eval", async () => {
+  it("shows backend failures without creating a simulated evaluation", async () => {
     const user = userEvent.setup();
     const close = vi.fn();
-    render(
-      <WorkbenchProvider>
-        <CreateEvalDialog onClose={close} />
-        <StateProbe />
-      </WorkbenchProvider>,
-    );
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+      if (_url.endsWith("/config")) return Response.json({bindings: [binding]});
+      if (init?.method === "POST") return Response.json({detail: "Kubernetes is unavailable"}, {status: 502});
+      return Response.json({items: []});
+    }));
+    render(<WorkbenchProvider><CreateEvalDialog onClose={close} /><StateProbe /></WorkbenchProvider>);
     await user.type(screen.getByLabelText("Evaluation name *"), "Safety check");
-    await user.selectOptions(screen.getByLabelText("Target type"), "GUARDRAIL");
-    await user.click(screen.getByRole("button", { name: "Review evaluation" }));
-    expect(screen.getByRole("alert").textContent).toContain("scorer");
-    await user.click(
-      screen.getByRole("checkbox", { name: /Policy compliance/ }),
-    );
-    await user.click(screen.getByRole("button", { name: "Review evaluation" }));
-    await user.click(screen.getByRole("button", { name: "Run simulation" }));
-    const run = readState().evaluations[0];
-    expect(run.snapshot.target.kind).toBe("GUARDRAIL");
-    expect(run.snapshot.scorers).toHaveLength(1);
-    expect(close).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole("button", {name: "Run evaluation"}));
+    expect((await screen.findByRole("alert")).textContent).toContain("Kubernetes is unavailable");
+    expect(readState().evaluations.every((e: {id: string}) => e.id.startsWith("eval-demo"))).toBe(true);
+    expect(close).not.toHaveBeenCalled();
   });
   it("filters reports by exact ID and opens per-sample trace feedback", async () => {
     const user = userEvent.setup();
@@ -162,7 +216,7 @@ describe("interactive workbench", () => {
     const config = within(screen.getByRole("dialog"));
     expect(config.getByText("demo-model-support")).not.toBeNull();
     expect(config.getByText("guardrail-privacy")).not.toBeNull();
-    expect(config.getByText("demo-sandbox-runner")).not.toBeNull();
+    expect(config.getByText("OpenShell")).not.toBeNull();
     expect(config.getByText("Runner configuration")).not.toBeNull();
     await user.click(config.getByRole("button", { name: "Close dialog" }));
     await user.click(screen.getByRole("button", { name: "#1" }));

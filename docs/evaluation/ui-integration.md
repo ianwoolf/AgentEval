@@ -1,5 +1,11 @@
 # Evaluation 工作台：纯 UI 演示与后端对接说明
 
+> **2026-10-20 状态更新**：真实 Trigger → Kubernetes Job → Langfuse 与报告恢复已接通；资源编辑仍是 UI 演示，真实执行目前使用 mock-score。当前实现、部署、限制与接续工作见 [分支交接](2026-10-20-branch-handoff.md)。下文较早日期的“无真实执行/纯模拟/未实现后端”描述为历史记录，不能代表当前 Trigger 状态。独立后端在被主仓库忽略的 `evaluation-backend/` 中单独管理 Git。
+
+后端实现规划见 [模块、接口与 OpenShell 执行设计](backend-execution-design.md)，包含 Dataset/Target/Scorer library 加载、任务状态与实时报告，以及平台无关的结果投递抽象。
+
+2026-10-19 UI 更新：入口更名为 Evaluation。主页面先选择 Target type，再展示对应 Target 列表，目前仅提供 Guardrail。Target 以表格展示，最后一列的 History 打开该 Target 的历史记录弹窗（支持状态筛选、进度、取消与报告入口），Trigger 打开配置弹窗，固定所选 Target，并选择 Dataset 版本、执行环境及评分器，点击 Run evaluation 直接启动并跳转到该任务的报告详情。报告实时展示运行状态、样本进度和临时指标，完成后自动更新；不再包含 Review 步骤。运行进度、取消和报告入口位于 History 弹窗中，主页面仅展示 Target 列表。没有新增真实执行接口。
+
 更新日期：2026-10-18。本文中的 v2 API 是拟议契约，**尚未实现任何对应 HTTP 服务**。
 
 ## 1. 本轮交付和运行边界
@@ -220,3 +226,13 @@ UI demo 为 RUNNING → COMPLETED/CANCELLED，每个 tick 同时产出样本和�
 发布版本及 evaluation 的 scorer 快照保存仓库地址、脚本路径、阈值和版本说明。报告的 scorer definition 展示该版本对应的仓库及脚本路径。示例仓库是演示占位地址；UI 不验证仓库存在性、不 clone、不执行脚本，Test 仍返回固定模拟分数。
 
 后续对接：scorer 创建 / 更新 / 发布接口接收上述字段；后端发布时需解析并保存不可变 `commitSha`，校验仓库访问权限及脚本存在性，在受限 runner 中执行。当前 UI 版本只冻结地址与路径，尚不能保证远程代码内容可复现。脚本契约仍为输入 `input`、`output`、`reference`，返回 `score`（0–1）及 `reason`；Git 凭证应由后端凭证引用管理，不放在仓库 URL 中。
+
+### Dataset 可选评分器（2026-10-19）
+
+Dataset 编辑器的 Scorers 页签可多选允许使用的评分器。`DatasetContent.scorerIds?: string[]` 随草稿保存、随发布版本冻结；未配置或空数组表示不限制评分器。Eval 按所选 Dataset 版本过滤评分器，同时要求评分器已启用且已发布；打开执行弹窗时默认全选该数据集版本下已启用且已发布的评分器；更换 Dataset 或版本会重新全选对应可用评分器，用户可手动取消。发布数据集只固定评分器 ID，执行时仍按现有逻辑使用评分器的最新发布版本，并写入执行快照。
+
+Scorers 列表及详情的 Datasets 页签反查显式配置关联的数据集，标明 Draft 和已发布版本。即使草稿移除关联，历史版本的关联仍展示；未限制评分器的数据集不计入显式关联。这些关联不是历史运行使用统计。正式后端应在发布与启动时校验评分器存在性、项目归属及版本规则，并为反查建立索引；当前仍为会话内 UI 数据。
+
+默认 Guardrail conversation safety 数据集显式关联 Policy compliance 与 Risk classification。Risk classification 的说明、版本备注与 Test 样本采用该数据集的 messages / has_issue 格式，比较 output.has_issue 和 reference.has_issue；匹配为 1，不匹配为 0。Test 按钮仍返回固定模拟分数，不执行该评分契约。
+
+Evaluation 侧栏显示规则：有效项目角色 admin 显示 Evaluation、Datasets、Environments、Scorers、Reports；member、compliance、ada、frt、iss 仅显示 Evaluation 和 Reports。真实 admin 与 Demo admin 使用相同规则。此变更仅调整导航可见性。

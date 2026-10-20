@@ -9,6 +9,10 @@ export default defineConfig({
   server: {
     host: process.env.HOST || "0.0.0.0",
     port: Number(process.env.PORT) || 8080,
+    // Windows-side edits on /mnt/* do not reliably emit WSL file events.
+    ...(process.env.WSL_DISTRO_NAME
+      ? { watch: { usePolling: true, interval: 1000 } }
+      : {}),
   },
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },

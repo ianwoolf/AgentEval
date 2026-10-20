@@ -170,11 +170,11 @@ export const projectNavGroups: Array<{
   {
     label: "Evaluation",
     items: [
-      { icon: CheckCircle2, label: "Eval", to: "/$projectId/evaluation/catalog", roles: SECURITY_EVAL_ROLES },
-      { icon: Database, label: "Datasets", to: "/$projectId/evaluation/datasets", roles: SECURITY_EVAL_ROLES },
-      { icon: Boxes, label: "Environments", to: "/$projectId/evaluation/environments", roles: SECURITY_EVAL_ROLES },
-      { icon: Gauge, label: "Scorers", to: "/$projectId/evaluation/scorers", roles: SECURITY_EVAL_ROLES },
-      { icon: FileText, label: "Reports", to: "/$projectId/evaluation/reports", roles: SECURITY_EVAL_ROLES },
+      { icon: CheckCircle2, label: "Evaluation", to: "/$projectId/evaluation/catalog" },
+      { icon: Database, label: "Datasets", to: "/$projectId/evaluation/datasets", roles: GUARDRAIL_ADMIN_ROLES },
+      { icon: Boxes, label: "Environments", to: "/$projectId/evaluation/environments", roles: GUARDRAIL_ADMIN_ROLES },
+      { icon: Gauge, label: "Scorers", to: "/$projectId/evaluation/scorers", roles: GUARDRAIL_ADMIN_ROLES },
+      { icon: FileText, label: "Reports", to: "/$projectId/evaluation/reports" },
     ],
   },
   {

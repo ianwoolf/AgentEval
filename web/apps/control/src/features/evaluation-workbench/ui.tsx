@@ -45,9 +45,8 @@ export function Frame({
       <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-xs text-muted-foreground">
         <FlaskConical className="size-4 shrink-0 text-amber-600" />
         <span>
-          <strong className="text-foreground">Interactive demo</strong> ·
-          Session-only data. Reload resets changes. Execution, scores and
-          security controls are simulated.
+          <strong className="text-foreground">Configuration preview</strong> ·
+          Resource edits are session-only. Trigger submits real backend jobs; live reports are labeled separately. Existing demo reports remain simulated.
         </span>
       </div>
       {children}
@@ -127,11 +126,13 @@ export function Modal({
   description,
   onClose,
   children,
+  footer,
 }: {
   title: string;
   description: string;
   onClose(): void;
   children: ReactNode;
+  footer?: ReactNode;
 }) {
   return (
     <Dialog
@@ -140,12 +141,13 @@ export function Modal({
         if (!open) onClose();
       }}
     >
-      <DialogContent className="sm:w-[min(calc(100%-2rem),60rem)]">
+      <DialogContent className={`sm:w-[min(calc(100%-2rem),60rem)] ${footer ? "grid-rows-[auto_minmax(0,1fr)_auto]" : "grid-rows-[auto_minmax(0,1fr)]"}`}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <div className="space-y-5 overflow-y-auto p-6">{children}</div>
+        <div className="min-h-0 space-y-5 overflow-y-auto p-6">{children}</div>
+        {footer && <div className="shrink-0 space-y-3 border-t bg-background px-6 py-4">{footer}</div>}
       </DialogContent>
     </Dialog>
   );

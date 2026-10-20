@@ -136,7 +136,7 @@ export function ReportConfig({ snapshot }: { snapshot: EvaluationSnapshot }) {
               <Details
                 title="Runner configuration"
                 items={[
-                  ["Runner ID", env.runner?.id || "Not configured"],
+                  ["执行环境", env.runner?.id === "openshell" ? "OpenShell" : env.runner?.id || "Not configured"],
                   ["Concurrency", env.runner?.concurrency ?? "Not configured"],
                   ["CPU / memory", `${env.cpu} cores / ${env.memoryMb} MB`],
                   ["Timeout", `${env.timeoutSeconds}s`],

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Plus, Braces, Sparkles } from "lucide-react";
-import type { Scorer } from "./contracts";
+import type { Dataset, Scorer } from "./contracts";
 import { clone, publishScorer, validateScorerSource, uid } from "./domain";
 import { useWorkbench } from "./provider";
 import {
@@ -83,6 +83,7 @@ export function ScorersPage() {
             <th>Published</th>
             <th>Threshold</th>
             <th>Status</th>
+            <th>Datasets</th>
             <th />
           </tr>
         </thead>
@@ -128,6 +129,7 @@ export function ScorersPage() {
                   {s.enabled ? "Enabled" : "Disabled"}
                 </Pill>
               </td>
+              <td><DatasetUsage datasets={state.datasets} scorerId={s.id} /></td>
               <td>
                 <div className="flex gap-1">
                   <Button variant="ghost" onClick={() => setEditing(clone(s))}>
@@ -156,7 +158,7 @@ export function ScorersPage() {
           ))}
           {!scorers.length && (
             <tr>
-              <td colSpan={7} className="text-center text-muted-foreground">
+              <td colSpan={8} className="text-center text-muted-foreground">
                 No scorers match this filter.
               </td>
             </tr>
@@ -183,6 +185,25 @@ export function ScorersPage() {
     </Frame>
   );
 }
+function DatasetUsage({ datasets, scorerId }: { datasets: Dataset[]; scorerId: string }) {
+  const usage = datasets.flatMap((dataset) => {
+    const draft = dataset.draft.scorerIds?.includes(scorerId);
+    const versions = dataset.versions.filter((v) => v.scorerIds?.includes(scorerId));
+    return draft || versions.length ? [{ dataset, draft, versions }] : [];
+  });
+  return usage.length ? (
+    <ul className="space-y-2 text-sm">
+      {usage.map(({ dataset, draft, versions }) => (
+        <li key={dataset.id}>
+          <p className="font-medium">{dataset.draft.name}</p>
+          <p className="text-xs text-muted-foreground">
+            {[...(draft ? ["Draft"] : []), ...versions.map((v) => `v${v.version}`)].join(" · ")}
+          </p>
+        </li>
+      ))}
+    </ul>
+  ) : <p className="text-sm text-muted-foreground">No explicit dataset links</p>;
+}
 function ScorerEditor({
   initial,
   onSave,
@@ -192,11 +213,18 @@ function ScorerEditor({
   onSave(s: Scorer): void;
   onClose(): void;
 }) {
+  const { state } = useWorkbench();
   const [scorer, setScorer] = useState(() => clone(initial));
   const [tab, setTab] = useState("Definition");
   const [error, setError] = useState("");
   const [sample, setSample] = useState(
-    '{"input":"Help me reset my password", "output":"Use the secure reset link", "reference":"Explain the reset flow"}',
+    initial.id === "sc-tone"
+      ? JSON.stringify({
+          input: { messages: state.datasets.find((d) => d.id === "ds-guardrail")?.versions[0]?.rows[0]?.messages ?? [] },
+          output: { has_issue: false, decision: "ALLOW", reason: "Safe request about the user's own account." },
+          reference: { has_issue: false },
+        }, null, 2)
+      : '{"input":"Help me reset my password", "output":"Use the secure reset link", "reference":"Explain the reset flow"}',
   );
   const [testResult, setTestResult] = useState<object | null>(null);
   const readonly = scorer.source === "BUILT_IN";
@@ -232,7 +260,7 @@ function ScorerEditor({
       onClose={onClose}
     >
       <Tabs
-        items={["Definition", "Test", "Versions"]}
+        items={["Definition", "Test", "Versions", "Datasets"]}
         active={tab}
         onChange={setTab}
       />
@@ -395,6 +423,15 @@ function ScorerEditor({
               </div>
             </details>
           ))}
+        </div>
+      )}
+      {tab === "Datasets" && (
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Datasets that explicitly select this scorer, including saved drafts and published versions.
+            Datasets allowing all scorers are not listed. Configure these links in Datasets → Scorers.
+          </p>
+          <DatasetUsage datasets={state.datasets} scorerId={scorer.id} />
         </div>
       )}
       <ErrorText message={error} />

@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, Play, Plus, ShieldCheck, FileText } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowRight, Play, ShieldCheck } from "lucide-react";
 import { useCurrentProjectId } from "@/hooks/use-project";
 import type { CreateEvaluationRequest } from "./contracts";
+import { executionApi, fromRemote, type Binding, type RemoteRun } from "./remote";
 import { createEvaluation } from "./domain";
 import { useWorkbench } from "./provider";
 import {
@@ -12,50 +13,68 @@ import {
   Field,
   Frame,
   Input,
-  Metric,
   Modal,
   Pill,
   Select,
   Table,
 } from "./ui";
 export function EvalPage() {
+  const navigate = useNavigate();
   const { state, setState } = useWorkbench();
   const projectId = useCurrentProjectId();
-  const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState("ALL");
+  const [targetType, setTargetType] = useState("GUARDRAIL");
+  const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
+  const [historyTargetId, setHistoryTargetId] = useState<string | null>(null);
+  const targets = state.targets.filter((target) => target.kind === targetType);
   const runs = state.evaluations.filter(
-    (e) => filter === "ALL" || e.status === filter,
+    (e) => (!historyTargetId || e.snapshot.target.id === historyTargetId) &&
+      (filter === "ALL" || e.status === filter),
   );
   return (
     <Frame
-      title="Eval"
-      description="Bring your target, dataset, sandbox and scorers together in a repeatable evaluation."
-      action={
-        <Button onClick={() => setCreating(true)}>
-          <Plus />
-          New evaluation
-        </Button>
-      }
+      title="Evaluation"
+      description="Choose a target type, inspect its targets, then configure and run an evaluation."
     >
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Metric
-          label="Evaluations"
-          value={state.evaluations.length}
-          detail="Current demo session"
-        />
-        <Metric
-          label="In progress"
-          value={state.evaluations.filter((e) => e.status === "RUNNING").length}
-          detail="Simulated execution"
-        />
-        <Metric
-          label="Available datasets"
-          value={state.datasets.filter((d) => d.versions.length).length}
-          detail="With published versions"
-        />
+      <div className="flex items-end justify-between gap-4">
+        <Field label="Target type">
+          <Select value={targetType} onChange={(e) => setTargetType(e.target.value)}>
+            <option value="GUARDRAIL">Guardrail</option>
+          </Select>
+        </Field>
+        <p className="text-sm text-muted-foreground">{targets.length} target{targets.length === 1 ? "" : "s"}</p>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-heading text-xl">Evaluation history</h2>
+      <Table>
+        <thead><tr><th>Target</th><th>Type</th><th>Version</th><th>Description</th><th>Actions</th></tr></thead>
+        <tbody>
+          {targets.map((target) => (
+            <tr key={target.id}>
+              <td><div className="flex items-center gap-3"><ShieldCheck className="size-5 text-primary" /><div><p className="font-medium">{target.name}</p><p className="mt-1 font-mono text-xs text-muted-foreground">{target.id}</p></div></div></td>
+              <td><Pill>Guardrail</Pill></td>
+              <td>v{target.version}</td>
+              <td className="max-w-md text-muted-foreground">{target.definition}</td>
+              <td><div className="flex gap-2">
+                <Button variant="outline" onClick={() => {
+                  setHistoryTargetId(target.id);
+                  setFilter("ALL");
+                }}>History</Button>
+                <Button onClick={() => setSelectedTargetId(target.id)}><Play />Trigger</Button>
+              </div></td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+      {!targets.length && <Empty>No targets available for this type.</Empty>}
+      {selectedTargetId && <CreateEvalDialog key={selectedTargetId} targetId={selectedTargetId}
+        onStarted={(id) => { void navigate({ to: "/$projectId/evaluation/reports", params: { projectId }, search: { evaluationId: id } }); }}
+        onClose={() => setSelectedTargetId(null)} />}
+      {historyTargetId && (
+      <Modal
+        title="Evaluation history"
+        description={state.targets.find((t) => t.id === historyTargetId)?.name ?? historyTargetId}
+        onClose={() => setHistoryTargetId(null)}
+      >
+      <div className="flex justify-end">
         <Select
           aria-label="Evaluation status"
           value={filter}
@@ -121,11 +140,11 @@ export function EvalPage() {
                   <div className="min-w-24">
                     <progress
                       className="h-1.5 w-full accent-primary"
-                      value={run.results.length}
+                      value={run.remote?.completed ?? run.results.length}
                       max={run.snapshot.dataset.rows.length}
                     />
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {run.results.length}/{run.snapshot.dataset.rows.length}{" "}
+                      {run.remote?.completed ?? run.results.length}/{run.snapshot.dataset.rows.length}{" "}
                       samples
                     </p>
                   </div>
@@ -136,7 +155,7 @@ export function EvalPage() {
                   </Pill>
                 </td>
                 <td>
-                  {run.status === "RUNNING" ? (
+                  {run.status === "RUNNING" && !run.remote ? (
                     <Button
                       variant="outline"
                       onClick={() =>
@@ -171,30 +190,43 @@ export function EvalPage() {
         </Table>
       ) : (
         <Empty>
-          No evaluations match this status. Create an evaluation to get started.
+          No evaluations match this status for this target.
         </Empty>
       )}
-      {creating && <CreateEvalDialog onClose={() => setCreating(false)} />}
+      </Modal>
+      )}
     </Frame>
   );
 }
-export function CreateEvalDialog({ onClose }: { onClose(): void }) {
+export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): void; targetId?: string; onStarted?(id: string): void }) {
   const { state, setState } = useWorkbench();
   const projectId = useCurrentProjectId();
   const firstDataset = state.datasets.find((d) => d.versions.length);
+  const defaultScorerIds = (ids?: string[]) => state.scorers
+    .filter((s) => s.enabled && s.versions.length && (!ids?.length || ids.includes(s.id)))
+    .map((s) => s.id);
   const [request, setRequest] = useState<CreateEvaluationRequest>({
     name: "",
-    targetId: state.targets[0]?.id ?? "",
+    targetId: targetId ?? state.targets.find((t) => t.kind === "GUARDRAIL")?.id ?? "",
     datasetId: firstDataset?.id ?? "",
     datasetVersion: firstDataset?.versions.at(-1)?.version ?? 0,
     environmentId: state.environments[0]?.id ?? "",
-    scorerIds: [],
+    scorerIds: defaultScorerIds(firstDataset?.versions.at(-1)?.scorerIds),
   });
-  const [step, setStep] = useState(0);
-  const [kind, setKind] = useState("ALL");
   const [error, setError] = useState("");
   const submitted = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const [bindings, setBindings] = useState<Binding[]>([]);
+  const idempotencyKey = useRef(crypto.randomUUID());
+  useEffect(() => {
+    let active = true;
+    executionApi<{bindings: Binding[]}>(projectId, "config")
+      .then(config => { if (active) setBindings(config.bindings); })
+      .catch(e => { if (active) setError(e.message); });
+    return () => { active = false; };
+  }, [projectId]);
   const patch = (value: Partial<CreateEvaluationRequest>) => {
+    idempotencyKey.current = crypto.randomUUID();
     setRequest((r) => ({ ...r, ...value }));
     setError("");
   };
@@ -205,73 +237,62 @@ export function CreateEvalDialog({ onClose }: { onClose(): void }) {
   const environment = state.environments
     .find((e) => e.id === request.environmentId)
     ?.versions.at(-1);
-  const target = state.targets.find((t) => t.id === request.targetId);
-  const check = () => {
-    try {
-      createEvaluation(state, request);
-      setStep(1);
-      setError("");
-    } catch (e) {
-      setError((e as Error).message);
-    }
-  };
   return (
     <Modal
-      title={step === 0 ? "New evaluation" : "Review evaluation"}
-      description={
-        step === 0
-          ? "Choose the resources to test together. Only published dataset and scorer versions can run."
-          : "These versions will be captured in the report. All execution and results are simulated."
-      }
+      title="Configure evaluation"
+      description="Run a real Kubernetes evaluation with Langfuse datasets and reporting. Scoring currently uses an explicit development mock."
+      footer={<>
+      <ErrorText message={error} />
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={onClose}
+        >
+          Cancel
+        </Button>
+          <Button
+            disabled={busy || !bindings.length}
+            onClick={async () => {
+              if (submitted.current) return;
+              submitted.current = true;
+              setBusy(true);
+              try {
+                const evaluation = createEvaluation(state, request);
+                const binding = bindings.find(b => b.target_id === request.targetId && b.dataset_id === request.datasetId &&
+                  b.dataset_version === request.datasetVersion && b.environment_id === request.environmentId);
+                if (!binding) throw new Error("This configuration has no backend resource binding. Select the published Guardrail conversation safety dataset and Isolated evaluation environment.");
+                const snapshot = { ...evaluation.snapshot, environment: { ...evaluation.snapshot.environment, modelId: binding.model_id, runner: { id: "kubernetes", concurrency: 1 } }, scorers: [] };
+                const run = await executionApi<RemoteRun>(projectId, "runs", {
+                  method: "POST", headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey.current },
+                  body: JSON.stringify({ name: request.name, target_id: request.targetId, dataset_id: request.datasetId,
+                    dataset_version: request.datasetVersion, environment_id: request.environmentId, model_id: binding.model_id,
+                    scoring_mode: "mock", scorer_ids: ["mock-score"], snapshot }),
+                });
+                setState(s => ({ ...s, evaluations: [fromRemote(run), ...s.evaluations.filter(e => e.id !== run.id)] }));
+                onClose();
+                onStarted?.(run.id);
+              } catch (e) {
+                setError((e as Error).message);
+                submitted.current = false;
+              } finally { setBusy(false); }
+            }}
+          >
+            <Play />
+            {busy ? "Starting…" : "Run evaluation"}
+          </Button>
+      </div>
+      </>}
       onClose={onClose}
     >
-      <div className="flex items-center gap-3 text-sm">
-        <Pill tone={step === 0 ? "good" : "neutral"}>1 · Configure</Pill>
-        <ArrowRight className="size-4 text-muted-foreground" />
-        <Pill tone={step === 1 ? "good" : "neutral"}>2 · Review & run</Pill>
-      </div>
-      {step === 0 ? (
         <div className="space-y-6">
           <Field label="Evaluation name *">
             <Input
               value={request.name}
-              placeholder="e.g. Support prompt regression"
+              placeholder="e.g. Guardrail safety regression"
               onChange={(e) => patch({ name: e.target.value })}
             />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Target type">
-              <Select
-                value={kind}
-                onChange={(e) => {
-                  const k = e.target.value;
-                  setKind(k);
-                  patch({
-                    targetId:
-                      state.targets.find((t) => k === "ALL" || t.kind === k)
-                        ?.id ?? "",
-                  });
-                }}
-              >
-                <option value="ALL">Prompt & Guardrail</option>
-                <option value="PROMPT">Prompt</option>
-                <option value="GUARDRAIL">Guardrail</option>
-              </Select>
-            </Field>
-            <Field label="Test target *">
-              <Select
-                value={request.targetId}
-                onChange={(e) => patch({ targetId: e.target.value })}
-              >
-                {state.targets
-                  .filter((t) => kind === "ALL" || t.kind === kind)
-                  .map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name} · v{t.version}
-                    </option>
-                  ))}
-              </Select>
-            </Field>
             <Field label="Dataset *">
               <Select
                 value={request.datasetId}
@@ -282,6 +303,7 @@ export function CreateEvalDialog({ onClose }: { onClose(): void }) {
                   patch({
                     datasetId: e.target.value,
                     datasetVersion: d?.versions.at(-1)?.version ?? 0,
+                    scorerIds: defaultScorerIds(d?.versions.at(-1)?.scorerIds),
                   });
                 }}
               >
@@ -299,7 +321,10 @@ export function CreateEvalDialog({ onClose }: { onClose(): void }) {
               <Select
                 value={request.datasetVersion}
                 onChange={(e) =>
-                  patch({ datasetVersion: Number(e.target.value) })
+                  patch({
+                    datasetVersion: Number(e.target.value),
+                    scorerIds: defaultScorerIds(dataset?.versions.find((v) => v.version === Number(e.target.value))?.scorerIds),
+                  })
                 }
               >
                 {dataset?.versions.toReversed().map((v) => (
@@ -337,135 +362,22 @@ export function CreateEvalDialog({ onClose }: { onClose(): void }) {
               ))}
             </Select>
           </Field>
-          <fieldset className="space-y-3">
-            <legend className="mb-3 text-sm font-medium">
-              Scorers *{" "}
-              <span className="font-normal text-muted-foreground">
-                Select one or more
-              </span>
-            </legend>
-            {state.scorers
-              .filter((s) => s.enabled && s.versions.length)
-              .map((s) => {
-                const v = s.versions.at(-1)!;
-                return (
-                  <label
-                    key={s.id}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm ${request.scorerIds.includes(s.id) ? "border-primary/40 bg-primary/5" : ""}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={request.scorerIds.includes(s.id)}
-                      onChange={(e) =>
-                        patch({
-                          scorerIds: e.target.checked
-                            ? [...request.scorerIds, s.id]
-                            : request.scorerIds.filter((id) => id !== s.id),
-                        })
-                      }
-                    />
-                    <span className="flex-1">
-                      <span className="font-medium">{v.name}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        v{v.version} · threshold {v.threshold}
-                      </span>
-                    </span>
-                    <Pill>
-                      {s.source === "BUILT_IN" ? "Built-in" : "Custom"}
-                    </Pill>
-                  </label>
-                );
-              })}
-          </fieldset>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <h3 className="font-heading text-xl">{request.name}</h3>
-          <div className="grid gap-4 rounded-lg border bg-muted/20 p-5 sm:grid-cols-2">
-            <div>
-              <p className="text-xs text-muted-foreground">Target</p>
-              <p className="mt-2 flex items-center gap-2 font-medium">
-                {target?.kind === "GUARDRAIL" ? (
-                  <ShieldCheck className="size-4" />
-                ) : (
-                  <FileText className="size-4" />
-                )}
-                {target?.name} · v{target?.version}
-              </p>
+          {environment && (
+            <div className="rounded-lg border bg-muted/20 p-4 text-sm">
+              <p className="font-medium">{environment.name} · v{environment.version} · Kubernetes Job</p>
+              <p className="mt-2 text-muted-foreground">{environment.description}</p>
+              <p className="mt-2 text-muted-foreground">Model: {bindings.find(b => b.environment_id === request.environmentId)?.model_id ?? "Not bound"} · Target execution: LLM risk classification · Concurrency: 1</p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Dataset</p>
-              <p className="mt-2 font-medium">
-                {version?.name} · v{version?.version}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {version?.rows.length} samples
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Environment</p>
-              <p className="mt-2 font-medium">
-                {environment?.name} · v{environment?.version}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                LLM + Guardrail proxy · simulated
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Scorers</p>
-              {request.scorerIds.map((id) => {
-                const s = state.scorers
-                  .find((item) => item.id === id)!
-                  .versions.at(-1)!;
-                return (
-                  <p key={id} className="mt-2 font-medium">
-                    {s.name} · v{s.version}
-                  </p>
-                );
-              })}
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            No external service will be called. Results appear incrementally
-            using deterministic demo data.
+          )}
+          <Field label="Scoring mode">
+            <Select value="mock" disabled><option value="mock">Mock score · development</option></Select>
+          </Field>
+          <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
+            Real model requests and Langfuse feedback. The mock-score scorer returns a fixed score of 1; this does not measure target quality.
+            Configured policy and risk scorers are not installed in the backend yet.
           </p>
+          <p className="text-sm text-muted-foreground">Runtime isolation uses the server-managed Kubernetes profile. OpenShell restrictions from the configuration preview are not applied.</p>
         </div>
-      )}
-      <ErrorText message={error} />
-      <div className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          onClick={() => (step ? setStep(0) : onClose())}
-        >
-          {step ? "Back" : "Cancel"}
-        </Button>
-        {step === 0 ? (
-          <Button onClick={check}>
-            Review evaluation
-            <ArrowRight />
-          </Button>
-        ) : (
-          <Button
-            onClick={() => {
-              if (submitted.current) return;
-              try {
-                const evaluation = createEvaluation(state, request);
-                submitted.current = true;
-                setState((s) => ({
-                  ...s,
-                  evaluations: [evaluation, ...s.evaluations],
-                }));
-                onClose();
-              } catch (e) {
-                setError((e as Error).message);
-              }
-            }}
-          >
-            <Play />
-            Run simulation
-          </Button>
-        )}
-      </div>
     </Modal>
   );
 }

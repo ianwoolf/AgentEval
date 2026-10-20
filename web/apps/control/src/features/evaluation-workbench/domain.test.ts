@@ -59,6 +59,23 @@ describe("dataset import boundary", () => {
 });
 
 describe("evaluation snapshots", () => {
+  it("uses the published dataset scorer choices and preserves historical associations", () => {
+    const state = createFixtures();
+    const original = state.datasets[0]!;
+    original.draft.scorerIds = ["sc-safety"];
+    state.datasets[0] = publishDataset(original);
+    const dataset = state.datasets[0]!;
+    const request = {
+      name: "Dataset scorer selection", targetId: state.targets[0]!.id,
+      datasetId: dataset.id, datasetVersion: 2,
+      environmentId: state.environments[0]!.id, scorerIds: ["sc-safety"],
+    };
+    const run = createEvaluation(state, request);
+    dataset.draft.scorerIds = ["sc-tone"];
+    expect(run.snapshot.dataset.scorerIds).toEqual(["sc-safety"]);
+    expect(() => createEvaluation(state, { ...request, scorerIds: ["sc-tone"] })).toThrow(/configured/);
+    expect(() => createEvaluation(state, { ...request, datasetVersion: 1, scorerIds: ["sc-tone"] })).not.toThrow();
+  });
   it("does not bind datasets to targets and freezes resources at launch", () => {
     const state = createFixtures();
     const run = createEvaluation(state, {
@@ -67,7 +84,7 @@ describe("evaluation snapshots", () => {
       datasetId: state.datasets[0]!.id,
       datasetVersion: 1,
       environmentId: state.environments[0]!.id,
-      scorerIds: [state.scorers[0]!.id],
+      scorerIds: [state.scorers[1]!.id],
     });
     state.datasets[0]!.versions[0]!.rows[0]!.messages = "changed";
     state.environments[0]!.versions[0]!.network = ["changed"];
@@ -89,10 +106,10 @@ describe("evaluation snapshots", () => {
       datasetId: state.datasets[0]!.id,
       datasetVersion: 99,
       environmentId: state.environments[0]!.id,
-      scorerIds: [state.scorers[0]!.id],
+      scorerIds: [state.scorers[1]!.id],
     };
     expect(() => createEvaluation(state, request)).toThrow(/version/i);
-    state.scorers[0]!.enabled = false;
+    state.scorers[1]!.enabled = false;
     expect(() =>
       createEvaluation(state, { ...request, datasetVersion: 1 }),
     ).toThrow(/scorer/i);
@@ -114,7 +131,7 @@ describe("evaluation snapshots", () => {
       datasetId: state.datasets[0]!.id,
       datasetVersion: 1,
       environmentId: state.environments[0]!.id,
-      scorerIds: [state.scorers[0]!.id],
+      scorerIds: [state.scorers[1]!.id],
     });
     expect(advanceEvaluation({ ...run, status: "CANCELLED" }).status).toBe(
       "CANCELLED",

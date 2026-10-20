@@ -61,6 +61,7 @@ export function DatasetsPage() {
                 objective: "",
                 description: "",
                 tags: [],
+                scorerIds: [],
                 metadata: {},
                 fields: [
                   {
@@ -105,6 +106,7 @@ export function DatasetsPage() {
               <th>Draft records</th>
               <th>Published</th>
               <th>Tags</th>
+              <th>Selectable scorers</th>
               <th />
             </tr>
           </thead>
@@ -137,6 +139,9 @@ export function DatasetsPage() {
                   </Pill>
                 </td>
                 <td>{d.draft.tags.join(", ") || "—"}</td>
+                <td>{d.draft.scorerIds?.length
+                  ? d.draft.scorerIds.map((id) => state.scorers.find((s) => s.id === id)?.draft.name ?? id).join(", ")
+                  : "All scorers"}</td>
                 <td>
                   <Button variant="ghost" onClick={() => setSelected(clone(d))}>
                     Manage
@@ -164,6 +169,7 @@ function DatasetEditor({
   onSave(d: Dataset): void;
   onBack(): void;
 }) {
+  const { state } = useWorkbench();
   const [dataset, setDataset] = useState(() => clone(initial));
   const [tab, setTab] = useState("Overview");
   const [metadata, setMetadata] = useState(
@@ -240,6 +246,7 @@ function DatasetEditor({
         items={[
           "Overview",
           "Fields",
+          "Scorers",
           `Data (${d.rows.length})`,
           `Versions (${dataset.versions.length})`,
         ]}
@@ -416,6 +423,33 @@ function DatasetEditor({
             <Plus />
             Add field
           </Button>
+        </div>
+      )}
+      {tab === "Scorers" && (
+        <div className="max-w-4xl space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Choose the scorers available for this dataset. Leave all unchecked to allow all scorers.
+            Save the draft, then publish a version to use these choices in Eval.
+            Only enabled, published scorers can run.
+          </p>
+          {state.scorers.map((scorer) => (
+            <label key={scorer.id} className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={d.scorerIds?.includes(scorer.id) ?? false}
+                onChange={(e) => update({ scorerIds: e.target.checked
+                  ? [...(d.scorerIds ?? []), scorer.id]
+                  : (d.scorerIds ?? []).filter((id) => id !== scorer.id) })}
+              />
+              <span className="flex-1">
+                <span className="font-medium">{scorer.draft.name}</span>
+                <span className="mt-1 block text-muted-foreground">{scorer.draft.description}</span>
+              </span>
+              <Pill>{!scorer.enabled ? "Disabled" : scorer.versions.length ? `v${scorer.versions.at(-1)!.version}` : "Draft only"}</Pill>
+            </label>
+          ))}
+          {!state.scorers.length && <Empty>Create a scorer in Scorers to configure this dataset.</Empty>}
         </div>
       )}
       {tab.startsWith("Data") && (

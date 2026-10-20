@@ -1,5 +1,7 @@
 # 换机接续开发指南
 
+> **2026-10-20 状态更新**：真实 Trigger → Kubernetes Job → Langfuse 与报告恢复已接通；资源编辑仍是 UI 演示，真实执行目前使用 mock-score。当前实现、部署、限制与接续工作见 [分支交接](2026-10-20-branch-handoff.md)。下文较早日期的“无真实执行/纯模拟/未实现后端”描述为历史记录，不能代表当前 Trigger 状态。独立后端在被主仓库忽略的 `evaluation-backend/` 中单独管理 Git。
+
 本轮日期：2026-10-18。代码提交：`a63c899`。
 
 ## 1. 仓库与分支
@@ -120,6 +122,8 @@ TASKLATTICE_CONFIG="$PWD/../data/control.dev.toml" npm run build:control
 本轮最终提交前：448 项 Web workspace 测试通过（Control 421 + example MCP 2 + Runner 25），TypeScript 通过。开发配置的 public_url=18082 会影响一个默认期望 8080 的测试，因此测试时需要移除 TASKLATTICE_CONFIG。
 
 ## 5. 接续阅读顺序
+
+2026-10-19 补充：[Evaluation 后端执行设计](backend-execution-design.md) 汇总当前模块、所需接口/数据、OpenShell 资源加载与执行流程，以及可切换 Langfuse/LangSmith 的 ResultSink + outbox 方案。该文档为拟议设计，尚未实现后端服务。
 
 1. [接口与集成说明](ui-integration.md)：现有功能、拟议 v2 API、版本规则、错误码、事件流、旧后端迁移及 Guardrail 样本格式。
 2. [本轮设计](../superpowers/specs/2026-10-18-evaluation-workbench.md)。

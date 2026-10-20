@@ -80,7 +80,7 @@ describe("getHeaderBreadcrumbItems", () => {
       getHeaderBreadcrumbItems("/individual/evaluation/catalog"),
     ).toEqual([
       { href: "/individual/evaluation", label: "Evaluation" },
-      { href: "/individual/evaluation/catalog", label: "Eval" },
+      { href: "/individual/evaluation/catalog", label: "Evaluation" },
     ]);
     expect(
       getHeaderBreadcrumbItems(

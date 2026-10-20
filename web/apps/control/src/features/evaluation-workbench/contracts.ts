@@ -10,6 +10,7 @@ export interface Field {
   description: string;
 }
 export interface DatasetContent {
+  scorerIds?: string[];
   name: string;
   objective: string;
   description: string;
@@ -123,7 +124,8 @@ export interface Evaluation {
   id: string;
   name: string;
   createdAt: string;
-  status: "RUNNING" | "COMPLETED" | "CANCELLED";
+  status: "RUNNING" | "COMPLETED" | "CANCELLED" | "FAILED";
+  remote?: import("./remote").RemoteRun;
   snapshot: EvaluationSnapshot;
   results: SampleResult[];
 }

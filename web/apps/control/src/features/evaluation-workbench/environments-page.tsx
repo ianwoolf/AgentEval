@@ -21,7 +21,7 @@ export const defaultEnvironment: EnvironmentConfig = {
   type: "SANDBOX",
   modelId: "demo-model-support",
   guardrailId: "guardrail-privacy",
-  runner: { id: "demo-sandbox-runner", concurrency: 1 },
+  runner: { id: "openshell", concurrency: 1 },
   network: [],
   readOnlyPaths: ["/app", "/datasets"],
   writablePaths: ["/workspace", "/tmp"],
@@ -164,9 +164,10 @@ function EnvironmentEditor({
   onSave(e: Environment): void;
   onClose(): void;
 }) {
-  const [config, setConfig] = useState<EnvironmentConfig>(() =>
-    clone(initial.versions.at(-1) ?? defaultEnvironment),
-  );
+  const [config, setConfig] = useState<EnvironmentConfig>(() => {
+    const value = clone(initial.versions.at(-1) ?? defaultEnvironment);
+    return { ...value, runner: { ...value.runner, id: "openshell" } };
+  });
   const [error, setError] = useState("");
   const patch = (value: Partial<EnvironmentConfig>) =>
     setConfig((c) => ({ ...c, ...value }));
@@ -210,7 +211,10 @@ function EnvironmentEditor({
             />
           </Field>
         </div>
-        <Field label="Model ID">
+        <Field
+          label="Model ID"
+          hint="Requests sent to Stork will be rewritten to override the model field with this Model ID. Simulated in this demo."
+        >
           <Input
             value={config.modelId ?? ""}
             onChange={(e) => patch({ modelId: e.target.value })}
@@ -222,18 +226,8 @@ function EnvironmentEditor({
             onChange={(e) => patch({ guardrailId: e.target.value })}
           />
         </Field>
-        <Field label="Runner ID">
-          <Input
-            value={config.runner?.id ?? ""}
-            onChange={(e) =>
-              patch({
-                runner: {
-                  ...(config.runner ?? { concurrency: 1 }),
-                  id: e.target.value,
-                },
-              })
-            }
-          />
+        <Field label="执行环境">
+          <Input value="OpenShell" disabled />
         </Field>
         <Field label="Runner concurrency">
           <Input
