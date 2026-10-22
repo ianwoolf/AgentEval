@@ -14,12 +14,15 @@ COPY packages/contracts/package.json packages/contracts/package.json
 RUN npm ci --include=optional
 
 FROM dependencies AS build
+ARG CONTROL_SPA=false
+ENV CONTROL_SPA=${CONTROL_SPA}
 
 COPY tsconfig.base.json ./
 COPY apps ./apps
 COPY packages ./packages
 COPY skills ./skills
-RUN npm run build:control
+COPY control.compose.toml ./control.compose.toml
+RUN TASKLATTICE_PRERENDER=${CONTROL_SPA} TASKLATTICE_CONFIG=/app/control.compose.toml npm run build:control
 
 FROM dependencies AS production-dependencies
 RUN npm prune --omit=dev
@@ -32,6 +35,11 @@ ENV NODE_ENV=production \
     TASKLATTICE_CONFIG=/app/control.compose.toml
 
 WORKDIR /app
+
+# Prisma must detect the same OpenSSL ABI as the build-stage engine.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates openssl \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=production-dependencies /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
@@ -53,3 +61,21 @@ HEALTHCHECK --interval=10s --timeout=3s --retries=10 \
     CMD ["node", "-e", "fetch('http://127.0.0.1:8080/api/health').then((response) => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"]
 
 CMD ["sh", "-c", "npm run db:migrate:control && exec node apps/control/.output/server/index.mjs"]
+
+# Nitro traces required external dependencies. Do not copy workspace node_modules.
+FROM node:22-bookworm-slim AS control-api
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=8080 TASKLATTICE_CONFIG=/config/control.toml
+WORKDIR /app
+COPY --from=build /app/apps/control/.output/server ./apps/control/.output/server
+COPY --from=build /app/skills/vendor/dist ./skills/vendor/dist
+USER node
+EXPOSE 8080
+CMD ["node", "apps/control/.output/server/index.mjs"]
+
+# Pure static SPA: no Node, database configuration, credentials or backend source.
+FROM nginxinc/nginx-unprivileged:stable-alpine AS nginx
+COPY deploy/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY deploy/nginx/upgrade.conf /etc/nginx/conf.d/upgrade.conf
+COPY --from=build /app/apps/control/.output/public /usr/share/nginx/html
+RUN test -s /usr/share/nginx/html/_shell.html
+EXPOSE 8080

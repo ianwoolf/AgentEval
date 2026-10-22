@@ -3,6 +3,8 @@ import { seedAgentCatalogForExistingProjects } from "../agent-garden/seed-agent-
 import { prisma } from "../db/prisma";
 
 export default definePlugin(() => {
+  // SPA shell generation must not connect to or mutate any database.
+  if (process.env.TASKLATTICE_PRERENDER === "true") return;
   void seedAgentCatalogForExistingProjects(prisma())
     .then(({ projects, records }) => {
       console.info(

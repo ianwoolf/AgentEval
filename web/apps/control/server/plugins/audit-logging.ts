@@ -13,6 +13,7 @@ interface AuditRequestContext extends Record<string, unknown> {
 const cleanupIntervalMs = 24 * 60 * 60 * 1000;
 
 export default definePlugin((nitro) => {
+  if (process.env.TASKLATTICE_PRERENDER === "true") return;
   nitro.hooks.hook("request", async (event) => {
     const context = (event.req.context ??= {}) as AuditRequestContext;
     const captured = await captureAuditRequest(event.req);

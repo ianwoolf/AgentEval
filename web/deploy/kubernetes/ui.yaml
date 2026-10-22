@@ -1,0 +1,155 @@
+# UI only. PostgreSQL is the existing host database.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evaluation-control-api
+  namespace: evaluation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evaluation-control-api
+  template:
+    metadata:
+      labels:
+        app: evaluation-control-api
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ui
+          image: evaluation-control-api:20261020-1
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: TASKLATTICE_CONFIG
+              value: /config/control.toml
+            - name: EVAL_EXECUTION_API_URL
+              value: http://evaluation-api.evaluation.svc.cluster.local:8001
+            - name: EVAL_TRIGGER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: evaluation-trigger
+                  key: token
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: '2'
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+      volumes:
+        - name: config
+          secret:
+            secretName: evaluation-ui-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evaluation-control-api
+  namespace: evaluation
+spec:
+  selector:
+    app: evaluation-control-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evaluation-ui
+  namespace: evaluation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evaluation-ui
+  template:
+    metadata:
+      labels:
+        app: evaluation-ui
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          image: evaluation-ui:nginx-20261020-1
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 3
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evaluation-ui
+  namespace: evaluation
+spec:
+  selector:
+    app: evaluation-ui
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

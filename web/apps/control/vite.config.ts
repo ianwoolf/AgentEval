@@ -23,7 +23,7 @@ export default defineConfig({
       features: { websocket: true },
     }),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart(process.env.CONTROL_SPA === "true" ? { spa: { enabled: true } } : {}),
     react(),
   ],
 });
