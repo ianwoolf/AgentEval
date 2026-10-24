@@ -25,6 +25,7 @@ export interface DatasetVersion extends DatasetContent {
 }
 export interface Dataset {
   id: string;
+  revision?: string;
   draft: DatasetContent;
   versions: DatasetVersion[];
 }

@@ -22,17 +22,10 @@ import {
   textValue,
 } from "./ui";
 export function DatasetsPage() {
-  const { state, setState } = useWorkbench();
+  const { state, saveDataset } = useWorkbench();
   const [selected, setSelected] = useState<Dataset | null>(null);
   const [search, setSearch] = useState("");
-  const save = (dataset: Dataset) => {
-    setState((s) => ({
-      ...s,
-      datasets: s.datasets.some((d) => d.id === dataset.id)
-        ? s.datasets.map((d) => (d.id === dataset.id ? clone(dataset) : d))
-        : [...s.datasets, clone(dataset)],
-    }));
-  };
+  const save = (dataset: Dataset) => saveDataset(dataset);
   if (selected)
     return (
       <DatasetEditor
@@ -166,7 +159,7 @@ function DatasetEditor({
   onBack,
 }: {
   initial: Dataset;
-  onSave(d: Dataset): void;
+  onSave(d: Dataset): Promise<Dataset>;
   onBack(): void;
 }) {
   const { state } = useWorkbench();
@@ -176,6 +169,7 @@ function DatasetEditor({
     JSON.stringify(initial.draft.metadata, null, 2),
   );
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
   const [importOpen, setImportOpen] = useState(false);
   const [editRow, setEditRow] = useState<{ index: number; raw: string } | null>(
@@ -190,7 +184,9 @@ function DatasetEditor({
     }));
     setNotice("Unsaved draft changes");
   };
-  const save = (publish: boolean) => {
+  const save = async (publish: boolean) => {
+    if (saving) return;
+    setSaving(true);
     try {
       const parsed = JSON.parse(metadata);
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
@@ -203,16 +199,18 @@ function DatasetEditor({
         draft: { ...d, name: d.name.trim(), metadata: parsed },
       };
       if (publish) next = publishDataset(next);
-      onSave(next);
-      setDataset(next);
+      const saved = await onSave(next);
+      setDataset(saved);
       setError("");
       setNotice(
         publish
           ? `Published v${next.versions.length}. Ready to use in Eval.`
-          : "Draft saved for this session.",
+          : "Draft saved to the backend.",
       );
     } catch (e) {
       setError((e as Error).message);
+    } finally {
+      setSaving(false);
     }
   };
   const changeField = (index: number, patch: Partial<DatasetField>) =>
@@ -225,10 +223,10 @@ function DatasetEditor({
       description="Draft changes never modify published versions or historical reports."
       action={
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => save(false)}>
+          <Button disabled={saving} variant="outline" onClick={() => void save(false)}>
             Save draft
           </Button>
-          <Button onClick={() => save(true)}>Publish version</Button>
+          <Button disabled={saving} onClick={() => void save(true)}>Publish version</Button>
         </div>
       }
     >

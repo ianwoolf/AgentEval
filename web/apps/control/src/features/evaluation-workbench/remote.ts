@@ -2,13 +2,13 @@ import { getAuthToken } from "@/lib/auth-token";
 import type { Evaluation, EvaluationSnapshot } from "./contracts";
 export interface Binding {
   target_id: string; dataset_id: string; dataset_version: number;
-  environment_id: string; model_id: string; langfuse_dataset_id: string;
+  environment_id: string; model_id: string;
 }
 export interface RemoteRun {
   id: string; name: string; status: Evaluation["status"]; created_at: string;
   snapshot: EvaluationSnapshot; experiment_id: string; completed: number;
   phase: string; report_url?: string; error?: string; model_id: string;
-  scorer_ids: string[]; scoring_mode: string; langfuse_experiment_id?: string;
+  scorer_ids: string[]; scoring_mode: string;
 }
 export async function executionApi<T>(project: string, path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
@@ -22,4 +22,13 @@ export async function executionApi<T>(project: string, path: string, init?: Requ
 export function fromRemote(run: RemoteRun): Evaluation {
   return { id: run.id, name: run.name, createdAt: run.created_at, status: run.status,
     snapshot: run.snapshot, results: [], remote: run };
+}
+export async function executionPages<T>(project: string, path: string): Promise<T[]> {
+  const items: T[] = [];
+  for (let offset = 0; offset < 10000; offset += 100) {
+    const page = await executionApi<{items: T[]; total: number}>(project, `${path}${path.includes("?") ? "&" : "?"}offset=${offset}&limit=100`);
+    items.push(...page.items);
+    if (items.length >= page.total || page.items.length < 100) return items;
+  }
+  throw new Error("Too many records. Narrow the query before loading more than 10,000 records.");
 }
