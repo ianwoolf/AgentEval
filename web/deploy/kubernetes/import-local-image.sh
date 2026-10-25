@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
-# Docker Desktop kind provisioner: Docker and the node use separate image stores.
-# Run from WSL Ubuntu. Stream the image locally; never push to a remote registry.
+# Local Docker Desktop kind node: Docker images and node containerd are separate.
 set -euo pipefail
-image="${1:?Usage: bash import-local-image.sh IMAGE:TAG}"
-wsl_exe="${WSL_EXE:-/mnt/c/Windows/System32/wsl.exe}"
-node_pid=""
-for candidate in $($wsl_exe -d docker-desktop -- pidof containerd | tr -d '\r'); do
-  if "$wsl_exe" -d docker-desktop -- test -f "/proc/$candidate/root/etc/kubernetes/kubelet.conf"; then
-    node_pid="$candidate"
-    break
-  fi
-done
-if [[ ! "$node_pid" =~ ^[0-9]+$ ]]; then
-  echo "Cannot identify the Docker Desktop Kubernetes node containerd process" >&2
-  exit 1
+if (($# == 0)); then echo "Usage: $0 IMAGE:TAG [IMAGE:TAG ...]" >&2; exit 2; fi
+for image in "$@"; do docker image inspect "$image" >/dev/null; done
+if [[ -n "${KIND_CLUSTER_NAME:-}" ]]; then
+  kind load docker-image --name "$KIND_CLUSTER_NAME" "$@"
+  exit
 fi
-docker image inspect "$image" --format '{{.Id}}'
-docker save "$image" | "$wsl_exe" -d docker-desktop -- nsenter -t "$node_pid" -m -p -- /usr/local/bin/ctr -n k8s.io images import -
+node_image="${KIND_NODE_IMAGE:-kindest/node:v1.36.1}"
+docker image inspect "$node_image" >/dev/null
+# Docker Desktop hides its kind node from normal docker ps. Enter only the
+# containerd process whose root contains kubelet.conf. Ephemeral helper, no push.
+docker save "$@" | docker run --rm -i --privileged --pid=host --entrypoint sh "$node_image" -c '
+  for p in /proc/[0-9]*; do
+    if test -f "$p/root/etc/kubernetes/kubelet.conf" && test "$(cat "$p/comm")" = containerd; then
+      exec nsenter -t "${p##*/}" -m -p -- ctr -n k8s.io images import --all-platforms -
+    fi
+  done
+  echo "Docker Desktop Kubernetes node containerd not found" >&2
+  exit 1
+'

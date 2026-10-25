@@ -46,7 +46,7 @@ export function Frame({
         <FlaskConical className="size-4 shrink-0 text-amber-600" />
         <span>
           <strong className="text-foreground">Configuration preview</strong> ·
-          Resource edits are session-only. Trigger submits real backend jobs; live reports are labeled separately. Existing demo reports remain simulated.
+          Datasets, environments and live results are saved to the backend. Scorer edits are session-only. Demo reports remain simulated.
         </span>
       </div>
       {children}

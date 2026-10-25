@@ -40,8 +40,8 @@ export interface EnvironmentConfig {
   readOnlyPaths: string[];
   writablePaths: string[];
   commands: string[];
-  cpu: number;
-  memoryMb: number;
+  cpuMillicores: number;
+  memoryMiB: number;
   timeoutSeconds: number;
   interceptLlm: true;
   interceptGuardrail: true;
@@ -52,6 +52,7 @@ export interface EnvironmentVersion extends EnvironmentConfig {
 }
 export interface Environment {
   id: string;
+  revision?: string;
   versions: EnvironmentVersion[];
 }
 export interface ScorerConfig {
@@ -77,6 +78,7 @@ export interface Scorer {
 }
 export interface Target {
   id: string;
+  provider?: "f5" | "nemo guardrail";
   name: string;
   kind: "PROMPT" | "GUARDRAIL";
   version: number;

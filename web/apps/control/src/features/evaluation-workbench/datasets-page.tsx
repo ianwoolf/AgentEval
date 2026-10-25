@@ -426,9 +426,9 @@ function DatasetEditor({
       {tab === "Scorers" && (
         <div className="max-w-4xl space-y-4">
           <p className="text-sm text-muted-foreground">
-            Choose the scorers available for this dataset. Leave all unchecked to allow all scorers.
+            A dataset supplies input and reference values; the target generates output, and a scorer evaluates output against reference. Choose compatible scorers for this dataset. Leave all unchecked to allow all scorers.
             Save the draft, then publish a version to use these choices in Eval.
-            Only enabled, published scorers can run.
+            Associations do not execute scorers. Actual runs use the scorer configured in the target Config and installed in the backend.
           </p>
           {state.scorers.map((scorer) => (
             <label key={scorer.id} className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 text-sm">

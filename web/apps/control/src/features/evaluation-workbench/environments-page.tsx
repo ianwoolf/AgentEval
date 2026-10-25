@@ -26,14 +26,14 @@ export const defaultEnvironment: EnvironmentConfig = {
   readOnlyPaths: ["/app", "/datasets"],
   writablePaths: ["/workspace", "/tmp"],
   commands: ["python"],
-  cpu: 2,
-  memoryMb: 2048,
+  cpuMillicores: 2000,
+  memoryMiB: 2048,
   timeoutSeconds: 120,
   interceptLlm: true,
   interceptGuardrail: true,
 };
 export function EnvironmentsPage() {
-  const { state, setState } = useWorkbench();
+  const { state, saveEnvironment } = useWorkbench();
   const [editing, setEditing] = useState<Environment | null>(null);
   const [history, setHistory] = useState<Environment | null>(null);
   return (
@@ -54,8 +54,9 @@ export function EnvironmentsPage() {
           <p className="mt-1 max-w-4xl text-sm leading-6 text-muted-foreground">
             LLM and Guardrail requests are designed to be intercepted and routed
             through the evaluation proxy for recording and controlled
-            evaluation. Both routes are mandatory. This UI only simulates the
-            configuration; it does not launch a sandbox or enforce restrictions.
+            evaluation. CPU and memory are applied to the evaluation worker as both
+            requests and limits. Environment versions are saved to the backend; other sandbox
+            restrictions remain a configuration preview.
           </p>
         </div>
       </div>
@@ -73,11 +74,11 @@ export function EnvironmentsPage() {
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div>
                     <p className="text-xs text-muted-foreground">CPU</p>
-                    <p className="mt-1 font-medium">{v.cpu} cores</p>
+                    <p className="mt-1 font-medium">{v.cpuMillicores}m</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Memory</p>
-                    <p className="mt-1 font-medium">{v.memoryMb} MB</p>
+                    <p className="mt-1 font-medium">{v.memoryMiB}Mi</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Timeout</p>
@@ -125,13 +126,8 @@ export function EnvironmentsPage() {
         <EnvironmentEditor
           initial={editing}
           onClose={() => setEditing(null)}
-          onSave={(env) => {
-            setState((s) => ({
-              ...s,
-              environments: s.environments.some((e) => e.id === env.id)
-                ? s.environments.map((e) => (e.id === env.id ? env : e))
-                : [...s.environments, env],
-            }));
+          onSave={async (env) => {
+            await saveEnvironment(env);
             setEditing(null);
           }}
         />
@@ -161,7 +157,7 @@ function EnvironmentEditor({
   onClose,
 }: {
   initial: Environment;
-  onSave(e: Environment): void;
+  onSave(e: Environment): Promise<void>;
   onClose(): void;
 }) {
   const [config, setConfig] = useState<EnvironmentConfig>(() => {
@@ -169,6 +165,7 @@ function EnvironmentEditor({
     return { ...value, runner: { ...value.runner, id: "openshell" } };
   });
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const patch = (value: Partial<EnvironmentConfig>) =>
     setConfig((c) => ({ ...c, ...value }));
   const list = (
@@ -190,7 +187,7 @@ function EnvironmentEditor({
           ? "Edit sandbox configuration"
           : "New sandbox configuration"
       }
-      description="Saving creates a new immutable version. Restrictions shown here are simulated."
+      description="Saving persists a new immutable version. CPU and memory apply to new evaluation Pods; other sandbox settings are previews."
       onClose={onClose}
     >
       <div className="grid gap-5 sm:grid-cols-2">
@@ -272,15 +269,16 @@ function EnvironmentEditor({
         <div className="grid gap-3 sm:col-span-2 sm:grid-cols-3">
           {(
             [
-              ["cpu", "CPU cores", 1, 32],
-              ["memoryMb", "Memory (MB)", 128, 65536],
+              ["cpuMillicores", "CPU (m)", 1, 32000],
+              ["memoryMiB", "Memory (Mi)", 128, 65536],
               ["timeoutSeconds", "Timeout (seconds)", 1, 3600],
             ] as const
           ).map(([key, label, min, max]) => (
-            <Field key={key} label={label}>
+            <Field key={key} label={label} hint={key === "cpuMillicores" ? "1000m = 1 CPU core. Requests and limits use this value." : key === "memoryMiB" ? "1024Mi = 1Gi. Requests and limits use this value." : ""}>
               <Input
                 type="number"
                 min={min}
+                step={1}
                 max={max}
                 value={Number.isFinite(config[key]) ? config[key] : ""}
                 onChange={(e) => patch({ [key]: e.target.valueAsNumber })}
@@ -295,8 +293,8 @@ function EnvironmentEditor({
           LLM access: evaluation proxy · Guardrail access: evaluation proxy
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          These are configuration placeholders. No live traffic is intercepted
-          in this demo.
+          These settings are configuration placeholders. Live runs use the
+          backend-managed proxy configuration.
         </p>
       </div>
       <ErrorText message={error} />
@@ -305,7 +303,9 @@ function EnvironmentEditor({
           Cancel
         </Button>
         <Button
-          onClick={() => {
+          disabled={saving}
+          onClick={async () => {
+            setSaving(true);
             try {
               const clean = {
                 ...config,
@@ -324,7 +324,7 @@ function EnvironmentEditor({
                 ),
               };
               validateEnvironment(clean);
-              onSave({
+              await onSave({
                 ...initial,
                 versions: [
                   ...initial.versions,
@@ -337,7 +337,7 @@ function EnvironmentEditor({
               });
             } catch (e) {
               setError((e as Error).message);
-            }
+            } finally { setSaving(false); }
           }}
         >
           Save v{initial.versions.length + 1}

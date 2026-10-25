@@ -1,3 +1,4 @@
+import { ScorerGuide } from "./scorer-guide";
 import { useState } from "react";
 import { Plus, Braces, Sparkles } from "lucide-react";
 import type { Dataset, Scorer } from "./contracts";
@@ -60,6 +61,11 @@ export function ScorersPage() {
         </Button>
       }
     >
+      <section className="space-y-2 rounded-lg border bg-muted/20 p-4 text-sm" aria-label="Dataset and scorer relationship">
+        <p><strong>Dataset → target → scorer → score.</strong> A dataset supplies input, reference answers/labels and metadata. The target produces output; a scorer compares that output with the reference and returns a value and reason.</p>
+        <p>Dataset associations define which scorers can be selected; they do not execute or install a scorer. One dataset can use several scorers, and one scorer can evaluate several datasets with compatible fields.</p>
+        <p className="text-muted-foreground">Live target configuration currently uses mock-score (fixed value 1) to verify the pipeline. It does not measure quality. The examples below describe scoring semantics; catalog edits and simulated tests do not install backend scoring code.</p>
+      </section>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Tabs
           items={["All scorers", "Built-in", "Custom"]}
@@ -266,6 +272,8 @@ function ScorerEditor({
       />
       {tab === "Definition" && (
         <div className="grid gap-4 sm:grid-cols-2">
+          <ScorerGuide scorer={scorer}/>
+          <section className="sm:col-span-2 rounded-lg border p-4"><h3 className="mb-2 font-medium">Associated datasets</h3><DatasetUsage datasets={state.datasets} scorerId={scorer.id}/></section>
           <Field label="Name *">
             <Input
               disabled={readonly}

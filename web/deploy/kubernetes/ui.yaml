@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: ui
-          image: evaluation-control-api:20261020-1
+          image: evaluation-control-api:local-config-v1
           imagePullPolicy: Never
           ports:
             - name: http
@@ -110,7 +110,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: nginx
-          image: evaluation-ui:nginx-20261020-1
+          image: evaluation-ui:local-config-v1
           imagePullPolicy: Never
           ports:
             - name: http

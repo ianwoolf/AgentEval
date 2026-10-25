@@ -1,5 +1,7 @@
 import { ReportConfig } from "./report-config";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useCurrentProjectId } from "@/hooks/use-project";
+import { executionPages } from "./remote";
 import {
   ArrowLeft,
   ArrowRight,
@@ -41,7 +43,7 @@ export function ReportsPage({
   const [idQuery, setIdQuery] = useState("");
   const [targetId, setTargetId] = useState("ALL");
   const run = state.evaluations.find((e) => e.id === evaluationId);
-  if (evaluationId && run?.remote) return <LiveReport run={run} onBack={() => onSelect("")} />;
+  if (evaluationId && run?.remote) return <LiveReport key={run.id} run={run} onBack={() => onSelect("")} />;
   if (evaluationId)
     return run ? (
       <ReportDetail key={run.id} run={run} onBack={() => onSelect("")} />
@@ -145,7 +147,7 @@ export function ReportsPage({
                       : "—"}
                   </td>
                   <td>
-                    {e.remote?.completed ?? e.results.length}/{e.snapshot.dataset.rows.length}
+                    {e.remote?.completed ?? e.results.length}/{e.remote?.sample_count ?? e.snapshot.dataset.rows.length}
                   </td>
                   <td className="text-xs text-muted-foreground">
                     {new Date(e.createdAt).toLocaleString()}
@@ -544,12 +546,41 @@ export function ReportDetail({
 
 function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
   const remote = run.remote!;
-  return <Frame title={run.name} description="Live Kubernetes evaluation · Real model calls and Langfuse feedback">
+  const projectId = useCurrentProjectId();
+  const [samples, setSamples] = useState<SampleResult[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const sample = samples.find(s => s.id === selectedId);
+  useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+    setSamples([]);
+    setSelectedId(null);
+    setLoading(true);
+    setError("");
+    async function refresh() {
+      try {
+        const rows = await executionPages<SampleResult>(projectId, `experiments/${encodeURIComponent(remote.experiment_id)}/samples`);
+        if (active) { setSamples(rows); setError(""); }
+      } catch (e) { if (active) setError((e as Error).message); }
+      finally {
+        if (active) {
+          setLoading(false);
+          if (run.status === "RUNNING") timer = setTimeout(refresh, 3000);
+        }
+      }
+    }
+    void refresh();
+    return () => { active = false; clearTimeout(timer); };
+  }, [projectId, remote.experiment_id, run.status, retry]);
+  return <Frame title={run.name} description="Live Kubernetes evaluation · Persisted sample results">
     <div className="flex items-center justify-between"><Button variant="outline" onClick={onBack}><ArrowLeft />All reports</Button><Pill>{run.status === "RUNNING" ? remote.phase : run.status}</Pill></div>
     <div role="status" aria-live="polite" className="space-y-3 rounded-xl border bg-card p-5">
       <h2 className="text-lg font-medium">{run.status === "RUNNING" ? "Evaluation in progress" : run.status === "FAILED" ? "Evaluation failed" : "Evaluation completed"}</h2>
       <p>{remote.completed} samples processed{run.status === "RUNNING" ? " · Waiting for worker summary. Status refreshes every 3 seconds." : ""}</p>
-      <p className="text-sm text-muted-foreground">Scores are development mocks (fixed 1). They do not represent evaluation quality.</p>
+      {remote.scoring_mode === "mock" && <p className="text-sm text-muted-foreground">Scores are development mocks (fixed 1). They do not represent evaluation quality.</p>}
       {remote.error && <p role="alert" className="text-destructive">{remote.error}</p>}
     </div>
     <dl className="grid gap-4 rounded-xl border p-5 text-sm sm:grid-cols-2">
@@ -557,11 +588,38 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
       <div><dt className="text-muted-foreground">Kubernetes Job</dt><dd className="font-mono">{run.id}</dd></div>
       <div><dt className="text-muted-foreground">Model ID</dt><dd>{remote.model_id}</dd></div>
       <div><dt className="text-muted-foreground">Scorers</dt><dd>{remote.scorer_ids.join(", ")}</dd></div>
-      <div><dt className="text-muted-foreground">Langfuse dataset</dt><dd>{run.snapshot.dataset.name} · UI version {run.snapshot.dataset.version}</dd></div>
+      <div><dt className="text-muted-foreground">Dataset</dt><dd>{run.snapshot.dataset.name} · UI version {run.snapshot.dataset.version}</dd></div>
       <div><dt className="text-muted-foreground">Execution environment</dt><dd>{run.snapshot.environment.name} · Kubernetes</dd></div>
     </dl>
-    <p className="text-sm text-muted-foreground">The backend requests glm-4.7. The provider may route legacy model names to a newer model; actual response model and token/timing data are recorded in Langfuse.</p>
-    {remote.report_url && <Button asChild><a href={remote.report_url} target="_blank" rel="noopener noreferrer">Open Langfuse report<ArrowRight /></a></Button>}
-    <Button variant="outline" onClick={() => download(`${run.id}.json`, {simulated: false, ...run})}><Download />Export run</Button>
+    <section className="space-y-4" aria-label="Sample results">
+      <h2 className="text-lg font-medium">Sample results</h2>
+      <p className="text-sm text-muted-foreground">Duration includes target execution and scoring. Select a sample to inspect full input, response and scorer feedback.</p>
+      {error && <div role="alert" className="text-sm text-destructive">Sample loading failed: {error} <Button variant="outline" onClick={() => setRetry(v => v + 1)}>Retry</Button></div>}
+      {loading ? <p role="status">Loading samples…</p> : !samples.length && !error ? <Empty>No sample results have been stored yet.</Empty> : null}
+      {samples.length > 0 && <Table>
+        <thead><tr><th>Sample</th><th>Status</th><th>Duration</th><th>Scores</th><th>Input</th><th>Response</th></tr></thead>
+        <tbody>{samples.map(row => <tr key={row.id}>
+          <td><Button variant="link" onClick={() => setSelectedId(row.id)}>{row.id}<ChevronRight /></Button></td>
+          <td><Pill tone={row.status === "PASS" ? "good" : "bad"}>{row.status}</Pill>{row.error && <p className="text-destructive">{row.error}</p>}</td>
+          <td className="whitespace-nowrap">{Math.round(row.latencyMs)} ms</td>
+          <td>{row.scores.length ? row.scores.map(score => <div key={score.scorerId} className="whitespace-nowrap">{score.scorerId}: {score.value.toFixed(2)}</div>) : "—"}</td>
+          <td className="max-w-72"><div className="line-clamp-3 break-words">{textValue(row.input)}</div></td>
+          <td className="max-w-72"><div className="line-clamp-3 break-words">{textValue(row.output)}</div></td>
+        </tr>)}</tbody>
+      </Table>}
+    </section>
+    <Sheet open={!!sample} onOpenChange={open => { if (!open) setSelectedId(null); }}>
+      <SheetContent className="overflow-y-auto sm:max-w-2xl">
+        <SheetHeader><SheetTitle>Sample {sample?.id}</SheetTitle><SheetDescription>Persisted input, response, duration and scoring details.</SheetDescription></SheetHeader>
+        {sample && <div className="space-y-6 px-5 pb-6">
+          <div className="flex gap-3"><Pill>{sample.status}</Pill><Pill>{Math.round(sample.latencyMs)} ms</Pill></div>
+          {sample.error && <p role="alert" className="text-destructive">{sample.error}</p>}
+          {([['Input', sample.input], ['Response', sample.output], ['Reference', sample.reference]] as const).map(([label, value]) => <section key={label}><h3 className="mb-2 font-medium">{label}</h3><JsonPreview value={value} /></section>)}
+          <section><h3 className="mb-2 font-medium">Scores</h3>{sample.scores.map(score => <div key={score.scorerId} className="mb-3 rounded-lg border p-4"><p>{score.scorerId}: {score.value.toFixed(2)} · {score.passed ? "PASS" : "FAIL"}</p><p className="mt-2 text-sm text-muted-foreground">{score.reason}</p></div>)}</section>
+          <section><h3 className="mb-2 font-medium">Execution trace</h3>{sample.trace.map((span, i) => <div key={i} className="mb-3"><p>{span.name} · {Math.round(span.durationMs)} ms</p><p className="text-sm text-muted-foreground">{span.detail}</p></div>)}</section>
+        </div>}
+      </SheetContent>
+    </Sheet>
+    <Button disabled={loading || !!error} variant="outline" onClick={() => download(`${run.id}.json`, {...run, simulated: false, results: samples})}><Download />Export run</Button>
   </Frame>;
 }

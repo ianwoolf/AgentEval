@@ -55,18 +55,18 @@ export function validateEnvironment(config: EnvironmentConfig) {
     throw new Error("Runner concurrency must be an integer from 1 to 32.");
   if (!config.name.trim()) throw new Error("Environment name is required.");
   if (
-    !Number.isFinite(config.cpu) ||
-    config.cpu < 1 ||
-    config.cpu > 32 ||
-    !Number.isInteger(config.cpu)
+    !Number.isFinite(config.cpuMillicores) ||
+    config.cpuMillicores < 1 ||
+    config.cpuMillicores > 32000 ||
+    !Number.isInteger(config.cpuMillicores)
   )
-    throw new Error("CPU must be an integer from 1 to 32.");
+    throw new Error("CPU must be an integer from 1 to 32,000 m (1000m = 1 core).");
   if (
-    !Number.isInteger(config.memoryMb) ||
-    config.memoryMb < 128 ||
-    config.memoryMb > 65536
+    !Number.isInteger(config.memoryMiB) ||
+    config.memoryMiB < 128 ||
+    config.memoryMiB > 65536
   )
-    throw new Error("Memory must be 128–65,536 MB.");
+    throw new Error("Memory must be 128–65,536 Mi (1024Mi = 1Gi).");
   if (
     !Number.isInteger(config.timeoutSeconds) ||
     config.timeoutSeconds < 1 ||
@@ -384,8 +384,8 @@ export function createFixtures(): WorkbenchState {
     readOnlyPaths: ["/app", "/datasets"],
     writablePaths: ["/workspace", "/tmp"],
     commands: ["python", "node"],
-    cpu: 2,
-    memoryMb: 2048,
+    cpuMillicores: 2000,
+    memoryMiB: 2048,
     timeoutSeconds: 120,
     interceptLlm: true,
     interceptGuardrail: true,
@@ -474,6 +474,7 @@ export function createFixtures(): WorkbenchState {
         id: "guardrail-privacy",
         name: "Privacy & prompt injection",
         kind: "GUARDRAIL",
+        provider: "nemo guardrail",
         version: 2,
         definition:
           "Block private-data requests and instruction override attempts.",

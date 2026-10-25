@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Play, ShieldCheck } from "lucide-react";
 import { useCurrentProjectId } from "@/hooks/use-project";
 import type { CreateEvaluationRequest } from "./contracts";
-import { executionApi, fromRemote, type Binding, type RemoteRun } from "./remote";
-import { createEvaluation } from "./domain";
+import { executionApi, fromRemote, type Binding, type RemoteRun, type TargetRunConfig } from "./remote";
+
+import { TriggerTargetDialog } from "./trigger-target";
 import { useWorkbench } from "./provider";
 import {
   Button,
@@ -24,9 +25,11 @@ export function EvalPage() {
   const projectId = useCurrentProjectId();
   const [filter, setFilter] = useState("ALL");
   const [targetType, setTargetType] = useState("GUARDRAIL");
+  const [provider, setProvider] = useState("ALL");
+  const [configTargetId, setConfigTargetId] = useState<string | null>(null);
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [historyTargetId, setHistoryTargetId] = useState<string | null>(null);
-  const targets = state.targets.filter((target) => target.kind === targetType);
+  const targets = state.targets.filter((target) => target.kind === targetType && (provider === "ALL" || target.provider === provider));
   const runs = state.evaluations.filter(
     (e) => (!historyTargetId || e.snapshot.target.id === historyTargetId) &&
       (filter === "ALL" || e.status === filter),
@@ -42,15 +45,23 @@ export function EvalPage() {
             <option value="GUARDRAIL">Guardrail</option>
           </Select>
         </Field>
+        <Field label="Provider">
+          <Select value={provider} onChange={e=>setProvider(e.target.value)}>
+            <option value="ALL">All providers</option>
+            <option value="f5">F5</option>
+            <option value="nemo guardrail">NeMo Guardrail</option>
+          </Select>
+        </Field>
         <p className="text-sm text-muted-foreground">{targets.length} target{targets.length === 1 ? "" : "s"}</p>
       </div>
       <Table>
-        <thead><tr><th>Target</th><th>Type</th><th>Version</th><th>Description</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Target</th><th>Type</th><th>Provider</th><th>Version</th><th>Description</th><th>Actions</th></tr></thead>
         <tbody>
           {targets.map((target) => (
             <tr key={target.id}>
               <td><div className="flex items-center gap-3"><ShieldCheck className="size-5 text-primary" /><div><p className="font-medium">{target.name}</p><p className="mt-1 font-mono text-xs text-muted-foreground">{target.id}</p></div></div></td>
               <td><Pill>Guardrail</Pill></td>
+              <td>{target.provider === "f5" ? "F5" : target.provider === "nemo guardrail" ? "NeMo Guardrail" : "—"}</td>
               <td>v{target.version}</td>
               <td className="max-w-md text-muted-foreground">{target.definition}</td>
               <td><div className="flex gap-2">
@@ -58,6 +69,7 @@ export function EvalPage() {
                   setHistoryTargetId(target.id);
                   setFilter("ALL");
                 }}>History</Button>
+                <Button variant="outline" onClick={() => setConfigTargetId(target.id)}>Config</Button>
                 <Button onClick={() => setSelectedTargetId(target.id)}><Play />Trigger</Button>
               </div></td>
             </tr>
@@ -65,7 +77,8 @@ export function EvalPage() {
         </tbody>
       </Table>
       {!targets.length && <Empty>No targets available for this type.</Empty>}
-      {selectedTargetId && <CreateEvalDialog key={selectedTargetId} targetId={selectedTargetId}
+      {configTargetId && <CreateEvalDialog targetId={configTargetId} onClose={()=>setConfigTargetId(null)} />}
+      {selectedTargetId && <TriggerTargetDialog key={selectedTargetId} targetId={selectedTargetId}
         onStarted={(id) => { void navigate({ to: "/$projectId/evaluation/reports", params: { projectId }, search: { evaluationId: id } }); }}
         onClose={() => setSelectedTargetId(null)} />}
       {historyTargetId && (
@@ -141,10 +154,10 @@ export function EvalPage() {
                     <progress
                       className="h-1.5 w-full accent-primary"
                       value={run.remote?.completed ?? run.results.length}
-                      max={run.snapshot.dataset.rows.length}
+                      max={run.remote?.sample_count ?? run.snapshot.dataset.rows.length}
                     />
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {run.remote?.completed ?? run.results.length}/{run.snapshot.dataset.rows.length}{" "}
+                      {run.remote?.completed ?? run.results.length}/{run.remote?.sample_count ?? run.snapshot.dataset.rows.length}{" "}
                       samples
                     </p>
                   </div>
@@ -205,19 +218,25 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
   const defaultScorerIds = (ids?: string[]) => state.scorers
     .filter((s) => s.enabled && s.versions.length && (!ids?.length || ids.includes(s.id)))
     .map((s) => s.id);
-  const [request, setRequest] = useState<CreateEvaluationRequest>({
+  const [request, setRequest] = useState<CreateEvaluationRequest & {environmentVersion:number}>({
     name: "",
     targetId: targetId ?? state.targets.find((t) => t.kind === "GUARDRAIL")?.id ?? "",
     datasetId: firstDataset?.id ?? "",
     datasetVersion: firstDataset?.versions.at(-1)?.version ?? 0,
     environmentId: state.environments[0]?.id ?? "",
+    environmentVersion: state.environments[0]?.versions.at(-1)?.version ?? 0,
     scorerIds: defaultScorerIds(firstDataset?.versions.at(-1)?.scorerIds),
   });
   const [error, setError] = useState("");
   const submitted = useRef(false);
   const [busy, setBusy] = useState(false);
+  const [source, setSource] = useState("published");
+  const [scoringMode, setScoringMode] = useState<"mock"|"installed">("mock");
+  const [revision, setRevision] = useState<string | undefined>();
+  const [loadingConfig, setLoadingConfig] = useState(true);
   const [bindings, setBindings] = useState<Binding[]>([]);
   const idempotencyKey = useRef(crypto.randomUUID());
+
   useEffect(() => {
     let active = true;
     executionApi<{bindings: Binding[]}>(projectId, "config")
@@ -225,7 +244,26 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
       .catch(e => { if (active) setError(e.message); });
     return () => { active = false; };
   }, [projectId]);
-  const patch = (value: Partial<CreateEvaluationRequest>) => {
+  useEffect(() => {
+    if (!targetId) {setLoadingConfig(false);return;}
+    let active=true;
+    executionApi<TargetRunConfig>(projectId, `targets/${encodeURIComponent(targetId)}/config`).then(c=>{
+      if(!active)return;
+      setRevision(c.revision);setSource(c.data_source);setScoringMode(c.scoring_mode);
+      setRequest(r=>({...r,datasetId:c.dataset_id,datasetVersion:c.dataset_version,environmentId:c.environment_id,environmentVersion:c.environment_version,scorerIds:c.scorer_ids}));
+    }).catch(e=>{if(active && e.status!==404)setError(e.message);}).finally(()=>{if(active)setLoadingConfig(false);});
+    return()=>{active=false;};
+  },[projectId,targetId]);
+  useEffect(() => {
+    if (!request.datasetId && firstDataset) setRequest(r => ({...r, datasetId: firstDataset.id, datasetVersion: firstDataset.versions.at(-1)!.version, scorerIds: defaultScorerIds(firstDataset.versions.at(-1)!.scorerIds)}));
+  }, [firstDataset, request.datasetId]);
+  useEffect(() => {
+    setRequest(r => r.targetId && r.environmentId ? r : ({...r,
+      targetId:r.targetId || targetId || state.targets.find(t=>t.kind==="GUARDRAIL")?.id || "",
+      environmentId:r.environmentId || state.environments[0]?.id || "",
+      environmentVersion:r.environmentVersion || state.environments[0]?.versions.at(-1)?.version || 0}));
+  }, [state.targets, state.environments, targetId]);
+  const patch = (value: Partial<CreateEvaluationRequest & {environmentVersion:number}>) => {
     idempotencyKey.current = crypto.randomUUID();
     setRequest((r) => ({ ...r, ...value }));
     setError("");
@@ -236,11 +274,11 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
   );
   const environment = state.environments
     .find((e) => e.id === request.environmentId)
-    ?.versions.at(-1);
+    ?.versions.find(v=>v.version===request.environmentVersion);
   return (
     <Modal
-      title="Configure evaluation"
-      description="Run a real Kubernetes evaluation with Langfuse datasets and reporting. Scoring currently uses an explicit development mock."
+      title="Target configuration"
+      description="Save the dataset, environment version and scoring settings used by future runs of this target."
       footer={<>
       <ErrorText message={error} />
       <div className="flex justify-end gap-2">
@@ -251,26 +289,21 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
           Cancel
         </Button>
           <Button
-            disabled={busy || !bindings.length}
+            disabled={busy || loadingConfig || !bindings.length}
             onClick={async () => {
               if (submitted.current) return;
               submitted.current = true;
               setBusy(true);
               try {
-                const evaluation = createEvaluation(state, request);
-                const binding = bindings.find(b => b.target_id === request.targetId && b.dataset_id === request.datasetId &&
-                  b.dataset_version === request.datasetVersion && b.environment_id === request.environmentId);
-                if (!binding) throw new Error("This configuration has no backend resource binding. Select the published Guardrail conversation safety dataset and Isolated evaluation environment.");
-                const snapshot = { ...evaluation.snapshot, environment: { ...evaluation.snapshot.environment, modelId: binding.model_id, runner: { id: "kubernetes", concurrency: 1 } }, scorers: [] };
-                const run = await executionApi<RemoteRun>(projectId, "runs", {
-                  method: "POST", headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey.current },
-                  body: JSON.stringify({ name: request.name, target_id: request.targetId, dataset_id: request.datasetId,
-                    dataset_version: request.datasetVersion, environment_id: request.environmentId, model_id: binding.model_id,
-                    scoring_mode: "mock", scorer_ids: ["mock-score"], snapshot }),
+                const saved=await executionApi<TargetRunConfig>(projectId, `targets/${encodeURIComponent(request.targetId)}/config`, {
+                  method:"POST",headers:{"Content-Type":"application/json"},
+                  body:JSON.stringify({revision,dataset_id:request.datasetId,dataset_version:request.datasetVersion,
+                    environment_id:request.environmentId,environment_version:request.environmentVersion,
+                    data_source:source,scoring_mode:scoringMode,scorer_ids:scoringMode==="mock"?["mock-score"]:request.scorerIds}),
                 });
-                setState(s => ({ ...s, evaluations: [fromRemote(run), ...s.evaluations.filter(e => e.id !== run.id)] }));
+                setRevision(saved.revision);
                 onClose();
-                onStarted?.(run.id);
+
               } catch (e) {
                 setError((e as Error).message);
                 submitted.current = false;
@@ -278,20 +311,13 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
             }}
           >
             <Play />
-            {busy ? "Starting…" : "Run evaluation"}
+            {busy ? "Saving…" : "Save config"}
           </Button>
       </div>
       </>}
       onClose={onClose}
     >
         <div className="space-y-6">
-          <Field label="Evaluation name *">
-            <Input
-              value={request.name}
-              placeholder="e.g. Guardrail safety regression"
-              onChange={(e) => patch({ name: e.target.value })}
-            />
-          </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Dataset *">
               <Select
@@ -335,6 +361,10 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
               </Select>
             </Field>
           </div>
+          <Field label="Data source"><Select value={source} disabled={busy} onChange={e=>{setSource(e.target.value);idempotencyKey.current=crypto.randomUUID();}}>
+            <option value="published">Published dataset</option><option value="upload">Upload for this evaluation</option>
+          </Select></Field>
+          {source === "upload" && <p className="text-sm text-muted-foreground">Each Trigger requires a fresh CSV/XLSX upload validated against this dataset version. Files are not saved in Config.</p>}
           {!firstDataset && (
             <p className="text-sm text-muted-foreground">
               Publish a dataset before running an evaluation.{" "}
@@ -351,7 +381,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
           <Field label="Execution environment *">
             <Select
               value={request.environmentId}
-              onChange={(e) => patch({ environmentId: e.target.value })}
+              onChange={(e) => patch({ environmentId: e.target.value, environmentVersion: state.environments.find(v=>v.id===e.target.value)?.versions.at(-1)?.version ?? 0 })}
             >
               <option value="">Select environment configuration</option>
               {state.environments.map((e) => (
@@ -362,18 +392,23 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
               ))}
             </Select>
           </Field>
+          <Field label="Environment version *"><Select value={request.environmentVersion} onChange={e=>patch({environmentVersion:Number(e.target.value)})}>
+            {state.environments.find(e=>e.id===request.environmentId)?.versions.toReversed().map(v=><option key={v.version} value={v.version}>v{v.version} · {v.cpuMillicores}m / {v.memoryMiB}Mi</option>)}
+          </Select></Field>
           {environment && (
             <div className="rounded-lg border bg-muted/20 p-4 text-sm">
               <p className="font-medium">{environment.name} · v{environment.version} · Kubernetes Job</p>
               <p className="mt-2 text-muted-foreground">{environment.description}</p>
+              <p className="mt-2">CPU: {environment.cpuMillicores}m · Memory: {environment.memoryMiB}Mi (requests = limits)</p>
+              <p className="text-xs text-muted-foreground">1000m = 1 CPU core · 1024Mi = 1Gi</p>
               <p className="mt-2 text-muted-foreground">Model: {bindings.find(b => b.environment_id === request.environmentId)?.model_id ?? "Not bound"} · Target execution: LLM risk classification · Concurrency: 1</p>
             </div>
           )}
           <Field label="Scoring mode">
-            <Select value="mock" disabled><option value="mock">Mock score · development</option></Select>
+            <Select value={scoringMode} disabled><option value="mock">Mock score · development</option><option value="installed">Installed scorers</option></Select>
           </Field>
           <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
-            Real model requests and Langfuse feedback. The mock-score scorer returns a fixed score of 1; this does not measure target quality.
+            Real model requests and persisted sample results. The mock-score scorer returns a fixed score of 1; this does not measure target quality.
             Configured policy and risk scorers are not installed in the backend yet.
           </p>
           <p className="text-sm text-muted-foreground">Runtime isolation uses the server-managed Kubernetes profile. OpenShell restrictions from the configuration preview are not applied.</p>
