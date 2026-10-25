@@ -144,6 +144,8 @@ describe("interactive workbench", () => {
     await user.click(
       await screen.findByRole("button", { name: "Edit configuration" }),
     );
+    await user.selectOptions(screen.getByRole("combobox", { name: "Model ID" }), "none");
+    expect(screen.getByRole("option", { name: "glm-dev" })).toBeTruthy();
     expect(screen.getByText("1000m = 1 CPU core. Requests and limits use this value.")).toBeTruthy();
     expect(screen.getByText("1024Mi = 1Gi. Requests and limits use this value.")).toBeTruthy();
     await user.clear(screen.getByLabelText("CPU (m)"));
@@ -154,6 +156,7 @@ describe("interactive workbench", () => {
     await user.type(screen.getByLabelText("CPU (m)"), "750");
     await user.click(screen.getByRole("button", { name: "Save v2" }));
     await waitFor(()=>expect(readState().environments[0].versions.map((v: {cpuMillicores:number})=>v.cpuMillicores)).toEqual([2000,750]));
+    expect(readState().environments[0].versions.at(-1).modelId).toBe("none");
     cleanup();
     render(<WorkbenchProvider><EnvironmentsPage /></WorkbenchProvider>);
     expect(await screen.findByText("750m")).toBeTruthy();

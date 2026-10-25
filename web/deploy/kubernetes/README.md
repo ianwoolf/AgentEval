@@ -1,5 +1,7 @@
 # 本地 K8s：UI / Control API 与部署总览
 
+迁移到另一台电脑请先阅读 [deploy/README.md](../README.md)，包含可选 PostgreSQL 和首次迁移。
+
 完整链路：浏览器 → Nginx → Control API → evaluation-api → worker Job → 模型服务。
 Control API 访问 PostgreSQL；evaluation-api/collector 使用 ES。旧 Langfuse 不参与此链路。
 
@@ -18,7 +20,7 @@ Control API 访问 PostgreSQL；evaluation-api/collector 使用 ES。旧 Langfus
 
 ## PostgreSQL 与密钥
 
-当前复用宿主机 `tasklattice-dev-postgres`（postgres:17），本机 55432 → 容器 5432；
+当前复用宿主机 `tasklattice-dev-postgres`（官方 postgres:17），本机 55432 → 容器 5432；
 Pod 连接 `host.docker.internal:55432`。它不是本目录管理的 K8s 数据库，必须独立保留数据卷。
 新机器可使用自有 PostgreSQL；通过 `render_ui_secret.py --database-host/--database-port`
 指定可从 Pod 访问的地址。Control schema 由 `npm run db:migrate:control` 迁移，镜像不自动迁移。
@@ -30,9 +32,9 @@ Secret 渲染输出只管道给 kubectl，勿提交或打印。public_url 应为
 ## 构建与部署（主工程根目录执行）
 
 ```bash
-docker build --build-arg CONTROL_SPA=true --target nginx -f web/Dockerfile.control -t evaluation-ui:local-config-v1 web
-docker build --build-arg CONTROL_SPA=true --target control-api -f web/Dockerfile.control -t evaluation-control-api:local-config-v1 web
-bash web/deploy/kubernetes/import-local-image.sh evaluation-ui:local-config-v1 evaluation-control-api:local-config-v1
+docker build --build-arg CONTROL_SPA=true --target nginx -f web/Dockerfile.control -t ianwoolf/evaluation-ui:20261025-none-v1 web
+docker build --build-arg CONTROL_SPA=true --target control-api -f web/Dockerfile.control -t ianwoolf/evaluation-control-api:20261025-config-v1 web
+bash web/deploy/kubernetes/import-local-image.sh ianwoolf/evaluation-ui:20261025-none-v1 ianwoolf/evaluation-control-api:20261025-config-v1
 python3 web/deploy/kubernetes/render_ui_secret.py --config data/control.dev.toml | kubectl --context docker-desktop apply -f -
 kubectl --context docker-desktop apply -f web/deploy/kubernetes/ui.yaml
 kubectl --context docker-desktop -n evaluation rollout status deployment/evaluation-control-api --timeout=180s
@@ -44,7 +46,7 @@ kubectl --context docker-desktop -n evaluation port-forward service/evaluation-u
 支持 macOS/Linux/WSL，不再依赖 wsl.exe。默认 helper 镜像 `kindest/node:v1.36.1` 必须已存在；
 可设置 `KIND_NODE_IMAGE`。标准 kind 集群设置 `KIND_CLUSTER_NAME` 使用 kind CLI。
 重建集群后 Docker 镜像仍在但节点缓存为空，需重新导入三个应用镜像和 ES 镜像。
-本地 YAML 使用 `imagePullPolicy: Never`。不要只检查 docker images。
+当前 YAML 使用 Docker Hub 地址和 `imagePullPolicy: IfNotPresent`；离线导入时不要只检查 docker images。
 
 ## 访问与检查
 

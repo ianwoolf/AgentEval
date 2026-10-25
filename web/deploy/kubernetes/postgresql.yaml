@@ -1,0 +1,64 @@
+# Optional fresh-install PostgreSQL. Do not apply when using an existing database.
+apiVersion: v1
+kind: Service
+metadata:
+  name: evaluation-postgres
+  namespace: evaluation
+spec:
+  selector:
+    app: evaluation-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: evaluation-postgres
+  namespace: evaluation
+spec:
+  serviceName: evaluation-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evaluation-postgres
+  template:
+    metadata:
+      labels:
+        app: evaluation-postgres
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: postgres
+          image: ianwoolf/evaluation-postgres:17
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: evaluation-postgres
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: '1'
+              memory: 1Gi
+          readinessProbe:
+            exec:
+              command: [sh, -c, 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"']
+            initialDelaySeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 5Gi

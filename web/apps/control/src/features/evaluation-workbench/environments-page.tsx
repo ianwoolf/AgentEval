@@ -13,13 +13,14 @@ import {
   Modal,
   Pill,
   Section,
+  Select,
   Textarea,
 } from "./ui";
 export const defaultEnvironment: EnvironmentConfig = {
   name: "",
   description: "",
   type: "SANDBOX",
-  modelId: "demo-model-support",
+  modelId: "glm-dev",
   guardrailId: "guardrail-privacy",
   runner: { id: "openshell", concurrency: 1 },
   network: [],
@@ -210,12 +211,18 @@ function EnvironmentEditor({
         </div>
         <Field
           label="Model ID"
-          hint="Requests sent to Stork will be rewritten to override the model field with this Model ID. Simulated in this demo."
+          hint="glm-dev 调用模型；none 跳过模型，将 dataset input 直接交给打分器，模型耗时为 0。"
         >
-          <Input
-            value={config.modelId ?? ""}
+          <Select
+            value={config.modelId ?? "glm-dev"}
             onChange={(e) => patch({ modelId: e.target.value })}
-          />
+          >
+            {config.modelId && !["glm-dev", "none"].includes(config.modelId) && (
+              <option value={config.modelId} disabled>{config.modelId} (legacy)</option>
+            )}
+            <option value="glm-dev">glm-dev</option>
+            <option value="none">none</option>
+          </Select>
         </Field>
         <Field label="Guardrail ID">
           <Input

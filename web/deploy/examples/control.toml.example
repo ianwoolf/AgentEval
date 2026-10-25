@@ -1,0 +1,41 @@
+schema_version = 1
+
+[server]
+public_url = "http://127.0.0.1:18082"
+
+[database]
+url = "postgresql://tasklattice:REPLACE_URL_ENCODED_PASSWORD@127.0.0.1:55432/tasklattice"
+
+[auth]
+session_signing_key = "REPLACE_WITH_RANDOM_SESSION_KEY_AT_LEAST_32_CHARS"
+
+[auth.local]
+enabled = true
+initial_super_admin_username = "admin"
+initial_super_admin_password_hash = "REPLACE_WITH_BCRYPT_HASH"
+
+[auth.oidc]
+enabled = false
+display_name = "SSO"
+issuer = ""
+client_id = ""
+client_secret = ""
+
+[runner]
+url = "http://127.0.0.1:9090"
+token = "REPLACE_WITH_RANDOM_UNUSED_RUNNER_TOKEN"
+
+[litellm]
+url = "http://127.0.0.1:4000"
+master_key = ""
+
+[smtp]
+enabled = false
+host = ""
+port = 587
+secure = false
+username = ""
+password = ""
+from_address = ""
+from_name = "TaskLattice"
+reply_to = ""

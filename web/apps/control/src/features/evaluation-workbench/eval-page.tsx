@@ -401,7 +401,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
               <p className="mt-2 text-muted-foreground">{environment.description}</p>
               <p className="mt-2">CPU: {environment.cpuMillicores}m · Memory: {environment.memoryMiB}Mi (requests = limits)</p>
               <p className="text-xs text-muted-foreground">1000m = 1 CPU core · 1024Mi = 1Gi</p>
-              <p className="mt-2 text-muted-foreground">Model: {bindings.find(b => b.environment_id === request.environmentId)?.model_id ?? "Not bound"} · Target execution: LLM risk classification · Concurrency: 1</p>
+              <p className="mt-2 text-muted-foreground">Model: {environment.modelId} · Target execution: {environment.modelId === "none" ? "Dataset input → scorers (no model)" : "LLM risk classification"} · Concurrency: 1</p>
             </div>
           )}
           <Field label="Scoring mode">
