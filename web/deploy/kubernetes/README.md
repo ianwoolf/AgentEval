@@ -1,6 +1,8 @@
 # 本地 K8s：UI / Control API 与部署总览
 
-迁移到另一台电脑请先阅读 [deploy/README.md](../README.md)，包含可选 PostgreSQL 和首次迁移。
+当前精简部署请阅读 [STANDALONE.md](../STANDALONE.md)，使用 `evaluation-ui.yaml`。
+只有 Docker 的机器使用 [docker-compose](../docker-compose/README.md)，不要运行本目录的 kubectl 命令。
+它不依赖 Control API 或 PostgreSQL。下文是完整平台的历史部署方法。
 
 完整链路：浏览器 → Nginx → Control API → evaluation-api → worker Job → 模型服务。
 Control API 访问 PostgreSQL；evaluation-api/collector 使用 ES。旧 Langfuse 不参与此链路。

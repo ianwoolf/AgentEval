@@ -1,4 +1,4 @@
-# UI / Control API. Configure PostgreSQL in evaluation-ui-config; optional postgresql.yaml supports fresh installs.
+# Legacy full platform UI / Control API. Standalone evaluation uses evaluation-ui.yaml instead.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

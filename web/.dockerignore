@@ -14,4 +14,6 @@ docs
 .DS_Store
 .env
 .env.*
+**/.env
+**/.secrets
 !.env.example

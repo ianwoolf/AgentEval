@@ -1,5 +1,16 @@
 # UI / Control API：在另一台电脑部署
 
+当前两种部署方式独立：
+
+- **仅 Docker：**[docker-compose/README.md](docker-compose/README.md)，先启动后端的 Compose，再启动静态 UI。
+- **Kubernetes：**[STANDALONE.md](STANDALONE.md)，使用 kubernetes/evaluation-ui.yaml。
+
+两者都不使用 Control API 或 PostgreSQL；UI JSON 与 Nginx 配置属于普通配置，不放 Secret。
+
+**当前默认采用精简评测部署，请先看 [STANDALONE.md](STANDALONE.md)。**
+它只部署静态 UI 和 Evaluation API，不使用 Control API、PostgreSQL、登录和权限层。
+下文保留完整 TaskLattice 平台的历史部署方法，不适用于当前精简模式。
+
 已发布镜像地址及架构见 [IMAGES.md](IMAGES.md)。当前上传镜像仅支持 linux/arm64。
 
 

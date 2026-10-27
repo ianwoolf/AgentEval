@@ -5,6 +5,8 @@
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
+    "build:evaluation": "vite build --config vite.evaluation.config.ts",
+    "dev:evaluation": "vite --config vite.evaluation.config.ts --open /evaluation.html",
     "db:generate": "prisma generate --config prisma.config.ts",
     "db:generate-seed": "tsx prisma/generate-seed-migration.ts",
     "db:migrate": "prisma migrate deploy --config prisma.config.ts",

@@ -1,0 +1,27 @@
+name: evaluation-ui
+services:
+  evaluation-ui:
+    image: ${EVAL_UI_IMAGE:-evaluation-ui:deploy-v2}
+    build:
+      context: ../..
+      dockerfile: Dockerfile.evaluation
+    ports: ['${EVAL_UI_BIND_ADDRESS:-127.0.0.1}:${EVAL_UI_PORT:-8080}:8080']
+    configs:
+      - source: ui_settings
+        target: /usr/share/nginx/html/evaluation-config.json
+      - source: proxy_settings
+        target: /etc/nginx/conf.d/default.conf
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, 'http://127.0.0.1:8080/healthz']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [evaluation]
+configs:
+  ui_settings: {file: ./config/ui.json}
+  proxy_settings: {file: ./config/nginx.conf}
+networks:
+  evaluation:
+    external: true
+    name: ${EVAL_NETWORK:-evaluation-compose}

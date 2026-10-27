@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { ProjectContext } from "@/components/project/project-context";
+import { evaluationRuntime } from '@/features/evaluation-workbench/runtime';
 
 export function useProject() {
   const context = useContext(ProjectContext);
@@ -10,5 +11,9 @@ export function useProject() {
 }
 
 export function useCurrentProjectId() {
-  return useProject().currentProject?.id ?? "individual";
+  const context = useContext(ProjectContext);
+  const runtime = evaluationRuntime();
+  if (runtime.standalone) return runtime.projectId;
+  if (!context) throw new Error('useCurrentProjectId must be used inside ProjectProvider.');
+  return context.currentProject?.id ?? 'individual';
 }

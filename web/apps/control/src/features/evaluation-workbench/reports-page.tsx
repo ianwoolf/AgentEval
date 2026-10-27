@@ -575,7 +575,7 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
     void refresh();
     return () => { active = false; clearTimeout(timer); };
   }, [projectId, remote.experiment_id, run.status, retry]);
-  return <Frame title={run.name} description="Live Kubernetes evaluation · Persisted sample results">
+  return <Frame title={run.name} description="Live evaluation · Persisted sample results">
     <div className="flex items-center justify-between"><Button variant="outline" onClick={onBack}><ArrowLeft />All reports</Button><Pill>{run.status === "RUNNING" ? remote.phase : run.status}</Pill></div>
     <div role="status" aria-live="polite" className="space-y-3 rounded-xl border bg-card p-5">
       <h2 className="text-lg font-medium">{run.status === "RUNNING" ? "Evaluation in progress" : run.status === "FAILED" ? "Evaluation failed" : "Evaluation completed"}</h2>
@@ -585,11 +585,11 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
     </div>
     <dl className="grid gap-4 rounded-xl border p-5 text-sm sm:grid-cols-2">
       <div><dt className="text-muted-foreground">Experiment ID</dt><dd className="break-all font-mono">{remote.experiment_id}</dd></div>
-      <div><dt className="text-muted-foreground">Kubernetes Job</dt><dd className="font-mono">{run.id}</dd></div>
+      <div><dt className="text-muted-foreground">{remote.runtime === 'docker' ? 'Docker container' : 'Kubernetes Job'}</dt><dd className="font-mono">{remote.container_name ?? run.id}</dd></div>
       <div><dt className="text-muted-foreground">Model ID</dt><dd>{remote.model_id}</dd></div>
       <div><dt className="text-muted-foreground">Scorers</dt><dd>{remote.scorer_ids.join(", ")}</dd></div>
       <div><dt className="text-muted-foreground">Dataset</dt><dd>{run.snapshot.dataset.name} · UI version {run.snapshot.dataset.version}</dd></div>
-      <div><dt className="text-muted-foreground">Execution environment</dt><dd>{run.snapshot.environment.name} · Kubernetes</dd></div>
+      <div><dt className="text-muted-foreground">Execution environment</dt><dd>{run.snapshot.environment.name} · {remote.runtime === 'docker' ? 'Docker' : 'Kubernetes'}</dd></div>
     </dl>
     <section className="space-y-4" aria-label="Sample results">
       <h2 className="text-lg font-medium">Sample results</h2>

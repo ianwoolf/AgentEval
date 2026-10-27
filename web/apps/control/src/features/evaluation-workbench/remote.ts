@@ -1,10 +1,13 @@
 import { getAuthToken } from "@/lib/auth-token";
 import type { Evaluation, EvaluationSnapshot } from "./contracts";
+import { evaluationRuntime } from './runtime';
 export interface Binding {
   target_id: string; dataset_id: string; dataset_version: number;
   environment_id: string; model_id: string;
 }
 export interface RemoteRun {
+  runtime?: 'docker' | 'kubernetes';
+  container_name?: string | null;
   id: string; name: string; status: Evaluation["status"]; created_at: string;
   snapshot: EvaluationSnapshot; experiment_id: string; completed: number;
   phase: string; sample_count?: number; report_url?: string; error?: string; model_id: string;
@@ -12,9 +15,15 @@ export interface RemoteRun {
 }
 export async function executionApi<T>(project: string, path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
-  const token = getAuthToken();
+  const runtime = evaluationRuntime();
+  const token = runtime.standalone ? null : getAuthToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  const response = await fetch(`/api/v1/projects/${encodeURIComponent(project)}/evaluation-execution/${path}`, { ...init, headers });
+  if (runtime.standalone) {
+    headers.delete('Authorization');
+    headers.set('X-Project-ID', runtime.projectId);
+  }
+  const base = runtime.standalone ? runtime.apiBase.replace(/\/$/, '') : `/api/v1/projects/${encodeURIComponent(project)}/evaluation-execution`;
+  const response = await fetch(`${base}/${path}`, { ...init, headers });
   const value = await response.json();
   if (!response.ok) throw Object.assign(new Error(typeof value.detail === "string" ? value.detail : "Evaluation request failed"), {status: response.status});
   return value as T;

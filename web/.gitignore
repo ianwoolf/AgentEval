@@ -1,5 +1,6 @@
 node_modules/
 dist/
+apps/control/dist-evaluation/
 !skills/vendor/dist/
 !skills/vendor/dist/**
 .vite/

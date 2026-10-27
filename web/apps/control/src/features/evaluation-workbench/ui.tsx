@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EvaluationLayerPageFrame } from "../evaluation-layer/shared/evaluation-page-frame";
+import { evaluationRuntime } from './runtime';
 export { Button };
 export { Input } from "@/components/ui/input";
 export { Textarea } from "@/components/ui/textarea";
@@ -45,8 +46,7 @@ export function Frame({
       <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-xs text-muted-foreground">
         <FlaskConical className="size-4 shrink-0 text-amber-600" />
         <span>
-          <strong className="text-foreground">Configuration preview</strong> ·
-          Datasets, environments and live results are saved to the backend. Scorer edits are session-only. Demo reports remain simulated.
+          {evaluationRuntime().standalone ? <>Datasets, environments and evaluation results are saved to the backend. Scorer edits are session-only.</> : <><strong className="text-foreground">Configuration preview</strong> · Datasets, environments and live results are saved to the backend. Scorer edits are session-only. Demo reports remain simulated.</>}
         </span>
       </div>
       {children}

@@ -1,0 +1,10 @@
+# Package an already compiled SPA; useful for offline Docker Desktop deployment.
+# Build first: cd apps/control && npm run build:evaluation
+ARG NGINX_BASE=nginxinc/nginx-unprivileged:stable-alpine
+FROM ${NGINX_BASE}
+USER root
+RUN rm -rf /usr/share/nginx/html/*
+COPY deploy/nginx/evaluation.conf /etc/nginx/conf.d/default.conf
+COPY apps/control/dist-evaluation /usr/share/nginx/html
+USER 101
+EXPOSE 8080

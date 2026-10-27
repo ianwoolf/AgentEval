@@ -11,7 +11,8 @@ import type { Dataset, Environment, Target, WorkbenchState } from "./contracts";
 import { advanceEvaluation, createFixtures } from "./domain";
 import { useCurrentProjectId } from "@/hooks/use-project";
 import { executionApi, executionPages, fromRemote, type RemoteRun } from "./remote";
-const initialState = () => ({ ...createFixtures(), datasets: [], environments: [], targets: [] });
+import { evaluationRuntime } from './runtime';
+const initialState = () => ({ ...createFixtures(), ...(evaluationRuntime().standalone ? {evaluations: []} : {}), datasets: [], environments: [], targets: [] });
 const Context = createContext<{
   state: WorkbenchState;
   setState: Dispatch<SetStateAction<WorkbenchState>>;
