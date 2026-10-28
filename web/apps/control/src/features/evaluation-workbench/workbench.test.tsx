@@ -15,17 +15,20 @@ vi.mock("@tanstack/react-router", () => ({ Link: ({children}: {children: React.R
 vi.mock("@/hooks/use-project", () => ({
   useCurrentProjectId: () => "individual",
 }));
-const binding = {target_id: "guardrail-privacy", dataset_id: "ds-guardrail", dataset_version: 1, environment_id: "env-isolated", model_id: "glm-dev", langfuse_dataset_id: "real-dataset"};
 beforeEach(() => {
   let environments = createFixtures().environments;
+  let targets = createFixtures().targets.filter(t=>t.kind==="GUARDRAIL");
   vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
     if (_url.includes("/environments?")) return Response.json({items:environments,total:environments.length});
-    if (_url.includes("/targets?")) return Response.json({items:createFixtures().targets.filter(t=>t.kind==="GUARDRAIL"),total:1});
+    if (_url.includes("/targets?")) return Response.json({items:targets,total:targets.length});
     if (_url.includes("/targets/") && _url.endsWith("/config")) return Response.json({id:"guardrail-privacy",revision:"1:1",dataset_id:"ds-guardrail",dataset_version:1,environment_id:"env-isolated",environment_version:1,data_source:"published",scoring_mode:"mock",scorer_ids:["mock-score"]});
-    if (_url.endsWith("/config")) return Response.json({bindings: [binding]});
     if (_url.includes("/datasets?")) return Response.json({items: createFixtures().datasets, total: createFixtures().datasets.length});
     if (init?.method === "POST") {
       const body = JSON.parse(init.body as string);
+      if (_url.includes("/targets/") && !_url.endsWith("/config") && !_url.endsWith("/runs")) {
+        if (targets.some(t=>t.id===body.id)) return Response.json({detail:"Target already exists"},{status:409});
+        const saved={...body,revision:"1:1"}; targets=[...targets,saved]; return Response.json(saved);
+      }
       if (_url.includes("/environments/")) {
         const old=environments.find(e=>_url.endsWith("/"+e.id))!;
         const saved={...old,revision:"2:1",versions:[...old.versions,{...body.config,version:old.versions.length+1,publishedAt:new Date().toISOString()}]};
@@ -191,7 +194,6 @@ describe("interactive workbench", () => {
       if (_url.includes("/environments?")) return Response.json({items:createFixtures().environments,total:1});
     if (_url.includes("/targets?")) return Response.json({items:createFixtures().targets.filter(t=>t.kind==="GUARDRAIL"),total:1});
     if (_url.includes("/targets/") && _url.endsWith("/config")) return Response.json({id:"guardrail-privacy",revision:"1:1",dataset_id:"ds-guardrail",dataset_version:1,environment_id:"env-isolated",environment_version:1,data_source:"published",scoring_mode:"mock",scorer_ids:["mock-score"]});
-    if (_url.endsWith("/config")) return Response.json({bindings: [binding]});
     if (_url.includes("/datasets?")) return Response.json({items: createFixtures().datasets, total: createFixtures().datasets.length});
       if (init?.method === "POST") return Response.json({detail: "Kubernetes is unavailable"}, {status: 502});
       return Response.json({items: []});
@@ -305,4 +307,44 @@ it("allows an empty trigger name and leaves naming to backend",async()=>{
  await waitFor(()=>expect(close).toHaveBeenCalled());
  const call=vi.mocked(fetch).mock.calls.find(([,init])=>init?.method==="POST")!;
  expect(JSON.parse(call[1]!.body as string)).toEqual({name:"",config_revision:"1:1"});
+});
+
+
+it("creates a persisted target from Evaluation and shows it after reloading",async()=>{
+ const user=userEvent.setup();
+ render(<WorkbenchProvider><EvalPage /></WorkbenchProvider>);
+ await screen.findByText("Privacy & prompt injection");
+ await user.click(screen.getByRole("button",{name:"New target"}));
+ const dialog=within(screen.getByRole("dialog"));
+ await user.type(dialog.getByLabelText("Target name *"),"New safety target");
+ await user.type(dialog.getByLabelText("Target ID *"),"guardrail-new");
+ await user.selectOptions(dialog.getByLabelText("Provider"),"f5");
+ await user.type(dialog.getByLabelText("Description"),"Evaluate safety risks");
+ await user.click(dialog.getByRole("button",{name:"Create target"}));
+ expect(await screen.findByText("New safety target")).toBeTruthy();
+ await waitFor(()=>expect(screen.queryByRole("dialog")).toBeNull());
+ const call=vi.mocked(fetch).mock.calls.find(([url,init])=>String(url).endsWith("/targets/guardrail-new") && init?.method==="POST")!;
+ expect(JSON.parse(call[1]!.body as string)).toEqual({id:"guardrail-new",name:"New safety target",kind:"GUARDRAIL",provider:"f5",version:1,definition:"Evaluate safety risks"});
+ cleanup();render(<WorkbenchProvider><EvalPage /></WorkbenchProvider>);
+ expect(await screen.findByText("New safety target")).toBeTruthy();
+});
+
+it("keeps a duplicate target form open and preserves the list",async()=>{
+ const user=userEvent.setup();
+ render(<WorkbenchProvider><EvalPage /><StateProbe /></WorkbenchProvider>);
+ await screen.findByText("Privacy & prompt injection");
+ await user.click(screen.getByRole("button",{name:"New target"}));
+ const dialog=within(screen.getByRole("dialog"));
+ await user.type(dialog.getByLabelText("Target name *"),"Duplicate");
+ await user.type(dialog.getByLabelText("Target ID *"),"guardrail-privacy");
+ await user.click(dialog.getByRole("button",{name:"Create target"}));
+ expect((await dialog.findByRole("alert")).textContent).toContain("Target already exists");
+ expect(readState().targets).toHaveLength(1);
+ expect((dialog.getByLabelText("Target name *") as HTMLInputElement).value).toBe("Duplicate");
+ await user.clear(dialog.getByLabelText("Target ID *"));
+ await user.type(dialog.getByLabelText("Target ID *"),"invalid/id");
+ const writes=vi.mocked(fetch).mock.calls.filter(([,init])=>init?.method==="POST").length;
+ await user.click(dialog.getByRole("button",{name:"Create target"}));
+ expect(dialog.getByRole("alert").textContent).toContain("Target ID must start");
+ expect(vi.mocked(fetch).mock.calls.filter(([,init])=>init?.method==="POST")).toHaveLength(writes);
 });

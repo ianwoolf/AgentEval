@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Play, ShieldCheck } from "lucide-react";
+import { ArrowRight, Play, Plus, ShieldCheck } from "lucide-react";
 import { useCurrentProjectId } from "@/hooks/use-project";
 import type { CreateEvaluationRequest } from "./contracts";
-import { executionApi, fromRemote, type Binding, type RemoteRun, type TargetRunConfig } from "./remote";
+import { executionApi, fromRemote, type RemoteRun, type TargetRunConfig } from "./remote";
 
 import { TriggerTargetDialog } from "./trigger-target";
+import { NewTargetDialog } from "./new-target-dialog";
 import { useWorkbench } from "./provider";
 import {
   Button,
@@ -29,6 +30,7 @@ export function EvalPage() {
   const [configTargetId, setConfigTargetId] = useState<string | null>(null);
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [historyTargetId, setHistoryTargetId] = useState<string | null>(null);
+  const [creatingTarget, setCreatingTarget] = useState(false);
   const targets = state.targets.filter((target) => target.kind === targetType && (provider === "ALL" || target.provider === provider));
   const runs = state.evaluations.filter(
     (e) => (!historyTargetId || e.snapshot.target.id === historyTargetId) &&
@@ -38,6 +40,7 @@ export function EvalPage() {
     <Frame
       title="Evaluation"
       description="Choose a target type, inspect its targets, then configure and run an evaluation."
+      action={<Button onClick={()=>setCreatingTarget(true)}><Plus />New target</Button>}
     >
       <div className="flex items-end justify-between gap-4">
         <Field label="Target type">
@@ -77,6 +80,9 @@ export function EvalPage() {
         </tbody>
       </Table>
       {!targets.length && <Empty>No targets available for this type.</Empty>}
+      {creatingTarget && <NewTargetDialog onClose={()=>setCreatingTarget(false)} onCreated={()=>{
+        setTargetType("GUARDRAIL"); setProvider("ALL"); setCreatingTarget(false);
+      }} />}
       {configTargetId && <CreateEvalDialog targetId={configTargetId} onClose={()=>setConfigTargetId(null)} />}
       {selectedTargetId && <TriggerTargetDialog key={selectedTargetId} targetId={selectedTargetId}
         onStarted={(id) => { void navigate({ to: "/$projectId/evaluation/reports", params: { projectId }, search: { evaluationId: id } }); }}
@@ -234,16 +240,8 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
   const [scoringMode, setScoringMode] = useState<"mock"|"installed">("mock");
   const [revision, setRevision] = useState<string | undefined>();
   const [loadingConfig, setLoadingConfig] = useState(true);
-  const [bindings, setBindings] = useState<Binding[]>([]);
   const idempotencyKey = useRef(crypto.randomUUID());
 
-  useEffect(() => {
-    let active = true;
-    executionApi<{bindings: Binding[]}>(projectId, "config")
-      .then(config => { if (active) setBindings(config.bindings); })
-      .catch(e => { if (active) setError(e.message); });
-    return () => { active = false; };
-  }, [projectId]);
   useEffect(() => {
     if (!targetId) {setLoadingConfig(false);return;}
     let active=true;
@@ -289,7 +287,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
           Cancel
         </Button>
           <Button
-            disabled={busy || loadingConfig || !bindings.length}
+            disabled={busy || loadingConfig || !version || !environment}
             onClick={async () => {
               if (submitted.current) return;
               submitted.current = true;

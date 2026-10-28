@@ -18,6 +18,7 @@ const Context = createContext<{
   setState: Dispatch<SetStateAction<WorkbenchState>>;
   saveDataset(dataset: Dataset): Promise<Dataset>;
   saveEnvironment(environment: Environment): Promise<void>;
+  saveTarget(target: Target): Promise<Target>;
 } | null>(null);
 export function WorkbenchProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<WorkbenchState>(initialState);
@@ -83,7 +84,15 @@ export function WorkbenchProvider({ children }: { children: ReactNode }) {
     });
     setState(s => ({...s, environments:s.environments.some(e=>e.id===saved.id) ? s.environments.map(e=>e.id===saved.id?saved:e) : [...s.environments,saved]}));
   }
-  return <Context value={{ state, setState, saveDataset, saveEnvironment }}>{datasetError && <p role="alert" className="px-6 py-2 text-sm text-destructive">Dataset loading failed: {datasetError}. Reload to retry.</p>}{syncError && <p role="alert" className="px-6 py-2 text-sm text-destructive">Live evaluation sync: {syncError}. Retrying…</p>}{children}</Context>;
+  async function saveTarget(target: Target) {
+    const saved = await executionApi<Target>(projectId, `targets/${encodeURIComponent(target.id)}`, {
+      method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(target),
+    });
+    setState(s => ({...s, targets:s.targets.some(t=>t.id===saved.id)
+      ? s.targets.map(t=>t.id===saved.id?saved:t) : [...s.targets,saved]}));
+    return saved;
+  }
+  return <Context value={{ state, setState, saveDataset, saveEnvironment, saveTarget }}>{datasetError && <p role="alert" className="px-6 py-2 text-sm text-destructive">Dataset loading failed: {datasetError}. Reload to retry.</p>}{syncError && <p role="alert" className="px-6 py-2 text-sm text-destructive">Live evaluation sync: {syncError}. Retrying…</p>}{children}</Context>;
 }
 export function useWorkbench() {
   const value = useContext(Context);
