@@ -27,7 +27,7 @@ it('requires validated upload and submits only its reference without sample rows
  await screen.findByText('Validated 2 samples');
  await user.click(start);
  await waitFor(()=>expect(bodies).toHaveLength(1));
- expect(bodies[0]!.upload_id).toBe('upload-abc');
+ expect(bodies[0]!.datasets).toEqual([{dataset_id:'ds-guardrail',dataset_version:1,upload_id:'upload-abc'}]);
  expect(bodies[0]).not.toHaveProperty('snapshot');
  expect(bodies[0]).not.toHaveProperty('content_policy');
  expect(bodies[0]).not.toHaveProperty("resources");

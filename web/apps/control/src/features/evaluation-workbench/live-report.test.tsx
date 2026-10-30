@@ -34,3 +34,20 @@ it('shows an explicit sample-load error instead of silently hiding results', asy
  render(<ReportsPage evaluationId="eval-live" onSelect={() => {}} />);
  expect((await screen.findByRole('alert')).textContent).toContain('Storage offline');
 });
+
+it('compares datasets and filters sample details within the same evaluation',async()=>{
+ setup();
+ const remote=store.evaluations[0]!.remote!;
+ remote.datasets=[{dataset_id:'a',dataset_version:1,name:'Dataset A',sample_count:1},{dataset_id:'b',dataset_version:2,name:'Dataset B',sample_count:1}];
+ const rows=remote.datasets.map((d,i)=>({id:`sample-${i}`,dataset_id:d.dataset_id,dataset_version:d.dataset_version,input:{text:d.name},output:{},reference:{},status:i?'FAIL':'PASS',latencyMs:10,costUsd:0,error:null,scores:[],trace:[]}));
+ vi.stubGlobal('fetch',vi.fn(async(url:string)=>url.includes('/reports/')?Response.json({datasets:remote.datasets!.map((d,i)=>({...d,status:'COMPLETED',completed:1,passed:1-i,failed:i,errors:0,pass_rate:1-i,average_latency_ms:10,scores:[{scorer_id:'mock-score',average:1-i,count:1}]}))}):Response.json({items:rows,total:2})));
+ render(<ReportsPage evaluationId="eval-live" onSelect={()=>{}}/>);
+ const comparison=await screen.findByRole('region',{name:'Dataset comparison'});
+ expect(within(comparison).getByText('100.0%')).toBeTruthy();
+ expect(within(comparison).getByText('0.0%')).toBeTruthy();
+ expect(within(comparison).getByText('0.000 (n=1)')).toBeTruthy();
+ await userEvent.selectOptions(screen.getByLabelText('Filter samples by dataset'),'b');
+ expect(screen.queryByRole('button',{name:/sample-0/})).toBeNull();
+ await userEvent.click(screen.getByRole('button',{name:/sample-1/}));
+ expect(within(screen.getByRole('dialog')).getByText(/Dataset B/)).toBeTruthy();
+});

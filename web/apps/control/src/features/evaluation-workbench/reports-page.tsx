@@ -1,7 +1,7 @@
 import { ReportConfig } from "./report-config";
 import { useEffect, useState } from "react";
 import { useCurrentProjectId } from "@/hooks/use-project";
-import { executionPages } from "./remote";
+import { executionApi, executionPages } from "./remote";
 import {
   ArrowLeft,
   ArrowRight,
@@ -544,10 +544,18 @@ export function ReportDetail({
   );
 }
 
+interface DatasetSummary {
+  dataset_id: string; dataset_version: number; name?: string; sample_count: number;
+  status: string; completed: number; passed: number; failed: number; errors: number;
+  pass_rate: number | null; average_latency_ms: number | null;
+  scores: Array<{scorer_id:string;scorer_version?:string;average:number;count:number}>;
+}
 function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
   const remote = run.remote!;
   const projectId = useCurrentProjectId();
   const [samples, setSamples] = useState<SampleResult[]>([]);
+  const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
+  const [datasetFilter, setDatasetFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
@@ -563,7 +571,17 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
     async function refresh() {
       try {
         const rows = await executionPages<SampleResult>(projectId, `experiments/${encodeURIComponent(remote.experiment_id)}/samples`);
-        if (active) { setSamples(rows); setError(""); }
+        let summaries: DatasetSummary[] = [];
+        if (remote.datasets?.length) {
+          try {
+            const report = await executionApi<{datasets:DatasetSummary[]}>(projectId, `reports/${encodeURIComponent(remote.experiment_id)}?limit=1`);
+            summaries = report.datasets ?? [];
+          } catch (e) {
+            if ((e as {status?:number}).status !== 404 || run.status !== 'RUNNING') throw e;
+            summaries = remote.datasets.map(d=>({...d,status:'QUEUED',completed:0,passed:0,failed:0,errors:0,pass_rate:null,average_latency_ms:null,scores:[]}));
+          }
+        }
+        if (active) { setSamples(rows); setDatasetSummaries(summaries); setError(""); }
       } catch (e) { if (active) setError((e as Error).message); }
       finally {
         if (active) {
@@ -575,31 +593,52 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
     void refresh();
     return () => { active = false; clearTimeout(timer); };
   }, [projectId, remote.experiment_id, run.status, retry]);
+  const visibleSamples = samples.filter(s=>datasetFilter==='ALL'||(s.dataset_id??run.snapshot.datasetId)===datasetFilter);
+  const scorerKeys = [...new Set(datasetSummaries.flatMap(d=>d.scores.map(s=>JSON.stringify([s.scorer_id,s.scorer_version]))))];
   return <Frame title={run.name} description="Live evaluation · Persisted sample results">
-    <div className="flex items-center justify-between"><Button variant="outline" onClick={onBack}><ArrowLeft />All reports</Button><Pill>{run.status === "RUNNING" ? remote.phase : run.status}</Pill></div>
-    <div role="status" aria-live="polite" className="space-y-3 rounded-xl border bg-card p-5">
-      <h2 className="text-lg font-medium">{run.status === "RUNNING" ? "Evaluation in progress" : run.status === "FAILED" ? "Evaluation failed" : "Evaluation completed"}</h2>
-      <p>{remote.completed} samples processed{run.status === "RUNNING" ? " · Waiting for worker summary. Status refreshes every 3 seconds." : ""}</p>
-      {remote.scoring_mode === "mock" && <p className="text-sm text-muted-foreground">Scores are development mocks (fixed 1). They do not represent evaluation quality.</p>}
-      {remote.error && <p role="alert" className="text-destructive">{remote.error}</p>}
-    </div>
-    <dl className="grid gap-4 rounded-xl border p-5 text-sm sm:grid-cols-2">
-      <div><dt className="text-muted-foreground">Experiment ID</dt><dd className="break-all font-mono">{remote.experiment_id}</dd></div>
-      <div><dt className="text-muted-foreground">{remote.runtime === 'docker' ? 'Docker container' : 'Kubernetes Job'}</dt><dd className="font-mono">{remote.container_name ?? run.id}</dd></div>
-      <div><dt className="text-muted-foreground">Model ID</dt><dd>{remote.model_id}</dd></div>
-      <div><dt className="text-muted-foreground">Scorers</dt><dd>{remote.scorer_ids.join(", ")}</dd></div>
-      <div><dt className="text-muted-foreground">Dataset</dt><dd>{run.snapshot.dataset.name} · UI version {run.snapshot.dataset.version}</dd></div>
-      <div><dt className="text-muted-foreground">Execution environment</dt><dd>{run.snapshot.environment.name} · {remote.runtime === 'docker' ? 'Docker' : 'Kubernetes'}</dd></div>
-    </dl>
+    <div><Button variant="ghost" onClick={onBack}><ArrowLeft />All reports</Button></div>
+    <section aria-label="Evaluation overview" className="overflow-hidden rounded-xl border bg-card">
+      <div role="status" aria-live="polite" className="flex flex-wrap items-center justify-between gap-3 border-b bg-muted/20 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-3"><Pill tone={run.status==='COMPLETED'?'good':run.status==='FAILED'?'bad':'neutral'}>{run.status === "RUNNING" ? remote.phase : run.status}</Pill><h2 className="text-sm font-medium">{run.status === "RUNNING" ? "Evaluation in progress" : run.status === "FAILED" ? "Evaluation failed" : run.status === "CANCELLED" ? "Evaluation cancelled" : "Evaluation completed"}</h2></div>
+        <span className="text-xs text-muted-foreground">{remote.completed}{remote.sample_count!==undefined?` / ${remote.sample_count}`:''} samples processed{run.status==='RUNNING'?' · Refreshes every 3 seconds':''}</span>
+      </div>
+      <dl className="grid gap-x-6 gap-y-3 px-4 py-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div className="min-w-0"><dt className="text-xs text-muted-foreground">Datasets</dt><dd className="mt-1 truncate font-medium" title={remote.datasets?.map(d=>`${d.name} · v${d.dataset_version}`).join(', ')??run.snapshot.dataset.name}>{remote.datasets?.length?`${remote.datasets.length} datasets`:`${run.snapshot.dataset.name} · v${run.snapshot.dataset.version}`}</dd></div>
+        <div className="min-w-0"><dt className="text-xs text-muted-foreground">Scorers</dt><dd className="mt-1 truncate font-medium" title={remote.scorer_ids.join(', ')}>{remote.scorer_ids.join(', ')}</dd></div>
+        <div className="min-w-0"><dt className="text-xs text-muted-foreground">Model</dt><dd className="mt-1 truncate font-medium" title={remote.model_id}>{remote.model_id==='none'?'No model':remote.model_id}</dd></div>
+        <div className="min-w-0"><dt className="text-xs text-muted-foreground">Execution environment</dt><dd className="mt-1 truncate font-medium" title={run.snapshot.environment.name}>{run.snapshot.environment.name} · v{run.snapshot.environment.version}</dd></div>
+      </dl>
+      {remote.scoring_mode === "mock" && <p className="border-t border-amber-500/15 bg-amber-500/5 px-4 py-2 text-xs text-muted-foreground">Scores are development mocks (fixed 1). They do not represent evaluation quality.</p>}
+      {remote.error && <p role="alert" className="border-t px-4 py-2 text-sm text-destructive">{remote.error}</p>}
+      <details className="border-t px-4 py-2 text-xs">
+        <summary className="cursor-pointer text-muted-foreground">Run identifiers · {remote.runtime === 'docker'?'Docker':'Kubernetes'}</summary>
+        <dl className="mt-3 grid gap-3 pb-1 sm:grid-cols-2"><div><dt className="text-muted-foreground">Experiment ID</dt><dd className="mt-1 break-all font-mono select-all">{remote.experiment_id}</dd></div><div><dt className="text-muted-foreground">{remote.runtime === 'docker'?'Docker container':'Kubernetes Job'}</dt><dd className="mt-1 break-all font-mono select-all">{remote.container_name??run.id}</dd></div></dl>
+      </details>
+    </section>
+    {datasetSummaries.length>0&&<section className="space-y-3" aria-label="Dataset comparison">
+      <h2 className="text-lg font-medium">Dataset comparison</h2>
+      <p className="text-sm text-muted-foreground">Pass rates include processed samples; errors count as not passed. Scores average the samples scored by each scorer. In-progress results are provisional.</p>
+      <Table><thead><tr><th>Dataset</th><th>Status</th><th>Progress</th><th>Pass rate</th><th>Failed / errors</th><th>Average duration</th>{scorerKeys.map(key=>{const [id,version]=JSON.parse(key);return <th key={key}>{id}{version?` · ${version}`:''}</th>;})}</tr></thead>
+      <tbody>{datasetSummaries.map(d=><tr key={d.dataset_id}>
+        <td><Button variant="link" onClick={()=>{setDatasetFilter(d.dataset_id);setSelectedId(null);}}>{d.name??d.dataset_id} · v{d.dataset_version}</Button></td>
+        <td><Pill>{d.status}</Pill></td><td>{d.completed} / {d.sample_count}</td>
+        <td>{d.pass_rate===null?'—':`${(d.pass_rate*100).toFixed(1)}%`}</td><td>{d.failed} / {d.errors}</td>
+        <td>{d.average_latency_ms===null?'—':`${Math.round(d.average_latency_ms)} ms`}</td>
+        {scorerKeys.map(key=>{const score=d.scores.find(s=>JSON.stringify([s.scorer_id,s.scorer_version])===key);return <td key={key}>{score?`${score.average.toFixed(3)} (n=${score.count})`:'—'}</td>;})}
+      </tr>)}</tbody></Table>
+    </section>}
     <section className="space-y-4" aria-label="Sample results">
       <h2 className="text-lg font-medium">Sample results</h2>
+      {remote.datasets?.length&&<Select aria-label="Filter samples by dataset" value={datasetFilter} onChange={e=>{setDatasetFilter(e.target.value);setSelectedId(null);}}><option value="ALL">All datasets</option>{remote.datasets.map(d=><option key={d.dataset_id} value={d.dataset_id}>{d.name} · v{d.dataset_version}</option>)}</Select>}
       <p className="text-sm text-muted-foreground">Duration includes target execution and scoring. Select a sample to inspect full input, response and scorer feedback.</p>
       {error && <div role="alert" className="text-sm text-destructive">Sample loading failed: {error} <Button variant="outline" onClick={() => setRetry(v => v + 1)}>Retry</Button></div>}
       {loading ? <p role="status">Loading samples…</p> : !samples.length && !error ? <Empty>No sample results have been stored yet.</Empty> : null}
-      {samples.length > 0 && <Table>
-        <thead><tr><th>Sample</th><th>Status</th><th>Duration</th><th>Scores</th><th>Input</th><th>Response</th></tr></thead>
-        <tbody>{samples.map(row => <tr key={row.id}>
+      {!loading&&samples.length>0&&!visibleSamples.length&&<Empty>No samples for this dataset yet.</Empty>}
+      {visibleSamples.length > 0 && <Table>
+        <thead><tr><th>Sample</th><th>Dataset</th><th>Status</th><th>Duration</th><th>Scores</th><th>Input</th><th>Response</th></tr></thead>
+        <tbody>{visibleSamples.map(row => <tr key={row.id}>
           <td><Button variant="link" onClick={() => setSelectedId(row.id)}>{row.id}<ChevronRight /></Button></td>
+          <td>{remote.datasets?.find(d=>d.dataset_id===row.dataset_id)?.name??row.dataset_id??run.snapshot.dataset.name} · v{row.dataset_version??run.snapshot.dataset.version}</td>
           <td><Pill tone={row.status === "PASS" ? "good" : "bad"}>{row.status}</Pill>{row.error && <p className="text-destructive">{row.error}</p>}</td>
           <td className="whitespace-nowrap">{Math.round(row.latencyMs)} ms</td>
           <td>{row.scores.length ? row.scores.map(score => <div key={score.scorerId} className="whitespace-nowrap">{score.scorerId}: {score.value.toFixed(2)}</div>) : "—"}</td>
@@ -620,6 +659,6 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
         </div>}
       </SheetContent>
     </Sheet>
-    <Button disabled={loading || !!error} variant="outline" onClick={() => download(`${run.id}.json`, {...run, simulated: false, results: samples})}><Download />Export run</Button>
+    <Button disabled={loading || !!error} variant="outline" onClick={() => download(`${run.id}.json`, {...run, simulated: false, datasetSummaries, results: samples})}><Download />Export run</Button>
   </Frame>;
 }

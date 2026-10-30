@@ -70,7 +70,7 @@ describe("interactive workbench", () => {
     expect(screen.getByText(/Scores are development mocks/)).toBeTruthy();
     const call = vi.mocked(fetch).mock.calls.find(([, init]) => init?.method === "POST")!;
     const body = JSON.parse(call[1]!.body as string);
-    expect(body).toEqual({name:"Inline safety check",config_revision:"1:1"});
+    expect(body).toEqual({name:"Inline safety check",config_revision:"1:1",datasets:[{dataset_id:'ds-guardrail',dataset_version:1}]});
   });
   it("saves dataset scorer choices and exposes reverse links without rewriting versions", async () => {
     const user = userEvent.setup();
@@ -293,7 +293,9 @@ it("filters Guardrail targets by provider", async () => {
 
 it("saves target Config without launching a job",async()=>{
  const user=userEvent.setup(),close=vi.fn();render(<WorkbenchProvider><CreateEvalDialog targetId="guardrail-privacy" onClose={close}/></WorkbenchProvider>);
- const save=screen.getByRole("button",{name:"Save config"});await waitFor(()=>expect((save as HTMLButtonElement).disabled).toBe(false));
+ const next=screen.getByRole("button",{name:"Continue to scorers"});await waitFor(()=>expect((next as HTMLButtonElement).disabled).toBe(false));
+ await user.click(next);await user.click(screen.getByRole("button",{name:"Continue to environment"}));
+ const save=screen.getByRole("button",{name:"Save config"});
  expect(screen.queryByLabelText("Evaluation name")).toBeNull();
  await user.click(save);await waitFor(()=>expect(close).toHaveBeenCalled());
  const writes=vi.mocked(fetch).mock.calls.filter(([,init])=>init?.method==="POST");
@@ -306,7 +308,7 @@ it("allows an empty trigger name and leaves naming to backend",async()=>{
  expect(screen.queryByLabelText("Dataset *")).toBeNull();await user.click(run);
  await waitFor(()=>expect(close).toHaveBeenCalled());
  const call=vi.mocked(fetch).mock.calls.find(([,init])=>init?.method==="POST")!;
- expect(JSON.parse(call[1]!.body as string)).toEqual({name:"",config_revision:"1:1"});
+ expect(JSON.parse(call[1]!.body as string)).toEqual({name:"",config_revision:"1:1",datasets:[{dataset_id:'ds-guardrail',dataset_version:1}]});
 });
 
 
@@ -347,4 +349,44 @@ it("keeps a duplicate target form open and preserves the list",async()=>{
  await user.click(dialog.getByRole("button",{name:"Create target"}));
  expect(dialog.getByRole("alert").textContent).toContain("Target ID must start");
  expect(vi.mocked(fetch).mock.calls.filter(([,init])=>init?.method==="POST")).toHaveLength(writes);
+});
+
+it('configures multiple datasets and only triggers a subset of configured versions', async()=>{
+ const original=fetch;
+ const dataset=createFixtures().datasets.find(d=>d.id==='ds-guardrail')!;
+ const second={...dataset,id:'ds-second',draft:{...dataset.draft,name:'Second safety dataset'},versions:[{...dataset.versions[0]!,version:1},{...dataset.versions[0]!,version:2}]};
+ const hidden={...dataset,id:'ds-hidden',draft:{...dataset.draft,name:'Unconfigured dataset'}};
+ let config={id:'guardrail-privacy',revision:'1:1',dataset_id:dataset.id,dataset_version:1,datasets:[{dataset_id:dataset.id,dataset_version:1}],environment_id:'env-isolated',environment_version:1,data_source:'published',scoring_mode:'mock',scorer_ids:['mock-score']};
+ vi.stubGlobal('fetch',vi.fn(async(url:string,init?:RequestInit)=>{
+  if(url.includes('/datasets?'))return Response.json({items:[dataset,second,hidden],total:3});
+  if(url.endsWith('/config')){
+   if(init?.method==='POST') config={...config,...JSON.parse(init.body as string),revision:'2:1'};
+   return Response.json(config);
+  }
+  return original(url,init);
+ }));
+ const user=userEvent.setup();
+ const view=render(<WorkbenchProvider><CreateEvalDialog targetId="guardrail-privacy" onClose={()=>{}}/></WorkbenchProvider>);
+ await screen.findByRole('checkbox',{name:'Second safety dataset'});
+ await waitFor(()=>expect((screen.getByRole('button',{name:'Continue to scorers'}) as HTMLButtonElement).disabled).toBe(false));
+ await user.click(screen.getByRole('checkbox',{name:'Second safety dataset'}));
+ await user.selectOptions(screen.getByLabelText('Second safety dataset version'),'1');
+ await user.click(screen.getByRole('button',{name:'Continue to scorers'}));
+ expect(screen.queryByRole('button',{name:'Save config'})).toBeNull();
+ await user.click(screen.getByRole('button',{name:'Continue to environment'}));
+ await user.click(screen.getByRole('button',{name:'Save config'}));
+ await waitFor(()=>expect(config.datasets).toHaveLength(2));
+ expect(config.datasets[1]).toEqual({dataset_id:'ds-second',dataset_version:1});
+ view.unmount();
+ render(<WorkbenchProvider><TriggerTargetDialog targetId="guardrail-privacy" onClose={()=>{}}/></WorkbenchProvider>);
+ const first=await screen.findByRole('checkbox',{name:dataset.draft.name});
+ expect(screen.queryByRole('checkbox',{name:'Unconfigured dataset'})).toBeNull();
+ expect(screen.queryByLabelText('Second safety dataset version')).toBeNull();
+ await user.click(first);
+ await user.click(screen.getByRole('checkbox',{name:'Second safety dataset'}));
+ expect((screen.getByRole('button',{name:'Run evaluation'}) as HTMLButtonElement).disabled).toBe(true);
+ await user.click(screen.getByRole('checkbox',{name:'Second safety dataset'}));
+ await user.click(screen.getByRole('button',{name:'Run evaluation'}));
+ const call=vi.mocked(fetch).mock.calls.find(([url,init])=>url.toString().endsWith('/runs')&&init?.method==='POST')!;
+ expect(JSON.parse(call[1]!.body as string).datasets).toEqual([{dataset_id:'ds-second',dataset_version:1}]);
 });

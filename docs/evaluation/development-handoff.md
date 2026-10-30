@@ -137,3 +137,20 @@ TASKLATTICE_CONFIG="$PWD/../data/control.dev.toml" npm run build:control
 ## 6. 不会随 Git 同步的内容
 
 node_modules、Python .venv、data/control.dev.toml、本地数据库、运行日志、浏览器内编辑的演示数据均不会随代码同步。首次启动会使用提交的 fixtures；若本机编辑的数据需要带走，应在离开前单独导出或转为受控 fixture，勿提交私密数据。
+
+### 2026-10-30: multi-dataset trigger and report comparison
+
+Trigger now selects one or more published dataset versions (defaulting to the
+saved target Config dataset); upload mode validates one upload per selected
+version. Environment/model/scorers remain target Config-owned. A single run ID
+covers all selected datasets. Backend pins the selection, runner executes each
+dataset with unique sample IDs, and the report API aggregates per-dataset metrics
+across all sample pages. Live reports show a comparison table and dataset sample
+filter. Old single-dataset runs and trigger requests remain compatible.
+See the independent backend README's Multi-dataset evaluations section for the
+request/response and existing-index schema changes.
+
+Target configuration now owns a multi-select `datasets` list with pinned versions.
+Trigger defaults to all configured selections and permits only a nonempty subset;
+versions cannot be changed in Trigger. The target trigger API rejects unconfigured
+dataset/version pairs, including for legacy single-dataset configurations.

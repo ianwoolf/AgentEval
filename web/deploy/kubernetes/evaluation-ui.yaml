@@ -55,7 +55,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: nginx
-          image: evaluation-ui:targets-create-20261028
+          image: evaluation-ui:compact-report-20261030
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

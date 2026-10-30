@@ -10,11 +10,12 @@
 
 ```bash
 cp .env.example .env
-docker compose build
+docker compose pull
 docker compose up -d --no-build --wait
 ```
 
-如果目标机器已有导入的 `evaluation-ui:deploy-v2` 镜像，跳过 build 即可。
+如果目标机器已有导入的 `ianwoolf/evaluation-ui:2.2` 镜像，可跳过 pull。需要从源码构建时，使用 `docker compose build` 替代 pull。
+已有 `.env` 需同步更新 EVAL_UI_IMAGE；它会覆盖 compose.yaml 的默认值。
 只有 Docker 的离线机器可在构建机通过 `docker save`、目标机器通过 `docker load` 导入。
 
 访问 http://127.0.0.1:8080。`.env` 中可改 `EVAL_UI_PORT`、镜像标签、网络名；

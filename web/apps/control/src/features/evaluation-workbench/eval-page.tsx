@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Play, Plus, ShieldCheck } from "lucide-react";
+import { ArrowRight, Play, Plus, ShieldCheck, Server, Gauge, Save, Layers } from "lucide-react";
 import { useCurrentProjectId } from "@/hooks/use-project";
 import type { CreateEvaluationRequest } from "./contracts";
 import { executionApi, fromRemote, type RemoteRun, type TargetRunConfig } from "./remote";
 
+import { ConfigDatasetPicker } from "./config-dataset-picker";
 import { TriggerTargetDialog } from "./trigger-target";
 import { NewTargetDialog } from "./new-target-dialog";
 import { useWorkbench } from "./provider";
@@ -233,6 +234,8 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
     environmentVersion: state.environments[0]?.versions.at(-1)?.version ?? 0,
     scorerIds: defaultScorerIds(firstDataset?.versions.at(-1)?.scorerIds),
   });
+  const [selectedDatasets, setSelectedDatasets] = useState<Array<{dataset_id:string;dataset_version:number}>>([]);
+  const [step,setStep] = useState(0);
   const [error, setError] = useState("");
   const submitted = useRef(false);
   const [busy, setBusy] = useState(false);
@@ -248,6 +251,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
     executionApi<TargetRunConfig>(projectId, `targets/${encodeURIComponent(targetId)}/config`).then(c=>{
       if(!active)return;
       setRevision(c.revision);setSource(c.data_source);setScoringMode(c.scoring_mode);
+      setSelectedDatasets(c.datasets ?? [{dataset_id:c.dataset_id,dataset_version:c.dataset_version}]);
       setRequest(r=>({...r,datasetId:c.dataset_id,datasetVersion:c.dataset_version,environmentId:c.environment_id,environmentVersion:c.environment_version,scorerIds:c.scorer_ids}));
     }).catch(e=>{if(active && e.status!==404)setError(e.message);}).finally(()=>{if(active)setLoadingConfig(false);});
     return()=>{active=false;};
@@ -266,28 +270,34 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
     setRequest((r) => ({ ...r, ...value }));
     setError("");
   };
-  const dataset = state.datasets.find((d) => d.id === request.datasetId);
-  const version = dataset?.versions.find(
-    (v) => v.version === request.datasetVersion,
-  );
+  const validDatasets = selectedDatasets.length > 0 && selectedDatasets.every(ref=>state.datasets.some(d=>d.id===ref.dataset_id&&d.versions.some(v=>v.version===ref.dataset_version)));
   const environment = state.environments
     .find((e) => e.id === request.environmentId)
     ?.versions.find(v=>v.version===request.environmentVersion);
+  const chosenVersions=selectedDatasets.map(ref=>state.datasets.find(d=>d.id===ref.dataset_id)?.versions.find(v=>v.version===ref.dataset_version));
+  const availableScorers=Object.keys((chosenVersions[0]?.metadata?.evaluation as {scorers?:Record<string,unknown>}|undefined)?.scorers??{}).filter(id=>chosenVersions.every(v=>{
+    const configs=(v?.metadata?.evaluation as {scorers?:Record<string,unknown>}|undefined)?.scorers;
+    return !!configs?.[id]&&(!v?.scorerIds?.length||v.scorerIds.includes(id));
+  }));
+  const validScorers=scoringMode==='mock'||(request.scorerIds.length>0&&request.scorerIds.every(id=>availableScorers.includes(id)));
+  const stepTitles=['Datasets','Scorers','Environment'];
   return (
     <Modal
       title="Target configuration"
-      description="Save the dataset, environment version and scoring settings used by future runs of this target."
+      description="Set up this target in three steps. You can go back to adjust your choices before saving."
       footer={<>
       <ErrorText message={error} />
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <span className="mr-auto flex items-center gap-2 text-xs text-muted-foreground"><Layers className="size-4"/>Step {step+1} of 3</span>
         <Button
           variant="outline"
           onClick={onClose}
         >
           Cancel
         </Button>
-          <Button
-            disabled={busy || loadingConfig || !version || !environment}
+        {step>0&&<Button variant="outline" disabled={busy} onClick={()=>setStep(v=>v-1)}>Back</Button>}
+        {step<2?<Button disabled={busy||loadingConfig||!validDatasets||(step===1&&!validScorers)} onClick={()=>setStep(v=>v+1)}>Continue to {stepTitles[step+1].toLowerCase()}<ArrowRight/></Button>:<Button
+            disabled={busy || loadingConfig || !validDatasets || !validScorers || !environment}
             onClick={async () => {
               if (submitted.current) return;
               submitted.current = true;
@@ -295,7 +305,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
               try {
                 const saved=await executionApi<TargetRunConfig>(projectId, `targets/${encodeURIComponent(request.targetId)}/config`, {
                   method:"POST",headers:{"Content-Type":"application/json"},
-                  body:JSON.stringify({revision,dataset_id:request.datasetId,dataset_version:request.datasetVersion,
+                  body:JSON.stringify({revision,dataset_id:selectedDatasets[0]!.dataset_id,dataset_version:selectedDatasets[0]!.dataset_version,datasets:selectedDatasets,
                     environment_id:request.environmentId,environment_version:request.environmentVersion,
                     data_source:source,scoring_mode:scoringMode,scorer_ids:scoringMode==="mock"?["mock-score"]:request.scorerIds}),
                 });
@@ -308,108 +318,69 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
               } finally { setBusy(false); }
             }}
           >
-            <Play />
+            <Save />
             {busy ? "Saving…" : "Save config"}
-          </Button>
+          </Button>}
       </div>
       </>}
       onClose={onClose}
     >
         <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Dataset *">
-              <Select
-                value={request.datasetId}
-                onChange={(e) => {
-                  const d = state.datasets.find(
-                    (item) => item.id === e.target.value,
-                  );
-                  patch({
-                    datasetId: e.target.value,
-                    datasetVersion: d?.versions.at(-1)?.version ?? 0,
-                    scorerIds: defaultScorerIds(d?.versions.at(-1)?.scorerIds),
-                  });
-                }}
-              >
-                <option value="">Choose a published dataset</option>
-                {state.datasets
-                  .filter((d) => d.versions.length)
-                  .map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.draft.name}
-                    </option>
-                  ))}
-              </Select>
-            </Field>
-            <Field label="Dataset version *">
-              <Select
-                value={request.datasetVersion}
-                onChange={(e) =>
-                  patch({
-                    datasetVersion: Number(e.target.value),
-                    scorerIds: defaultScorerIds(dataset?.versions.find((v) => v.version === Number(e.target.value))?.scorerIds),
-                  })
-                }
-              >
-                {dataset?.versions.toReversed().map((v) => (
-                  <option key={v.version} value={v.version}>
-                    v{v.version} · {v.rows.length} records
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
-          <Field label="Data source"><Select value={source} disabled={busy} onChange={e=>{setSource(e.target.value);idempotencyKey.current=crypto.randomUUID();}}>
-            <option value="published">Published dataset</option><option value="upload">Upload for this evaluation</option>
-          </Select></Field>
-          {source === "upload" && <p className="text-sm text-muted-foreground">Each Trigger requires a fresh CSV/XLSX upload validated against this dataset version. Files are not saved in Config.</p>}
-          {!firstDataset && (
-            <p className="text-sm text-muted-foreground">
-              Publish a dataset before running an evaluation.{" "}
-              <Link
-                className="underline"
-                to="/$projectId/evaluation/datasets"
-                params={{ projectId }}
-                onClick={onClose}
-              >
-                Open Datasets
-              </Link>
-            </p>
-          )}
-          <Field label="Execution environment *">
-            <Select
-              value={request.environmentId}
-              onChange={(e) => patch({ environmentId: e.target.value, environmentVersion: state.environments.find(v=>v.id===e.target.value)?.versions.at(-1)?.version ?? 0 })}
-            >
-              <option value="">Select environment configuration</option>
-              {state.environments.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.versions.at(-1)!.name} · Sandbox · v
-                  {e.versions.at(-1)!.version}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Environment version *"><Select value={request.environmentVersion} onChange={e=>patch({environmentVersion:Number(e.target.value)})}>
-            {state.environments.find(e=>e.id===request.environmentId)?.versions.toReversed().map(v=><option key={v.version} value={v.version}>v{v.version} · {v.cpuMillicores}m / {v.memoryMiB}Mi</option>)}
-          </Select></Field>
-          {environment && (
-            <div className="rounded-lg border bg-muted/20 p-4 text-sm">
-              <p className="font-medium">{environment.name} · v{environment.version} · Kubernetes Job</p>
-              <p className="mt-2 text-muted-foreground">{environment.description}</p>
-              <p className="mt-2">CPU: {environment.cpuMillicores}m · Memory: {environment.memoryMiB}Mi (requests = limits)</p>
-              <p className="text-xs text-muted-foreground">1000m = 1 CPU core · 1024Mi = 1Gi</p>
-              <p className="mt-2 text-muted-foreground">Model: {environment.modelId} · Target execution: {environment.modelId === "none" ? "Dataset input → scorers (no model)" : "LLM risk classification"} · Concurrency: 1</p>
+          <nav aria-label="Configuration progress"><ol className="grid grid-cols-3 gap-2">{stepTitles.map((title,index)=><li key={title} className={`border-b-2 pb-3 ${index<=step?'border-primary':'border-muted'}`}><button type="button" disabled={busy||index>step} onClick={()=>setStep(index)} aria-current={index===step?'step':undefined} className={`flex items-center gap-2 text-sm ${index===step?'font-medium text-primary':'text-muted-foreground'}`}><span className={`flex size-6 items-center justify-center rounded-full text-xs ${index<=step?'bg-primary text-primary-foreground':'bg-muted'}`}>{index<step?'✓':index+1}</span>{title}</button></li>)}</ol></nav>
+          <div><h2 className="text-lg font-medium">{['Choose your evaluation datasets','Choose how to score results','Choose where to run'][step]}</h2><p className="mt-1 text-sm text-muted-foreground">{['Select the datasets and versions available when you trigger this target.','Apply the same scorers to every selected dataset.','Select an environment, then save your target configuration.'][step]}</p></div>
+          {step===0&&<div className="min-w-0 space-y-4">
+            <ConfigDatasetPicker datasets={state.datasets} selected={selectedDatasets} onChange={setSelectedDatasets} disabled={busy||loadingConfig}/>
+            {!firstDataset&&<Link className="text-sm text-primary underline" to="/$projectId/evaluation/datasets" params={{projectId}} onClick={onClose}>Publish a dataset to get started</Link>}
+            <fieldset disabled={busy||loadingConfig} className="rounded-xl border bg-background p-5">
+              <legend className="sr-only">Data source</legend>
+              <h3 className="mb-1 text-sm font-medium">Sample source</h3>
+              <p className="mb-4 text-xs text-muted-foreground">Choose where each run gets its samples.</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {([{value:'published',title:'Published dataset',detail:'Use the records in each selected version.'},{value:'upload',title:'Upload at trigger',detail:'Upload a CSV or XLSX for each selected dataset.'}]).map(item=><label key={item.value} className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3 transition-colors ${source===item.value?'border-primary/50 bg-primary/5':'hover:bg-muted/30'}`}>
+                  <input type="radio" name="config-data-source" value={item.value} checked={source===item.value} onChange={()=>setSource(item.value)} className="mt-0.5 accent-primary"/>
+                  <span><span className="block text-xs font-medium">{item.title}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{item.detail}</span></span>
+                </label>)}
+              </div>
+            </fieldset>
+          </div>}
+          {step===1&&<section aria-label="Scoring settings" className="space-y-4">
+            <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-5 ${scoringMode==='mock'?'border-primary/50 bg-primary/5':''}`}><input type="radio" name="scorer-mode" checked={scoringMode==='mock'} onChange={()=>setScoringMode('mock')} className="mt-1 accent-primary"/><span><span className="flex items-center gap-2 font-medium">Mock score<Pill>Development</Pill></span><span className="mt-2 block text-sm text-muted-foreground">Returns a fixed score of 1 to validate the workflow. This does not measure target quality.</span></span></label>
+            <div className={`space-y-4 rounded-xl border p-5 ${scoringMode==='installed'?'border-primary/50 bg-primary/5':''}`}>
+              <label className="flex cursor-pointer items-center gap-3 font-medium"><input type="radio" name="scorer-mode" checked={scoringMode==='installed'} disabled={!availableScorers.length} onChange={()=>{setScoringMode('installed');patch({scorerIds:availableScorers});}} className="accent-primary"/>Dataset scorers</label>
+              <p className="text-sm text-muted-foreground">{availableScorers.length?'Versioned scorers shared by all selected datasets. The backend validates the installed library when saving.':'No shared versioned scorers are configured for these datasets. Add scorer metadata to the dataset versions to enable this option.'}</p>
+              {scoringMode==='installed'&&availableScorers.map(id=><label key={id} className="flex items-center gap-3 rounded-lg border bg-background p-3 text-sm"><input type="checkbox" checked={request.scorerIds.includes(id)} onChange={e=>patch({scorerIds:e.target.checked?[...request.scorerIds,id]:request.scorerIds.filter(s=>s!==id)})} className="accent-primary"/>{state.scorers.find(s=>s.id===id)?.draft.name??id}</label>)}
             </div>
-          )}
-          <Field label="Scoring mode">
-            <Select value={scoringMode} disabled><option value="mock">Mock score · development</option><option value="installed">Installed scorers</option></Select>
-          </Field>
-          <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
-            Real model requests and persisted sample results. The mock-score scorer returns a fixed score of 1; this does not measure target quality.
-            Configured policy and risk scorers are not installed in the backend yet.
-          </p>
-          <p className="text-sm text-muted-foreground">Runtime isolation uses the server-managed Kubernetes profile. OpenShell restrictions from the configuration preview are not applied.</p>
+          </section>}
+          {step===2&&<div className="space-y-4">
+            <section aria-label="Execution settings" className="space-y-4 rounded-xl border bg-background p-5">
+              <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+              <Field label="Execution environment *"><Select disabled={busy||loadingConfig} value={request.environmentId} onChange={e=>patch({environmentId:e.target.value,environmentVersion:state.environments.find(v=>v.id===e.target.value)?.versions.at(-1)?.version??0})}>
+                <option value="">Select an environment</option>
+                {state.environments.map(e=><option key={e.id} value={e.id}>{e.versions.at(-1)!.name}</option>)}
+              </Select></Field>
+              <Field label="Environment version *"><Select disabled={busy||loadingConfig} value={request.environmentVersion} onChange={e=>patch({environmentVersion:Number(e.target.value)})}>
+                {state.environments.find(e=>e.id===request.environmentId)?.versions.toReversed().map(v=><option key={v.version} value={v.version}>v{v.version} · {v.cpuMillicores}m / {v.memoryMiB}Mi</option>)}
+              </Select></Field>
+              </div>
+              {environment&&<section aria-label="Selected environment details" className="overflow-hidden rounded-lg border bg-muted/10">
+                <div className="flex items-center justify-between gap-3 border-b bg-muted/30 px-4 py-3">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground"><Server className="size-4"/>Selected environment details</div>
+                  <Pill>v{environment.version}</Pill>
+                </div>
+                <div className="space-y-4 p-4">
+                  <div><h3 className="text-base font-medium">{environment.name}</h3>{environment.description&&<p className="mt-1 text-xs leading-5 text-muted-foreground">{environment.description}</p>}</div>
+                  <dl className="grid gap-4 border-t pt-4 sm:grid-cols-3">
+                    <div><dt className="text-xs text-muted-foreground">Model</dt><dd className="mt-1 break-all text-sm font-medium">{environment.modelId==='none'?'No model':environment.modelId}</dd></div>
+                    <div><dt className="text-xs text-muted-foreground">CPU</dt><dd className="mt-1 text-sm font-medium">{environment.cpuMillicores}m</dd></div>
+                    <div><dt className="text-xs text-muted-foreground">Memory</dt><dd className="mt-1 text-sm font-medium">{environment.memoryMiB} MiB</dd></div>
+                  </dl>
+                  <p className="rounded-md bg-background px-3 py-2 text-xs leading-5 text-muted-foreground">{environment.modelId==='none'?'Execution flow: dataset input → scorers. No model call is made.':'Execution flow: dataset input → configured model → scorers.'}</p>
+                </div>
+              </section>}
+
+            </section>
+            <div className="rounded-xl border bg-muted/20 p-4 text-sm"><p className="font-medium">Ready to save</p><p className="mt-2 text-muted-foreground">{selectedDatasets.length} datasets · {scoringMode==='mock'?'Mock score':request.scorerIds.join(', ')} · {source==='upload'?'Upload at trigger':'Published samples'}</p><p className="mt-2 text-xs text-muted-foreground">Saving config makes these choices available in Trigger. It does not start an evaluation.</p></div>
+          </div>}
         </div>
     </Modal>
   );

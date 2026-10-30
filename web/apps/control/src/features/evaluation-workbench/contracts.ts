@@ -107,6 +107,8 @@ export interface Score {
   reason: string;
 }
 export interface SampleResult {
+  dataset_id?: string;
+  dataset_version?: number;
   id: string;
   input: Row;
   reference: Row;
