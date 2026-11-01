@@ -56,6 +56,8 @@ export interface Environment {
   versions: EnvironmentVersion[];
 }
 export interface ScorerConfig {
+  execution?: import("./execution-editor").ExecutionConfig;
+  criteria?: import("./criteria").EvaluationCriteria;
   name: string;
   description: string;
   kind: "LLM_JUDGE" | "CODE" | "RULE";
@@ -70,6 +72,7 @@ export interface ScorerVersion extends ScorerConfig {
   publishedAt: string;
 }
 export interface Scorer {
+  revision?: string;
   id: string;
   source: "BUILT_IN" | "CUSTOM";
   enabled: boolean;

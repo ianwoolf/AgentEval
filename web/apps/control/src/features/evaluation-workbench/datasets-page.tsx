@@ -1,3 +1,7 @@
+import {DeleteResource} from './delete-resource';
+import {datasetCoverage} from "./dataset-scoring";
+import {CriteriaEditor,CriteriaSummary} from "./criteria-ui";
+import {readCriteria} from "./criteria";
 import { useState } from "react";
 import { Database, Plus, Upload, ArrowLeft, Trash2 } from "lucide-react";
 import type { Dataset, Field as DatasetField, Row } from "./contracts";
@@ -95,11 +99,11 @@ export function DatasetsPage() {
           <thead>
             <tr>
               <th>Dataset</th>
-              <th>Objective</th>
+              <th>Purpose & acceptance criteria</th>
               <th>Draft records</th>
               <th>Published</th>
               <th>Tags</th>
-              <th>Selectable scorers</th>
+              <th>Assigned scorers</th>
               <th />
             </tr>
           </thead>
@@ -122,7 +126,7 @@ export function DatasetsPage() {
                     </div>
                   </div>
                 </td>
-                <td className="max-w-sm">{d.draft.objective}</td>
+                <td className="min-w-80 max-w-lg"><p className="mb-3 font-medium">{d.draft.objective}</p><p className="text-xs text-muted-foreground">Coverage: {datasetCoverage(d.draft,state.scorers).join(", ")||"No scorers assigned"}</p></td>
                 <td>{d.draft.rows.length}</td>
                 <td>
                   <Pill>
@@ -133,12 +137,12 @@ export function DatasetsPage() {
                 </td>
                 <td>{d.draft.tags.join(", ") || "—"}</td>
                 <td>{d.draft.scorerIds?.length
-                  ? d.draft.scorerIds.map((id) => state.scorers.find((s) => s.id === id)?.draft.name ?? id).join(", ")
-                  : "All scorers"}</td>
+                  ? d.draft.scorerIds.map((id) => state.scorers.find((s) => s.id === id)?.draft.name ?? `${id} (missing from catalog)`).join(", ")
+                  : "No scorers assigned"}</td>
                 <td>
                   <Button variant="ghost" onClick={() => setSelected(clone(d))}>
                     Manage
-                  </Button>
+                  </Button><DeleteResource collection="datasets" id={d.id} name={d.draft.name}/>
                 </td>
               </tr>
             ))}
@@ -194,6 +198,11 @@ function DatasetEditor({
       if (!d.name.trim() || !d.objective.trim())
         throw new Error("Name and objective are required.");
       validateFields(d.fields);
+      parsed.evaluation??={};parsed.evaluation.scorers??={};
+      for(const id of d.scorerIds??[]) {
+        const version=state.scorers.find(s=>s.id===id)?.versions.at(-1);
+        if(version&&!parsed.evaluation.scorers[id]?.version)parsed.evaluation.scorers[id]={version:String(version.version),threshold:version.threshold};
+      }
       let next = {
         ...dataset,
         draft: { ...d, name: d.name.trim(), metadata: parsed },
@@ -426,14 +435,16 @@ function DatasetEditor({
       {tab === "Scorers" && (
         <div className="max-w-4xl space-y-4">
           <p className="text-sm text-muted-foreground">
-            A dataset supplies input and reference values; the target generates output, and a scorer evaluates output against reference. Choose compatible scorers for this dataset. Leave all unchecked to allow all scorers.
+            Choose the checks this dataset should run. Each scorer explains the behavior, expected outcome and evidence it needs. Dataset-specific mode requires at least one scorer.
             Save the draft, then publish a version to use these choices in Eval.
-            Associations do not execute scorers. Actual runs use the scorer configured in the target Config and installed in the backend.
+            Real scoring requires an installed compatible engine. Demo scoring produces illustrative values.
           </p>
+          {(d.scorerIds??[]).filter(id=>!state.scorers.some(s=>s.id===id)).map(id=><div key={id} className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/40 p-3"><div><p className="font-mono text-sm">{id} · Missing from catalog</p><p className="text-xs text-muted-foreground">Legacy or demo reference. No current scoring definition is available. Remove it or select a published scorer below, then save the draft.</p></div><Button variant="outline" onClick={()=>update({scorerIds:(d.scorerIds??[]).filter(v=>v!==id)})}>Remove missing reference</Button></div>)}
           {state.scorers.map((scorer) => (
             <label key={scorer.id} className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 text-sm">
               <input
                 type="checkbox"
+                disabled={!scorer.versions.length || !scorer.enabled}
                 className="mt-1"
                 checked={d.scorerIds?.includes(scorer.id) ?? false}
                 onChange={(e) => update({ scorerIds: e.target.checked
@@ -442,8 +453,14 @@ function DatasetEditor({
               />
               <span className="flex-1">
                 <span className="font-medium">{scorer.draft.name}</span>
-                <span className="mt-1 block text-muted-foreground">{scorer.draft.description}</span>
+                <span className="mt-1 block text-muted-foreground">{scorer.draft.description}</span><CriteriaSummary criteria={scorer.draft.criteria}/>
               </span>
+              <Select aria-label={`Version for ${scorer.draft.name}`} value={String((d.metadata.evaluation as {scorers?:Record<string,{version?:string}>}|undefined)?.scorers?.[scorer.id]?.version??scorer.versions.at(-1)?.version??'')} onChange={e=>{
+                const current=JSON.parse(metadata); const evaluation=current.evaluation??{};const scorers=evaluation.scorers??{};
+                const v=scorer.versions.find(v=>String(v.version)===e.target.value);
+                const next={...current,evaluation:{...evaluation,scorers:{...scorers,[scorer.id]:{...scorers[scorer.id],version:e.target.value,threshold:v?.threshold??.8}}}};
+                update({metadata:next});setMetadata(JSON.stringify(next,null,2));
+              }}>{scorer.versions.map(v=><option key={v.version} value={v.version}>v{v.version}</option>)}</Select>
               <Pill>{!scorer.enabled ? "Disabled" : scorer.versions.length ? `v${scorer.versions.at(-1)!.version}` : "Draft only"}</Pill>
             </label>
           ))}

@@ -16,10 +16,12 @@ function setup() {
 it('loads persisted samples with duration, score and expandable full input/response', async () => {
  setup();
  vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+  if(url.includes('/reports/')) return Response.json({datasets:[],bindings:[],aspects:[]});
   if (!url.includes('/experiments/exp-live/samples?')) throw Error('Wrong sample endpoint');
   return Response.json({total:1,items:[{id:'sample-00000000',input:{messages:[{role:'user',content:'Inspect this private input'}]},output:{has_issue:true,explanation:'Actual model response'},reference:{has_issue:true},status:'PASS',latencyMs:1234.56,costUsd:0,error:null,trace:[],scores:[{scorerId:'mock-score',value:1,passed:true,reason:'Fixed test score'}]}]});
  }));
  render(<ReportsPage evaluationId="eval-live" onSelect={() => {}} />);
+ await userEvent.click(screen.getByRole('tab',{name:'Samples'}));
  const row = await screen.findByRole('row', {name:/sample-00000000/});
  expect(within(row).getByText('1235 ms')).toBeTruthy();
  expect(within(row).getByText(/mock-score: 1/)).toBeTruthy();
@@ -42,10 +44,13 @@ it('compares datasets and filters sample details within the same evaluation',asy
  const rows=remote.datasets.map((d,i)=>({id:`sample-${i}`,dataset_id:d.dataset_id,dataset_version:d.dataset_version,input:{text:d.name},output:{},reference:{},status:i?'FAIL':'PASS',latencyMs:10,costUsd:0,error:null,scores:[],trace:[]}));
  vi.stubGlobal('fetch',vi.fn(async(url:string)=>url.includes('/reports/')?Response.json({datasets:remote.datasets!.map((d,i)=>({...d,status:'COMPLETED',completed:1,passed:1-i,failed:i,errors:0,pass_rate:1-i,average_latency_ms:10,scores:[{scorer_id:'mock-score',average:1-i,count:1}]}))}):Response.json({items:rows,total:2})));
  render(<ReportsPage evaluationId="eval-live" onSelect={()=>{}}/>);
- const comparison=await screen.findByRole('region',{name:'Dataset comparison'});
+ await userEvent.click(screen.getByRole('tab',{name:'Configuration'}));
+ await userEvent.click(await screen.findByText('Dataset statistics'));
+ const comparison=screen.getByLabelText('Dataset comparison');
  expect(within(comparison).getByText('100.0%')).toBeTruthy();
  expect(within(comparison).getByText('0.0%')).toBeTruthy();
  expect(within(comparison).getByText('0.000 (n=1)')).toBeTruthy();
+ await userEvent.click(screen.getByRole('tab',{name:'Samples'}));
  await userEvent.selectOptions(screen.getByLabelText('Filter samples by dataset'),'b');
  expect(screen.queryByRole('button',{name:/sample-0/})).toBeNull();
  await userEvent.click(screen.getByRole('button',{name:/sample-1/}));

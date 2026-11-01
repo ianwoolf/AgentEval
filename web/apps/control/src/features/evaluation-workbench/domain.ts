@@ -1,3 +1,4 @@
+import {criteriaPresets} from "./criteria";
 import type {
   CreateEvaluationRequest,
   Dataset,
@@ -114,7 +115,7 @@ export function publishScorer(scorer: Scorer): Scorer {
   const d = scorer.draft;
   if (!d.name.trim() || !d.notes.trim())
     throw new Error("Name and version notes are required.");
-  validateScorerSource(d);
+  if (d.kind === "CODE") validateScorerSource(d);
   if (!Number.isFinite(d.threshold) || d.threshold < 0 || d.threshold > 1)
     throw new Error("Threshold must be between 0 and 1.");
   const result = clone(scorer);
@@ -405,6 +406,7 @@ export function createFixtures(): WorkbenchState {
           : "Scores Guardrail conversation safety cases by comparing the Guardrail prediction (output.has_issue) with the dataset label (reference.has_issue). Matching labels score 1; mismatches score 0, with a reason identifying false positives or false negatives. input.messages provides conversation context; category is metadata only. This scorer evaluates predictions rather than detecting risks itself.",
       kind,
       definition: source === "CUSTOM" ? "" : definition,
+      criteria: id === "sc-correctness" ? {aspect:"custom" as const,subject:"Generated answer",expectation:"Match the reference answer correctly",requirements:definition,evidence:"input, actual_output, expected_output"} : {...criteriaPresets[4]!},
       ...(source === "CUSTOM"
         ? {
             repoUrl: "https://github.com/example/evaluation-scorers.git",

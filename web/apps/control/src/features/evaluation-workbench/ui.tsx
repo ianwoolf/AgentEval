@@ -43,12 +43,12 @@ export function Frame({
       description={description}
       action={action}
     >
-      <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-xs text-muted-foreground">
+      {!evaluationRuntime().standalone&&<div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-xs text-muted-foreground">
         <FlaskConical className="size-4 shrink-0 text-amber-600" />
         <span>
-          {evaluationRuntime().standalone ? <>Datasets, environments and evaluation results are saved to the backend. Scorer edits are session-only.</> : <><strong className="text-foreground">Configuration preview</strong> · Datasets, environments and live results are saved to the backend. Scorer edits are session-only. Demo reports remain simulated.</>}
+          {evaluationRuntime().standalone ? <>Datasets, scorer specifications, environments and evaluation results are saved to the backend.</> : <><strong className="text-foreground">Configuration preview</strong> · Datasets, scorer specifications, environments and live results are saved to the backend. Demo reports remain simulated.</>}
         </span>
-      </div>
+      </div>}
       {children}
     </EvaluationLayerPageFrame>
   );
@@ -146,7 +146,7 @@ export function Modal({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <div className="min-h-0 space-y-5 overflow-y-auto p-6">{children}</div>
+        <div className="min-h-0 space-y-3 overflow-y-auto p-4">{children}</div>
         {footer && <div className="shrink-0 space-y-3 border-t bg-background px-6 py-4">{footer}</div>}
       </DialogContent>
     </Dialog>

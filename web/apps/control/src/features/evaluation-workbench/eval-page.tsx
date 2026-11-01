@@ -1,3 +1,6 @@
+import {useAdminView} from './view-mode';
+import {aspectLabels,criteriaPresets,readCriteria} from "./criteria";
+import {datasetScoring,datasetCoverage} from './dataset-scoring';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Play, Plus, ShieldCheck, Server, Gauge, Save, Layers } from "lucide-react";
@@ -22,6 +25,7 @@ import {
   Table,
 } from "./ui";
 export function EvalPage() {
+  const admin=useAdminView();
   const navigate = useNavigate();
   const { state, setState } = useWorkbench();
   const projectId = useCurrentProjectId();
@@ -40,8 +44,8 @@ export function EvalPage() {
   return (
     <Frame
       title="Evaluation"
-      description="Choose a target type, inspect its targets, then configure and run an evaluation."
-      action={<Button onClick={()=>setCreatingTarget(true)}><Plus />New target</Button>}
+      description="Choose a target, run an evaluation, then review its results."
+      action={admin&&<Button onClick={()=>setCreatingTarget(true)}><Plus />New target</Button>}
     >
       <div className="flex items-end justify-between gap-4">
         <Field label="Target type">
@@ -73,7 +77,7 @@ export function EvalPage() {
                   setHistoryTargetId(target.id);
                   setFilter("ALL");
                 }}>History</Button>
-                <Button variant="outline" onClick={() => setConfigTargetId(target.id)}>Config</Button>
+                {admin&&<Button variant="outline" onClick={() => setConfigTargetId(target.id)}>Config</Button>}
                 <Button onClick={() => setSelectedTargetId(target.id)}><Play />Trigger</Button>
               </div></td>
             </tr>
@@ -235,6 +239,9 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
     scorerIds: defaultScorerIds(firstDataset?.versions.at(-1)?.scorerIds),
   });
   const [selectedDatasets, setSelectedDatasets] = useState<Array<{dataset_id:string;dataset_version:number}>>([]);
+  const [scorerSelection,setScorerSelection] = useState<'shared'|'dataset'>('dataset');
+  const [demoScoring,setDemoScoring] = useState(false);
+  useEffect(()=>{let active=true; executionApi<{scoring_enabled:boolean}>(projectId,'capabilities').then(c=>{if(active)setDemoScoring(!c.scoring_enabled);}).catch(()=>{});return()=>{active=false;};},[projectId]);
   const [step,setStep] = useState(0);
   const [error, setError] = useState("");
   const submitted = useRef(false);
@@ -250,7 +257,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
     let active=true;
     executionApi<TargetRunConfig>(projectId, `targets/${encodeURIComponent(targetId)}/config`).then(c=>{
       if(!active)return;
-      setRevision(c.revision);setSource(c.data_source);setScoringMode(c.scoring_mode);
+      setScorerSelection(c.scorer_selection??'shared');setRevision(c.revision);setSource(c.data_source);setScoringMode(c.scoring_mode);
       setSelectedDatasets(c.datasets ?? [{dataset_id:c.dataset_id,dataset_version:c.dataset_version}]);
       setRequest(r=>({...r,datasetId:c.dataset_id,datasetVersion:c.dataset_version,environmentId:c.environment_id,environmentVersion:c.environment_version,scorerIds:c.scorer_ids}));
     }).catch(e=>{if(active && e.status!==404)setError(e.message);}).finally(()=>{if(active)setLoadingConfig(false);});
@@ -279,7 +286,8 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
     const configs=(v?.metadata?.evaluation as {scorers?:Record<string,unknown>}|undefined)?.scorers;
     return !!configs?.[id]&&(!v?.scorerIds?.length||v.scorerIds.includes(id));
   }));
-  const validScorers=scoringMode==='mock'||(request.scorerIds.length>0&&request.scorerIds.every(id=>availableScorers.includes(id)));
+  const datasetScorers=chosenVersions.map(v=>v?datasetScoring(v,state.scorers):null);
+  const validScorers=scoringMode==='mock'||(scorerSelection==='dataset'?datasetScorers.every(d=>d&&d.ids.length>0&&(demoScoring||d.ready)):(request.scorerIds.length>0&&request.scorerIds.every(id=>availableScorers.includes(id))));
   const stepTitles=['Datasets','Scorers','Environment'];
   return (
     <Modal
@@ -296,7 +304,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
           Cancel
         </Button>
         {step>0&&<Button variant="outline" disabled={busy} onClick={()=>setStep(v=>v-1)}>Back</Button>}
-        {step<2?<Button disabled={busy||loadingConfig||!validDatasets||(step===1&&!validScorers)} onClick={()=>setStep(v=>v+1)}>Continue to {stepTitles[step+1].toLowerCase()}<ArrowRight/></Button>:<Button
+        {step<2?<Button disabled={busy||loadingConfig||!validDatasets||(step===1&&!validScorers)} onClick={()=>setStep(v=>v+1)}>Continue to {stepTitles[step+1]?.toLowerCase()}<ArrowRight/></Button>:<Button
             disabled={busy || loadingConfig || !validDatasets || !validScorers || !environment}
             onClick={async () => {
               if (submitted.current) return;
@@ -307,7 +315,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
                   method:"POST",headers:{"Content-Type":"application/json"},
                   body:JSON.stringify({revision,dataset_id:selectedDatasets[0]!.dataset_id,dataset_version:selectedDatasets[0]!.dataset_version,datasets:selectedDatasets,
                     environment_id:request.environmentId,environment_version:request.environmentVersion,
-                    data_source:source,scoring_mode:scoringMode,scorer_ids:scoringMode==="mock"?["mock-score"]:request.scorerIds}),
+                    data_source:source,scoring_mode:scoringMode,scorer_selection:scorerSelection,scorer_ids:scoringMode==="mock"?["mock-score"]:scorerSelection==="dataset"?[]:request.scorerIds}),
                 });
                 setRevision(saved.revision);
                 onClose();
@@ -327,7 +335,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
     >
         <div className="space-y-6">
           <nav aria-label="Configuration progress"><ol className="grid grid-cols-3 gap-2">{stepTitles.map((title,index)=><li key={title} className={`border-b-2 pb-3 ${index<=step?'border-primary':'border-muted'}`}><button type="button" disabled={busy||index>step} onClick={()=>setStep(index)} aria-current={index===step?'step':undefined} className={`flex items-center gap-2 text-sm ${index===step?'font-medium text-primary':'text-muted-foreground'}`}><span className={`flex size-6 items-center justify-center rounded-full text-xs ${index<=step?'bg-primary text-primary-foreground':'bg-muted'}`}>{index<step?'✓':index+1}</span>{title}</button></li>)}</ol></nav>
-          <div><h2 className="text-lg font-medium">{['Choose your evaluation datasets','Choose how to score results','Choose where to run'][step]}</h2><p className="mt-1 text-sm text-muted-foreground">{['Select the datasets and versions available when you trigger this target.','Apply the same scorers to every selected dataset.','Select an environment, then save your target configuration.'][step]}</p></div>
+          <div><h2 className="text-lg font-medium">{['Choose your evaluation datasets','Choose how to score results','Choose where to run'][step]}</h2><p className="mt-1 text-sm text-muted-foreground">{['Select the datasets and versions available when you trigger this target.','Review what each dataset tests and how its results will be judged.','Select an environment, then save your target configuration.'][step]}</p></div>
           {step===0&&<div className="min-w-0 space-y-4">
             <ConfigDatasetPicker datasets={state.datasets} selected={selectedDatasets} onChange={setSelectedDatasets} disabled={busy||loadingConfig}/>
             {!firstDataset&&<Link className="text-sm text-primary underline" to="/$projectId/evaluation/datasets" params={{projectId}} onClick={onClose}>Publish a dataset to get started</Link>}
@@ -344,12 +352,17 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
             </fieldset>
           </div>}
           {step===1&&<section aria-label="Scoring settings" className="space-y-4">
-            <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-5 ${scoringMode==='mock'?'border-primary/50 bg-primary/5':''}`}><input type="radio" name="scorer-mode" checked={scoringMode==='mock'} onChange={()=>setScoringMode('mock')} className="mt-1 accent-primary"/><span><span className="flex items-center gap-2 font-medium">Mock score<Pill>Development</Pill></span><span className="mt-2 block text-sm text-muted-foreground">Returns a fixed score of 1 to validate the workflow. This does not measure target quality.</span></span></label>
-            <div className={`space-y-4 rounded-xl border p-5 ${scoringMode==='installed'?'border-primary/50 bg-primary/5':''}`}>
-              <label className="flex cursor-pointer items-center gap-3 font-medium"><input type="radio" name="scorer-mode" checked={scoringMode==='installed'} disabled={!availableScorers.length} onChange={()=>{setScoringMode('installed');patch({scorerIds:availableScorers});}} className="accent-primary"/>Dataset scorers</label>
-              <p className="text-sm text-muted-foreground">{availableScorers.length?'Versioned scorers shared by all selected datasets. The backend validates the installed library when saving.':'No shared versioned scorers are configured for these datasets. Add scorer metadata to the dataset versions to enable this option.'}</p>
-              {scoringMode==='installed'&&availableScorers.map(id=><label key={id} className="flex items-center gap-3 rounded-lg border bg-background p-3 text-sm"><input type="checkbox" checked={request.scorerIds.includes(id)} onChange={e=>patch({scorerIds:e.target.checked?[...request.scorerIds,id]:request.scorerIds.filter(s=>s!==id)})} className="accent-primary"/>{state.scorers.find(s=>s.id===id)?.draft.name??id}</label>)}
-            </div>
+            {demoScoring&&<p role="status" className="rounded-lg border p-3 text-sm">Demo scoring is enabled. Scorer selections are preserved, but the runner produces illustrative scores without executing scorer code.</p>}
+            <Field label="Scorer selection"><Select value={scorerSelection} onChange={e=>setScorerSelection(e.target.value as 'shared'|'dataset')}><option value="dataset">Use each dataset's scorers</option><option value="shared">Shared scorers (legacy)</option></Select></Field>
+            {chosenVersions.map((v,i)=>v&&<article key={selectedDatasets[i]?.dataset_id??i} className="rounded-lg border px-3 py-2 space-y-1">
+              <h3 className="font-medium">{v.name} · v{v.version}</h3>
+
+              <p className="text-sm text-muted-foreground">Scorers: {datasetScorers[i]?.ids.map(id=>state.scorers.find(s=>s.id===id)?.draft.name??id).join(', ')||'No scorers assigned'}</p>
+              {!demoScoring&&!datasetScorers[i]?.ready&&<p className="text-sm text-amber-600">Not ready: {datasetScorers[i]?.issues.join('; ')||'No scorers assigned'}.  Open Datasets → Scorers, select a published scorer version, publish the dataset, then select the new dataset version here.</p>}
+            </article>)}
+            <Field label="Scoring mode"><Select value={scoringMode} onChange={e=>{setScoringMode(e.target.value as 'installed'|'mock');if(e.target.value==='installed')patch({scorerIds:availableScorers});}}><option value="installed" disabled={scorerSelection==='dataset'?!datasetScorers.every(d=>d&&d.ids.length>0&&(demoScoring||d.ready)):!availableScorers.length}>Run configured scorers</option><option value="mock">Mock · fixed score of 1</option></Select></Field>
+            <p className="text-xs text-muted-foreground">{scoringMode==='mock'?'Illustrative scores only; this mode does not measure target quality.':scorerSelection==='dataset'?'Each dataset runs its own pinned scorers.':'Only scorers shared by all selected datasets can be selected.'}</p>
+            {scoringMode==='installed'&&scorerSelection==='shared'&&availableScorers.map(id=><label key={id} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={request.scorerIds.includes(id)} onChange={e=>patch({scorerIds:e.target.checked?[...request.scorerIds,id]:request.scorerIds.filter(s=>s!==id)})}/>{state.scorers.find(s=>s.id===id)?.draft.name??id}</label>)}
           </section>}
           {step===2&&<div className="space-y-4">
             <section aria-label="Execution settings" className="space-y-4 rounded-xl border bg-background p-5">
@@ -379,7 +392,7 @@ export function CreateEvalDialog({ onClose, targetId, onStarted }: { onClose(): 
               </section>}
 
             </section>
-            <div className="rounded-xl border bg-muted/20 p-4 text-sm"><p className="font-medium">Ready to save</p><p className="mt-2 text-muted-foreground">{selectedDatasets.length} datasets · {scoringMode==='mock'?'Mock score':request.scorerIds.join(', ')} · {source==='upload'?'Upload at trigger':'Published samples'}</p><p className="mt-2 text-xs text-muted-foreground">Saving config makes these choices available in Trigger. It does not start an evaluation.</p></div>
+            <div className="rounded-xl border bg-muted/20 p-4 text-sm"><p className="font-medium">Ready to save</p><p className="mt-2 text-muted-foreground">{selectedDatasets.length} datasets · {scoringMode==='mock'?'Mock score':scorerSelection==='dataset'?'Dataset-specific scorers':request.scorerIds.join(', ')} · {source==='upload'?'Upload at trigger':'Published samples'}</p><p className="mt-2 text-xs text-muted-foreground">Saving config makes these choices available in Trigger. It does not start an evaluation.</p></div>
           </div>}
         </div>
     </Modal>

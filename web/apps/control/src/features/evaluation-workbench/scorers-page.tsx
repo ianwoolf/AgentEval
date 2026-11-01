@@ -1,3 +1,7 @@
+import {DeleteResource} from './delete-resource';
+import {ExecutionEditor,defaultExecution} from "./execution-editor";
+import {aspectLabels} from "./criteria";
+import {CriteriaEditor,CriteriaSummary} from "./criteria-ui";
 import { ScorerGuide } from "./scorer-guide";
 import { useState } from "react";
 import { Plus, Braces, Sparkles } from "lucide-react";
@@ -19,9 +23,11 @@ import {
   Textarea,
 } from "./ui";
 export function ScorersPage() {
-  const { state, setState } = useWorkbench();
+  const { state, saveScorer } = useWorkbench();
+  const [pageError,setPageError]=useState("");
   const [editing, setEditing] = useState<Scorer | null>(null);
   const [filter, setFilter] = useState("All scorers");
+  const [aspect,setAspect]=useState("ALL");
   const [query, setQuery] = useState("");
   const scorers = state.scorers.filter(
     (s) =>
@@ -29,12 +35,13 @@ export function ScorersPage() {
         (filter === "Built-in"
           ? s.source === "BUILT_IN"
           : s.source === "CUSTOM")) &&
+      (aspect==="ALL" || s.draft.criteria?.aspect===aspect) &&
       s.draft.name.toLowerCase().includes(query.toLowerCase()),
   );
   return (
     <Frame
       title="Scorers"
-      description="Define how quality is measured. Publish custom scorers without changing historical evaluations."
+      description="Choose an aspect, configure a scoring method, then test and publish."
       action={
         <Button
           onClick={() =>
@@ -46,7 +53,8 @@ export function ScorersPage() {
               draft: {
                 name: "",
                 description: "",
-                kind: "CODE",
+                kind: "RULE",
+                execution:defaultExecution("RULE"),
                 definition: "",
                 repoUrl: "",
                 scriptPath: "",
@@ -61,11 +69,7 @@ export function ScorersPage() {
         </Button>
       }
     >
-      <section className="space-y-2 rounded-lg border bg-muted/20 p-4 text-sm" aria-label="Dataset and scorer relationship">
-        <p><strong>Dataset → target → scorer → score.</strong> A dataset supplies input, reference answers/labels and metadata. The target produces output; a scorer compares that output with the reference and returns a value and reason.</p>
-        <p>Dataset associations define which scorers can be selected; they do not execute or install a scorer. One dataset can use several scorers, and one scorer can evaluate several datasets with compatible fields.</p>
-        <p className="text-muted-foreground">Live target configuration currently uses mock-score (fixed value 1) to verify the pipeline. It does not measure quality. The examples below describe scoring semantics; catalog edits and simulated tests do not install backend scoring code.</p>
-      </section>
+      <ErrorText message={pageError}/>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Tabs
           items={["All scorers", "Built-in", "Custom"]}
@@ -80,11 +84,12 @@ export function ScorersPage() {
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
+      <Field label="Filter by aspect"><Select value={aspect} onChange={e=>setAspect(e.target.value)}><option value="ALL">All aspects</option>{Object.entries(aspectLabels).map(([id,label])=><option key={id} value={id}>{label}</option>)}</Select></Field>
       <Table>
         <thead>
           <tr>
             <th>Scorer</th>
-            <th>Source</th>
+            <th>Aspect</th>
             <th>Type</th>
             <th>Published</th>
             <th>Threshold</th>
@@ -110,16 +115,14 @@ export function ScorersPage() {
                     >
                       {s.draft.name}
                     </button>
-                    <p className="mt-1 max-w-xs text-xs text-muted-foreground">
+                    <p className="mt-1 font-mono text-xs text-muted-foreground">{s.id}</p>
+                    <p className="mt-1 max-w-xs line-clamp-2 text-xs text-muted-foreground">
                       {s.draft.description}
                     </p>
                   </div>
                 </div>
               </td>
-              <td>
-                <Pill>{s.source === "BUILT_IN" ? "Built-in" : "Custom"}</Pill>
-              </td>
-              <td>
+              <td><Pill>{s.draft.criteria?aspectLabels[s.draft.criteria.aspect]:"Unspecified"}</Pill></td>              <td>
                 {s.draft.kind === "LLM_JUDGE"
                   ? "LLM judge"
                   : s.draft.kind === "CODE"
@@ -132,7 +135,7 @@ export function ScorersPage() {
               <td>≥ {s.versions.at(-1)?.threshold ?? s.draft.threshold}</td>
               <td>
                 <Pill tone={s.enabled ? "good" : "neutral"}>
-                  {s.enabled ? "Enabled" : "Disabled"}
+                  {!s.enabled?"Disabled":s.draft.execution?"Configured":"Needs configuration"}
                 </Pill>
               </td>
               <td><DatasetUsage datasets={state.datasets} scorerId={s.id} /></td>
@@ -141,19 +144,10 @@ export function ScorersPage() {
                   <Button variant="ghost" onClick={() => setEditing(clone(s))}>
                     {s.source === "BUILT_IN" ? "Inspect" : "Manage"}
                   </Button>
-                  {s.source === "CUSTOM" && (
+                  <DeleteResource collection="scorers" id={s.id} name={s.draft.name}/>{s.source === "CUSTOM" && (
                     <Button
                       variant="ghost"
-                      onClick={() =>
-                        setState((current) => ({
-                          ...current,
-                          scorers: current.scorers.map((item) =>
-                            item.id === s.id
-                              ? { ...item, enabled: !item.enabled }
-                              : item,
-                          ),
-                        }))
-                      }
+                      onClick={() => void saveScorer({...s,enabled:!s.enabled}).catch(e=>setPageError((e as Error).message))}
                     >
                       {s.enabled ? "Disable" : "Enable"}
                     </Button>
@@ -175,17 +169,7 @@ export function ScorersPage() {
         <ScorerEditor
           initial={editing}
           onClose={() => setEditing(null)}
-          onSave={(scorer) => {
-            setState((s) => ({
-              ...s,
-              scorers: s.scorers.some((item) => item.id === scorer.id)
-                ? s.scorers.map((item) =>
-                    item.id === scorer.id ? scorer : item,
-                  )
-                : [...s.scorers, scorer],
-            }));
-            setEditing(null);
-          }}
+          onSave={async (scorer) => { await saveScorer(scorer); setEditing(null); }}
         />
       )}
     </Frame>
@@ -216,7 +200,7 @@ function ScorerEditor({
   onClose,
 }: {
   initial: Scorer;
-  onSave(s: Scorer): void;
+  onSave(s: Scorer): Promise<void>;
   onClose(): void;
 }) {
   const { state } = useWorkbench();
@@ -239,15 +223,21 @@ function ScorerEditor({
     setScorer((s) => ({ ...s, draft: { ...s.draft, ...value } }));
     setTestResult(null);
   };
-  const save = (publish: boolean) => {
+  const [saving,setSaving]=useState(false);
+  const [executionValid,setExecutionValid]=useState(true);
+  const save = async (publish: boolean) => {
+    setSaving(true);
     try {
+      if(!executionValid) throw new Error("Fix the rule value before saving.");
       if (!d.name.trim()) throw new Error("Name is required.");
       if (!Number.isFinite(d.threshold) || d.threshold < 0 || d.threshold > 1)
         throw new Error("Threshold must be between 0 and 1.");
-      onSave(publish ? publishScorer(scorer) : scorer);
+      if(publish && !d.execution) throw new Error("Configure an execution engine before publishing.");
+      if(!d.criteria)scorer.draft.criteria={aspect:'custom',subject:'Target output',expectation:'Configured check passes',requirements:'Use executable configuration',evidence:'Configured inputs'};
+      await onSave(publish ? publishScorer(scorer) : scorer);
     } catch (e) {
       setError((e as Error).message);
-    }
+    } finally {setSaving(false);}
   };
   return (
     <Modal
@@ -260,20 +250,18 @@ function ScorerEditor({
       }
       description={
         readonly
-          ? "System-maintained scorer. The definition is read-only."
+          ? "Example specification. Use this template to create and save your own scorer."
           : "Save drafts or publish a new version. Existing evaluations retain their original scorer version."
       }
       onClose={onClose}
     >
       <Tabs
-        items={["Definition", "Test", "Versions", "Datasets"]}
+        items={["Definition", "Execution", "Versions", "Datasets"]}
         active={tab}
         onChange={setTab}
       />
       {tab === "Definition" && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <ScorerGuide scorer={scorer}/>
-          <section className="sm:col-span-2 rounded-lg border p-4"><h3 className="mb-2 font-medium">Associated datasets</h3><DatasetUsage datasets={state.datasets} scorerId={scorer.id}/></section>
+        <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Name *">
             <Input
               disabled={readonly}
@@ -283,37 +271,32 @@ function ScorerEditor({
           </Field>
           <Field label="Scorer type">
             <Select
-              disabled
+              disabled={readonly}
               value={d.kind}
               onChange={(e) =>
-                patch({ kind: e.target.value as Scorer["draft"]["kind"] })
+                patch({ kind: e.target.value as Scorer["draft"]["kind"], execution:defaultExecution(e.target.value as Scorer["draft"]["kind"]) })
               }
             >
               <option value="LLM_JUDGE">LLM judge</option>
-              <option value="CODE">Git script</option>
-              {readonly && <option value="RULE">Rule</option>}
+              <option value="CODE" disabled>Python script (unavailable)</option>
+              <option value="RULE">Rule</option>
             </Select>
           </Field>
           <div className="sm:col-span-2">
             <Field label="Description">
-              <Textarea
+              <Input
                 disabled={readonly}
                 value={d.description}
                 onChange={(e) => patch({ description: e.target.value })}
               />
             </Field>
           </div>
-          {readonly ? (
-            <div className="sm:col-span-2">
-              <Field label="Scoring rubric">
-                <Textarea
-                  disabled
-                  className="min-h-40 font-mono text-xs"
-                  value={d.definition}
-                />
-              </Field>
-            </div>
-          ) : (
+          <Field label="Aspect"><Select value={d.criteria?.aspect??'custom'} disabled={readonly} onChange={e=>patch({criteria:{aspect:e.target.value as import('./criteria').EvaluationCriteria['aspect'],subject:d.criteria?.subject??'Target output',expectation:d.criteria?.expectation??'Configured check passes',requirements:d.criteria?.requirements??'Use executable configuration',evidence:d.criteria?.evidence??'Configured inputs'}})}>{Object.entries(aspectLabels).map(([id,name])=><option key={id} value={id}>{name}</option>)}</Select></Field>
+
+
+
+
+          {d.kind === "CODE" && !readonly && (
             <>
               <div className="sm:col-span-2">
                 <Field
@@ -361,6 +344,7 @@ function ScorerEditor({
           </Field>
         </div>
       )}
+      {tab === "Execution" && <ExecutionEditor config={d} disabled={readonly} onValidityChange={setExecutionValid} onChange={execution=>patch({execution})}/>}
       {tab === "Test" && (
         <div className="space-y-4">
           <p className="rounded-md border border-amber-500/25 bg-amber-500/5 p-3 text-sm">
@@ -393,7 +377,7 @@ function ScorerEditor({
                   throw new Error(
                     "Sample requires input, output and reference.",
                   );
-                if (!readonly) validateScorerSource(d);
+                if (!readonly && d.kind === "CODE") validateScorerSource(d);
                 else if (!d.definition.trim())
                   throw new Error("Add a definition first.");
                 setTestResult({
@@ -443,16 +427,18 @@ function ScorerEditor({
         </div>
       )}
       <ErrorText message={error} />
-      <div className="flex justify-end gap-2">
+      <div className="sticky bottom-0 flex justify-end gap-2 border-t bg-background pt-3">
+        {tab==='Definition'&&<Button variant="outline" onClick={()=>setTab('Execution')}>Next: Configure scoring</Button>}
         <Button variant="outline" onClick={onClose}>
           Close
         </Button>
+        {readonly && <Button onClick={()=>setScorer({...clone(scorer),id:uid("sc"),source:"CUSTOM",versions:[],draft:{...clone(d),name:d.name+" (custom)"}})}>Use this template</Button>}
         {!readonly && (
           <>
-            <Button variant="outline" onClick={() => save(false)}>
+            <Button disabled={saving} variant="outline" onClick={() => void save(false)}>
               Save draft
             </Button>
-            <Button onClick={() => save(true)}>
+            <Button disabled={saving} onClick={() => void save(true)}>
               Publish v{scorer.versions.length + 1}
             </Button>
           </>

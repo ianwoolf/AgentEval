@@ -17,6 +17,10 @@ COPY packages ./packages
 RUN npm run build:evaluation --workspace @tasklattice/control
 
 FROM nginxinc/nginx-unprivileged:stable-alpine
+USER root
+RUN apk add --no-cache curl ca-certificates jq procps iproute2 bind-tools netcat-openbsd
 COPY deploy/nginx/evaluation.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/apps/control/dist-evaluation /usr/share/nginx/html
 EXPOSE 8080
+
+USER 101

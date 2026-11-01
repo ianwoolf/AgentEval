@@ -1,0 +1,16 @@
+import {aspectLabels,criteriaPresets,type EvaluationCriteria} from './criteria';
+import {Field,Select,Textarea,Input,Pill} from './ui';
+export function CriteriaSummary({criteria}:{criteria:EvaluationCriteria|undefined}) {
+ if(!criteria) return <p className="text-sm text-muted-foreground">Not specified — define the aspect, subject and expected behavior.</p>;
+ return <div className="space-y-2 text-sm"><Pill>{aspectLabels[criteria.aspect]}</Pill><p><strong>Evaluates:</strong> {criteria.subject||'Not specified'}</p><p><strong>Expected:</strong> {criteria.expectation||'Not specified'}</p><p><strong>Criteria:</strong> {criteria.requirements||'Not specified'}</p><p className="text-muted-foreground"><strong>Evidence:</strong> {criteria.evidence||'Not specified'}</p></div>;
+}
+export function CriteriaEditor({value,onChange,disabled=false}:{value:EvaluationCriteria|undefined;onChange(c:EvaluationCriteria):void;disabled?:boolean}) {
+ const c=value??{aspect:'custom',subject:'',expectation:'',requirements:'',evidence:''};
+ return <section className="grid gap-3 rounded-lg border p-3 sm:col-span-2 sm:grid-cols-2" aria-label="Evaluation criteria"><h3 className="font-semibold sm:col-span-2">What does this evaluate?</h3>
+ <div className="grid gap-3 sm:grid-cols-2 sm:col-span-2"><Field label="Evaluation aspect"><Select disabled={disabled} value={c.aspect} onChange={e=>onChange({...c,aspect:e.target.value as EvaluationCriteria['aspect']})}>{Object.entries(aspectLabels).map(([id,label])=><option key={id} value={id}>{label}</option>)}</Select></Field>
+ {!disabled&&<Field label="Start from a template" hint="Selecting a template replaces these criteria; customize them below."><Select value="" onChange={e=>{const preset=criteriaPresets.find(p=>p.aspect===e.target.value);if(preset)onChange({...preset});}}><option value="">Choose an example…</option>{criteriaPresets.map(p=><option key={p.aspect} value={p.aspect}>{aspectLabels[p.aspect]}</option>)}</Select></Field>}</div>
+ <Field label="Evaluation subject" hint="Which behavior or output is being judged?"><Input disabled={disabled} value={c.subject} onChange={e=>onChange({...c,subject:e.target.value})}/></Field>
+ <Field label="Authoring mode"><Select disabled={disabled} value={c.authoringMode??'criteria'} onChange={e=>onChange({...c,authoringMode:e.target.value as 'criteria'|'steps'})}><option value="criteria">Criteria</option><option value="steps">Explicit evaluation steps</option></Select></Field>
+ <Field label={c.authoringMode==='steps'?'Evaluation steps':'Criteria'} hint={c.authoringMode==='steps'?'One judging step per line. This mode uses steps instead of criteria.':'Define what counts as success, partial completion and failure.'}><Textarea disabled={disabled} className="min-h-28" value={c.authoringMode==='steps'?(c.evaluationSteps??''):(c.requirements||c.expectation)} onChange={e=>onChange(c.authoringMode==='steps'?{...c,evaluationSteps:e.target.value,requirements:e.target.value,expectation:e.target.value}:{...c,requirements:e.target.value,expectation:e.target.value})}/></Field>
+ <Field label="Required evidence / inputs" hint="For example: actual_output, expected_output, retrieval_context, tools_called."><Input disabled={disabled} value={c.evidence} onChange={e=>onChange({...c,evidence:e.target.value})}/></Field></section>;
+}

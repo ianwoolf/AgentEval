@@ -7,15 +7,17 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import type { Dataset, Environment, Target, WorkbenchState } from "./contracts";
+import type { Dataset, Environment, Scorer, Target, WorkbenchState } from "./contracts";
 import { advanceEvaluation, createFixtures } from "./domain";
 import { useCurrentProjectId } from "@/hooks/use-project";
 import { executionApi, executionPages, fromRemote, type RemoteRun } from "./remote";
 import { evaluationRuntime } from './runtime';
-const initialState = () => ({ ...createFixtures(), ...(evaluationRuntime().standalone ? {evaluations: []} : {}), datasets: [], environments: [], targets: [] });
+const initialState = () => ({ ...createFixtures(), ...(evaluationRuntime().standalone ? {evaluations: []} : {}), datasets: [], environments: [], targets: [], scorers: [] });
 const Context = createContext<{
+  archiveResource(collection:"datasets"|"scorers"|"environments",id:string):Promise<void>;
   state: WorkbenchState;
   setState: Dispatch<SetStateAction<WorkbenchState>>;
+  saveScorer(scorer: Scorer): Promise<Scorer>;
   saveDataset(dataset: Dataset): Promise<Dataset>;
   saveEnvironment(environment: Environment): Promise<void>;
   saveTarget(target: Target): Promise<Target>;
@@ -38,6 +40,9 @@ export function WorkbenchProvider({ children }: { children: ReactNode }) {
     void Promise.all([executionPages<Environment>(projectId, "environments"), executionPages<Target>(projectId, "targets")]).then(([environments, targets]) => {
       if (active) setState(s => ({...s, environments, targets}));
     }).catch(e => { if (active) setDatasetError("Environment/target loading failed: " + (e as Error).message); });
+    void executionPages<Scorer>(projectId, "scorers").then(scorers => {
+      if(active) setState(s=>({...s, scorers:[...s.scorers.filter(t=>!scorers.some(v=>v.id===t.id)), ...scorers]}));
+    }).catch(e=>{if(active)setDatasetError("Scorer loading failed: "+(e as Error).message);});
     async function refresh() {
       try {
         const response = await executionApi<{items: RemoteRun[]}>(projectId, "runs");
@@ -69,6 +74,13 @@ export function WorkbenchProvider({ children }: { children: ReactNode }) {
     );
     return () => clearInterval(timer);
   }, []);
+  async function saveScorer(scorer: Scorer) {
+    const saved = await executionApi<Scorer>(projectId, `scorers/${encodeURIComponent(scorer.id)}`, {
+      method: "POST", headers: {"Content-Type":"application/json"}, body:JSON.stringify(scorer),
+    });
+    setState(s=>({...s, scorers:s.scorers.some(v=>v.id===saved.id)?s.scorers.map(v=>v.id===saved.id?saved:v):[...s.scorers,saved]}));
+    return saved;
+  }
   async function saveDataset(dataset: Dataset) {
     const saved = await executionApi<Dataset>(projectId, `datasets/${encodeURIComponent(dataset.id)}`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dataset),
@@ -92,7 +104,11 @@ export function WorkbenchProvider({ children }: { children: ReactNode }) {
       ? s.targets.map(t=>t.id===saved.id?saved:t) : [...s.targets,saved]}));
     return saved;
   }
-  return <Context value={{ state, setState, saveDataset, saveEnvironment, saveTarget }}>{datasetError && <p role="alert" className="px-6 py-2 text-sm text-destructive">Dataset loading failed: {datasetError}. Reload to retry.</p>}{syncError && <p role="alert" className="px-6 py-2 text-sm text-destructive">Live evaluation sync: {syncError}. Retrying…</p>}{children}</Context>;
+  async function archiveResource(collection:"datasets"|"scorers"|"environments",id:string) {
+    await executionApi(projectId,`catalog/${collection}/${encodeURIComponent(id)}`,{method:'DELETE'});
+    setState(s=>({...s,[collection]:s[collection].filter(v=>v.id!==id)}));
+  }
+  return <Context value={{ archiveResource, state, setState, saveScorer, saveDataset, saveEnvironment, saveTarget }}>{datasetError && <p role="alert" className="px-6 py-2 text-sm text-destructive">Dataset loading failed: {datasetError}. Reload to retry.</p>}{syncError && <p role="alert" className="px-6 py-2 text-sm text-destructive">Live evaluation sync: {syncError}. Retrying…</p>}{children}</Context>;
 }
 export function useWorkbench() {
   const value = useContext(Context);

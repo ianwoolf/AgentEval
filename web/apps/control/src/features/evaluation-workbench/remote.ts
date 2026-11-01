@@ -2,7 +2,9 @@ import { getAuthToken } from "@/lib/auth-token";
 import type { Evaluation, EvaluationSnapshot } from "./contracts";
 import { evaluationRuntime } from './runtime';
 export interface RemoteRun {
-  datasets?: Array<{dataset_id:string;dataset_version:number;name:string;sample_count:number}>;
+  feature_modes?: {scoring_enabled:boolean;reflection_enabled:boolean;effective_reflection_mode:'real'|'mock'};
+  datasets?: Array<{dataset_id:string;dataset_version:number;name:string;sample_count:number;objective?:string;scorer_ids?:string[]}>;
+  scorer_selection?: 'shared'|'dataset';
   runtime?: 'docker' | 'kubernetes';
   container_name?: string | null;
   id: string; name: string; status: Evaluation["status"]; created_at: string;
@@ -40,6 +42,7 @@ export async function executionPages<T>(project: string, path: string): Promise<
 }
 
 export interface TargetRunConfig {
+ scorer_selection?: 'shared'|'dataset';
  datasets?: Array<{dataset_id:string;dataset_version:number}>;
  id: string; revision: string; dataset_id: string; dataset_version: number;
  environment_id: string; environment_version: number; model_id: string;

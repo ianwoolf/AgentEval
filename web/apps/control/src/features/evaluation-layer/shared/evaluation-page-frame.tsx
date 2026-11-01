@@ -13,7 +13,7 @@ export function EvaluationLayerPageFrame({
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-6 max-sm:[&_[data-slot=button]]:min-h-11 max-sm:[&_select]:min-h-11">
+    <section className="space-y-3 max-sm:[&_[data-slot=button]]:min-h-11 max-sm:[&_select]:min-h-11">
       <PageHeader
         title={title}
         description={description}

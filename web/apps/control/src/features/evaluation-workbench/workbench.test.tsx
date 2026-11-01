@@ -1,3 +1,4 @@
+import {scorerTemplates} from "./criteria";
 /** @vitest-environment jsdom */
 import { createFixtures } from "./domain";
 import { useState } from "react";
@@ -19,6 +20,7 @@ beforeEach(() => {
   let environments = createFixtures().environments;
   let targets = createFixtures().targets.filter(t=>t.kind==="GUARDRAIL");
   vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+    if (_url.includes("/scorers?")) return Response.json({items:[...createFixtures().scorers,...scorerTemplates()]});
     if (_url.includes("/environments?")) return Response.json({items:environments,total:environments.length});
     if (_url.includes("/targets?")) return Response.json({items:targets,total:targets.length});
     if (_url.includes("/targets/") && _url.endsWith("/config")) return Response.json({id:"guardrail-privacy",revision:"1:1",dataset_id:"ds-guardrail",dataset_version:1,environment_id:"env-isolated",environment_version:1,data_source:"published",scoring_mode:"mock",scorer_ids:["mock-score"]});
@@ -34,6 +36,7 @@ beforeEach(() => {
         const saved={...old,revision:"2:1",versions:[...old.versions,{...body.config,version:old.versions.length+1,publishedAt:new Date().toISOString()}]};
         environments=environments.map(e=>e.id===saved.id?saved:e);return Response.json(saved);
       }
+      if (_url.includes("/scorers/")) return Response.json({...body,revision:"1:1"});
       if (_url.includes("/datasets/")) return Response.json({...body, revision: "1:1"});
       return Response.json({...body, scorer_ids:["mock-score"],scoring_mode:"mock",model_id:"glm-dev",snapshot:createFixtures().evaluations.find(e=>e.snapshot.target.kind==="GUARDRAIL")!.snapshot, id: "eval-live-test", created_at: new Date().toISOString(), status: "RUNNING", experiment_id: "exp-live-test", completed: 0, phase: "QUEUED"});
     }
@@ -172,7 +175,7 @@ describe("interactive workbench", () => {
         <StateProbe />
       </WorkbenchProvider>,
     );
-    await user.click(screen.getByRole("button", { name: "Manage" }));
+    await user.click(await screen.findByRole("button", { name: "Manage" }));
     await user.clear(screen.getByLabelText("Version notes *"));
     await user.type(
       screen.getByLabelText("Version notes *"),
@@ -180,6 +183,7 @@ describe("interactive workbench", () => {
     );
     await user.clear(screen.getByLabelText("Pass threshold (0–1)"));
     await user.type(screen.getByLabelText("Pass threshold (0–1)"), "0.9");
+    await user.selectOptions(screen.getByLabelText("Scorer type"), "RULE");
     await user.click(screen.getByRole("button", { name: "Publish v2" }));
     expect(
       readState().scorers[2].versions.map(
@@ -253,32 +257,15 @@ describe("interactive workbench", () => {
   });
 });
 
-it("creates a custom scorer from a Git repository and relative script path", async () => {
-  const user = userEvent.setup();
-  render(
-    <WorkbenchProvider>
-      <ScorersPage />
-      <StateProbe />
-    </WorkbenchProvider>,
-  );
-  await user.click(screen.getByRole("button", { name: "New scorer" }));
-  await user.type(screen.getByLabelText("Name *"), "Git risk scorer");
-  await user.type(
-    screen.getByLabelText("Git repository *"),
-    "https://github.com/example/scorers.git",
-  );
-  await user.type(
-    screen.getByLabelText("Script path *"),
-    "scorers/guardrail.py",
-  );
-  await user.type(screen.getByLabelText("Version notes *"), "Initial script");
-  await user.click(screen.getByRole("button", { name: "Publish v1" }));
-  expect(screen.queryByRole("dialog")).toBeNull();
-  expect(readState().scorers.at(-1).versions[0]).toMatchObject({
-    kind: "CODE",
-    repoUrl: "https://github.com/example/scorers.git",
-    scriptPath: "scorers/guardrail.py",
-  });
+it("creates an executable rule with typed evidence paths",async()=>{
+ const user=userEvent.setup();render(<WorkbenchProvider><ScorersPage/><StateProbe/></WorkbenchProvider>);
+ await user.click(screen.getByRole('button',{name:'New scorer'}));
+ await user.type(screen.getByLabelText('Name *'),'Risk exact match');
+ await user.type(screen.getByLabelText('Version notes *'),'Executable rule');
+ expect(screen.queryByLabelText('Judge prompt')).toBeNull();
+ await user.click(screen.getByRole('button',{name:'Publish v1'}));
+ await waitFor(()=>expect(screen.queryByRole('dialog')).toBeNull());
+ expect(readState().scorers.at(-1).versions[0].execution).toMatchObject({engine:'rule',operator:'equals',actual:'actual_output.has_issue',expected_path:'expected_output.has_issue'});
 });
 
 it("filters Guardrail targets by provider", async () => {
@@ -389,4 +376,34 @@ it('configures multiple datasets and only triggers a subset of configured versio
  await user.click(screen.getByRole('button',{name:'Run evaluation'}));
  const call=vi.mocked(fetch).mock.calls.find(([url,init])=>url.toString().endsWith('/runs')&&init?.method==='POST')!;
  expect(JSON.parse(call[1]!.body as string).datasets).toEqual([{dataset_id:'ds-second',dataset_version:1}]);
+});
+
+it('shows a compact evaluation landing page', async()=>{
+ render(<WorkbenchProvider><EvalPage/></WorkbenchProvider>);
+ expect(screen.getByRole('heading',{name:'Evaluation'})).toBeTruthy();
+ expect(screen.queryByRole('heading',{name:'What are you evaluating?'})).toBeNull();
+});
+it('customizes a scorer template and saves its criteria to the server',async()=>{
+ const user=userEvent.setup();
+ render(<WorkbenchProvider><ScorersPage/></WorkbenchProvider>);
+ await user.click(await screen.findByRole('button',{name:'Factual grounding'}));
+ await user.click(screen.getByRole('button',{name:'Use this template'}));
+ await user.click(screen.getByRole('tab',{name:'Execution'}));
+ await user.click(screen.getByRole('button',{name:'Configure execution'}));
+ const expectation=screen.getByLabelText('Judge prompt');
+ await user.clear(expectation);await user.type(expectation,'Cite supplied policy only');
+ await user.click(screen.getByRole('button',{name:'Publish v1'}));
+ await waitFor(()=>expect(vi.mocked(fetch).mock.calls.some(([url,init])=>String(url).includes('/scorers/')&&init?.method==='POST')).toBe(true));
+ const call=vi.mocked(fetch).mock.calls.find(([url,init])=>String(url).includes('/scorers/')&&init?.method==='POST')!;
+ const body=JSON.parse(call[1]!.body as string);
+ expect(body.versions[0].execution.prompt).toBe('Cite supplied policy only');
+ expect(body.versions[0].criteria.aspect).toBe('grounding');
+});
+
+it('filters scorer rows by their explicit aspect',async()=>{
+ const user=userEvent.setup();render(<WorkbenchProvider><ScorersPage/></WorkbenchProvider>);
+ await screen.findByRole('button',{name:'Factual grounding'});
+ await user.selectOptions(screen.getByLabelText('Filter by aspect'),'grounding');
+ expect(screen.getByRole('button',{name:'Factual grounding'})).toBeTruthy();
+ expect(screen.queryByRole('button',{name:'Tool usage'})).toBeNull();
 });

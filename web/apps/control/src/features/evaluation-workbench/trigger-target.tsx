@@ -1,3 +1,5 @@
+import {CriteriaSummary} from "./criteria-ui";
+import {readCriteria} from "./criteria";
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {useCurrentProjectId} from '@/hooks/use-project';
 import {executionApi,fromRemote,type RemoteRun,type TargetRunConfig} from './remote';
@@ -6,7 +8,7 @@ import {RunUploadInput,type RunUpload} from './run-upload';
 import type {DatasetVersion} from './contracts';
 import {Button,ErrorText,Field,Input,Modal} from './ui';
 
-type Selection = {dataset_id:string;dataset_version:number;upload_id?:string};
+type Selection = {dataset_id:string;dataset_version:number;upload_id?:string|undefined};
 function DatasetUpload({projectId,selection,schema,onReady}:{projectId:string;selection:Selection;schema:DatasetVersion;onReady(id:string,value:RunUpload|null):void}) {
  const ready=useCallback((value:RunUpload|null)=>onReady(selection.dataset_id,value),[onReady,selection.dataset_id]);
  return <RunUploadInput projectId={projectId} datasetId={selection.dataset_id} version={selection.dataset_version} fields={schema.fields.map(f=>f.name)} onReady={ready}/>;
@@ -45,12 +47,14 @@ export function TriggerTargetDialog({targetId,onClose,onStarted}:{targetId:strin
     const d=state.datasets.find(d=>d.id===ref.dataset_id);
     if(!d)return <p key={ref.dataset_id} role="alert">Configured dataset {ref.dataset_id} is unavailable. Update Target configuration.</p>;
     const selection=selected.find(s=>s.dataset_id===d.id);
-    const version=d.versions.find(v=>v.version===selection?.dataset_version);
+    const version=d.versions.find(v=>v.version===ref.dataset_version);
     return <div key={d.id} className="space-y-3 rounded-lg border p-4">
      <div className="flex items-center justify-between gap-4"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!selection} disabled={!selection&&selected.length>=20} onChange={e=>{
       setSelected(rows=>e.target.checked?[...rows,{dataset_id:d.id,dataset_version:ref.dataset_version}]:rows.filter(s=>s.dataset_id!==d.id));key.current=crypto.randomUUID();
      }}/>{d.draft.name}</label>
      <span className="text-sm text-muted-foreground">v{ref.dataset_version}</span></div>
+     <p className="text-sm">{version?.objective||'No evaluation purpose defined.'}</p>
+     <p className="text-xs text-muted-foreground">Scorers: {(config?.scorer_selection==='dataset'?version?.scorerIds:config?.scorer_ids)?.map(id=>state.scorers.find(s=>s.id===id)?.draft.name??id).join(', ')||'None configured'}</p>
      {selection&&version&&config?.data_source==='upload'&&<DatasetUpload projectId={projectId} selection={selection} schema={version} onReady={ready}/>}
     </div>;
    })}

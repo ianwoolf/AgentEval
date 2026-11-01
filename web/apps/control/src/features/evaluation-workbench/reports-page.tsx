@@ -1,3 +1,4 @@
+import {aspectLabels} from "./criteria";
 import { ReportConfig } from "./report-config";
 import { useEffect, useState } from "react";
 import { useCurrentProjectId } from "@/hooks/use-project";
@@ -29,6 +30,7 @@ import {
   Pill,
   Select,
   Table,
+  Tabs,
   download,
   textValue,
 } from "./ui";
@@ -552,9 +554,12 @@ interface DatasetSummary {
 }
 function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
   const remote = run.remote!;
+  const {state:catalog}=useWorkbench();
   const projectId = useCurrentProjectId();
   const [samples, setSamples] = useState<SampleResult[]>([]);
+  const [aspectReport,setAspectReport]=useState<{bindings:Array<{id:string;name:string;aspect:string;version:string|null;dataset_id:string;provenance:string;definition:unknown}>;aspects:Array<{aspect:string;source:string;evaluated:number;passed:number;errors:number;missing:number;pending:number;pass_rate:number|null}>;dataset_aspects?:Array<{dataset_id:string;aspect:string;source:string;pass_rate:number|null;evaluated:number;passed:number;errors:number;missing:number}>}>({bindings:[],aspects:[]});
   const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
+  const [reportTab,setReportTab]=useState('Overview');
   const [datasetFilter, setDatasetFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -572,13 +577,14 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
       try {
         const rows = await executionPages<SampleResult>(projectId, `experiments/${encodeURIComponent(remote.experiment_id)}/samples`);
         let summaries: DatasetSummary[] = [];
-        if (remote.datasets?.length) {
+        {
           try {
-            const report = await executionApi<{datasets:DatasetSummary[]}>(projectId, `reports/${encodeURIComponent(remote.experiment_id)}?limit=1`);
+            const report = await executionApi<{datasets:DatasetSummary[]}&typeof aspectReport>(projectId, `reports/${encodeURIComponent(remote.experiment_id)}?limit=1`);
             summaries = report.datasets ?? [];
+            if(active)setAspectReport({bindings:report.bindings??[],aspects:report.aspects??[],dataset_aspects:report.dataset_aspects??[]});
           } catch (e) {
             if ((e as {status?:number}).status !== 404 || run.status !== 'RUNNING') throw e;
-            summaries = remote.datasets.map(d=>({...d,status:'QUEUED',completed:0,passed:0,failed:0,errors:0,pass_rate:null,average_latency_ms:null,scores:[]}));
+            summaries = (remote.datasets??[]).map(d=>({...d,status:'QUEUED',completed:0,passed:0,failed:0,errors:0,pass_rate:null,average_latency_ms:null,scores:[]}));
           }
         }
         if (active) { setSamples(rows); setDatasetSummaries(summaries); setError(""); }
@@ -596,8 +602,21 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
   const visibleSamples = samples.filter(s=>datasetFilter==='ALL'||(s.dataset_id??run.snapshot.datasetId)===datasetFilter);
   const scorerKeys = [...new Set(datasetSummaries.flatMap(d=>d.scores.map(s=>JSON.stringify([s.scorer_id,s.scorer_version]))))];
   return <Frame title={run.name} description="Live evaluation · Persisted sample results">
-    <div><Button variant="ghost" onClick={onBack}><ArrowLeft />All reports</Button></div>
-    <section aria-label="Evaluation overview" className="overflow-hidden rounded-xl border bg-card">
+    <div className="flex items-center justify-between"><Button variant="ghost" onClick={onBack}><ArrowLeft/>All reports</Button><Pill>{run.status}</Pill></div>
+    <Tabs items={['Overview','Samples','Configuration']} active={reportTab} onChange={setReportTab}/>
+    {error&&<div role="alert" className="text-sm text-destructive">Sample loading failed: {error} <Button variant="outline" onClick={()=>setRetry(v=>v+1)}>Retry</Button></div>}
+    {reportTab==='Overview'&&<section className="space-y-2"><h2 className="font-semibold">Results by dataset and aspect</h2><p className="text-xs text-muted-foreground">Aspect score = sample pass rate across all required scorers. Scorer score = mean on a 0–1 scale. Errors count as not passed.</p>
+    <Table><thead><tr><th>Dataset</th><th>Aspect</th><th>Aspect score</th><th>Scorer · version</th><th>Scorer score</th><th>Evidence</th></tr></thead><tbody>{aspectReport.bindings.map(b=>{const d=datasetSummaries.find(d=>d.dataset_id===b.dataset_id);const a=aspectReport.dataset_aspects?.find(a=>a.dataset_id===b.dataset_id&&a.aspect===b.aspect);const score=d?.scores.find(s=>s.scorer_id===b.id&&(!s.scorer_version||String(s.scorer_version)===String(b.version)));return <tr key={b.dataset_id+b.id}><td>{d?.name??remote.datasets?.find(d=>d.dataset_id===b.dataset_id)?.name??b.dataset_id}</td><td>{aspectLabels[b.aspect as keyof typeof aspectLabels]??'Unclassified'}</td><td>{a?.pass_rate==null?'—':`${(a.pass_rate*100).toFixed(1)}%`}<p className="text-xs text-muted-foreground">{a?`${a.passed}/${a.evaluated} passed · ${a.source}`:'Not evaluated'}</p></td><td>{b.name} · v{b.version??'?'}</td><td>{score?score.average.toFixed(3):'—'}</td><td><Button variant="link" onClick={()=>{setDatasetFilter(b.dataset_id);setReportTab('Samples');}}>View samples</Button></td></tr>;})}</tbody></Table>
+    {!aspectReport.bindings.length&&<p className="text-sm text-muted-foreground">Historical scorer definitions unavailable. {remote.scorer_ids.join(', ')} — unclassified.</p>}
+    </section>}
+    {reportTab==='Configuration'&&<details open className="rounded-lg border p-3"><summary className="cursor-pointer text-sm">Recorded scoring configuration</summary>{aspectReport.bindings.map(b=><details key={b.dataset_id+b.id} className="mt-2 text-xs"><summary>{b.name} · v{b.version??'?'} · {b.dataset_id}</summary><pre className="max-h-60 overflow-auto whitespace-pre-wrap">{JSON.stringify(b.definition,null,2)}</pre></details>)}</details>}
+    {remote.feature_modes?.scoring_enabled === false && <p role="status" className="rounded-lg border border-amber-500/30 p-3 text-sm">Demo scores — illustrative only. These results do not measure evaluation quality.</p>}
+    {reportTab==='Overview'&&remote.feature_modes?.effective_reflection_mode === 'mock' && <details aria-label="Reflection" className="rounded-lg border p-3 space-y-2"><summary className="cursor-pointer text-sm">Demo reflection</summary>
+      <h2 className="font-medium">Reflection</h2>
+      <p className="text-sm text-muted-foreground">Demo reflection — illustrative only</p>
+      <p className="text-sm">This report demonstrates how findings and recommendations will appear. Review sample evidence and scoring criteria before drawing quality conclusions.</p>
+    </details>}
+    {reportTab==='Overview'&&<section aria-label="Evaluation overview" className="overflow-hidden rounded-xl border bg-card">
       <div role="status" aria-live="polite" className="flex flex-wrap items-center justify-between gap-3 border-b bg-muted/20 px-4 py-3">
         <div className="flex flex-wrap items-center gap-3"><Pill tone={run.status==='COMPLETED'?'good':run.status==='FAILED'?'bad':'neutral'}>{run.status === "RUNNING" ? remote.phase : run.status}</Pill><h2 className="text-sm font-medium">{run.status === "RUNNING" ? "Evaluation in progress" : run.status === "FAILED" ? "Evaluation failed" : run.status === "CANCELLED" ? "Evaluation cancelled" : "Evaluation completed"}</h2></div>
         <span className="text-xs text-muted-foreground">{remote.completed}{remote.sample_count!==undefined?` / ${remote.sample_count}`:''} samples processed{run.status==='RUNNING'?' · Refreshes every 3 seconds':''}</span>
@@ -614,8 +633,8 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
         <summary className="cursor-pointer text-muted-foreground">Run identifiers · {remote.runtime === 'docker'?'Docker':'Kubernetes'}</summary>
         <dl className="mt-3 grid gap-3 pb-1 sm:grid-cols-2"><div><dt className="text-muted-foreground">Experiment ID</dt><dd className="mt-1 break-all font-mono select-all">{remote.experiment_id}</dd></div><div><dt className="text-muted-foreground">{remote.runtime === 'docker'?'Docker container':'Kubernetes Job'}</dt><dd className="mt-1 break-all font-mono select-all">{remote.container_name??run.id}</dd></div></dl>
       </details>
-    </section>
-    {datasetSummaries.length>0&&<section className="space-y-3" aria-label="Dataset comparison">
+    </section>}
+    {reportTab==='Configuration'&&datasetSummaries.length>0&&<details className="space-y-3" aria-label="Dataset comparison"><summary className="cursor-pointer text-sm">Dataset statistics</summary>
       <h2 className="text-lg font-medium">Dataset comparison</h2>
       <p className="text-sm text-muted-foreground">Pass rates include processed samples; errors count as not passed. Scores average the samples scored by each scorer. In-progress results are provisional.</p>
       <Table><thead><tr><th>Dataset</th><th>Status</th><th>Progress</th><th>Pass rate</th><th>Failed / errors</th><th>Average duration</th>{scorerKeys.map(key=>{const [id,version]=JSON.parse(key);return <th key={key}>{id}{version?` · ${version}`:''}</th>;})}</tr></thead>
@@ -626,12 +645,12 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
         <td>{d.average_latency_ms===null?'—':`${Math.round(d.average_latency_ms)} ms`}</td>
         {scorerKeys.map(key=>{const score=d.scores.find(s=>JSON.stringify([s.scorer_id,s.scorer_version])===key);return <td key={key}>{score?`${score.average.toFixed(3)} (n=${score.count})`:'—'}</td>;})}
       </tr>)}</tbody></Table>
-    </section>}
-    <section className="space-y-4" aria-label="Sample results">
+    </details>}
+    {reportTab==='Samples'&&<section className="space-y-3" aria-label="Sample results">
       <h2 className="text-lg font-medium">Sample results</h2>
       {remote.datasets?.length&&<Select aria-label="Filter samples by dataset" value={datasetFilter} onChange={e=>{setDatasetFilter(e.target.value);setSelectedId(null);}}><option value="ALL">All datasets</option>{remote.datasets.map(d=><option key={d.dataset_id} value={d.dataset_id}>{d.name} · v{d.dataset_version}</option>)}</Select>}
       <p className="text-sm text-muted-foreground">Duration includes target execution and scoring. Select a sample to inspect full input, response and scorer feedback.</p>
-      {error && <div role="alert" className="text-sm text-destructive">Sample loading failed: {error} <Button variant="outline" onClick={() => setRetry(v => v + 1)}>Retry</Button></div>}
+
       {loading ? <p role="status">Loading samples…</p> : !samples.length && !error ? <Empty>No sample results have been stored yet.</Empty> : null}
       {!loading&&samples.length>0&&!visibleSamples.length&&<Empty>No samples for this dataset yet.</Empty>}
       {visibleSamples.length > 0 && <Table>
@@ -646,7 +665,7 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
           <td className="max-w-72"><div className="line-clamp-3 break-words">{textValue(row.output)}</div></td>
         </tr>)}</tbody>
       </Table>}
-    </section>
+    </section>}
     <Sheet open={!!sample} onOpenChange={open => { if (!open) setSelectedId(null); }}>
       <SheetContent className="overflow-y-auto sm:max-w-2xl">
         <SheetHeader><SheetTitle>Sample {sample?.id}</SheetTitle><SheetDescription>Persisted input, response, duration and scoring details.</SheetDescription></SheetHeader>

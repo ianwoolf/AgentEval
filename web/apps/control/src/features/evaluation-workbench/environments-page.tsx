@@ -1,3 +1,4 @@
+import {DeleteResource} from './delete-resource';
 import { useState } from "react";
 import { Plus, ShieldCheck, Network, FolderLock, Terminal } from "lucide-react";
 import type { Environment, EnvironmentConfig } from "./contracts";
@@ -108,7 +109,7 @@ export function EnvironmentsPage() {
                   <Pill>Guardrail proxy</Pill>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" onClick={() => setHistory(env)}>
+                  <DeleteResource collection="environments" id={env.id} name={v.name}/><Button variant="ghost" onClick={() => setHistory(env)}>
                     Versions
                   </Button>
                   <Button

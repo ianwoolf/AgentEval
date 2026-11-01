@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
+import {AdminViewContext} from '@/features/evaluation-workbench/view-mode';
 import { createRoot } from 'react-dom/client';
-import { createRootRoute, createRoute, createRouter, RouterProvider, Outlet, Link, redirect } from '@tanstack/react-router';
+import { createRootRoute, createRoute, createRouter, RouterProvider, Outlet, Link, redirect, useLocation } from '@tanstack/react-router';
 import { WorkbenchProvider } from '@/features/evaluation-workbench/provider';
 import { EvalPage } from '@/features/evaluation-workbench/eval-page';
 import { DatasetsPage } from '@/features/evaluation-workbench/datasets-page';
@@ -10,16 +11,18 @@ import { ReportsPage } from '@/features/evaluation-workbench/reports-page';
 import { evaluationRuntime } from '@/features/evaluation-workbench/runtime';
 import '../styles.css';
 
-const pages = [['catalog', 'Evaluation'], ['datasets', 'Datasets'], ['environments', 'Environments'], ['scorers', 'Scorers'], ['reports', 'Reports']] as const;
+const pages = [['catalog', 'Evaluation'], ['datasets', 'Datasets'], ['scorers', 'Scorers'], ['environments', 'Environments'], ['reports', 'Reports']] as const;
 function Shell() {
   const projectId = evaluationRuntime().projectId;
-  return <WorkbenchProvider><div className="min-h-screen bg-background text-foreground">
-    <header className="border-b px-6 py-4"><div className="mx-auto flex max-w-7xl flex-wrap items-center gap-6">
+  const [admin,setAdmin]=useState(false);
+  const location=useLocation();
+  return <AdminViewContext value={admin}><WorkbenchProvider><div className="min-h-screen bg-background text-foreground">
+    <header className="border-b px-5 py-2"><div className="mx-auto flex max-w-7xl flex-wrap items-center gap-6">
       <Link to="/$projectId/evaluation/catalog" params={{projectId}} className="text-xl font-semibold">AgentEval</Link>
-      <nav aria-label="Evaluation navigation" className="flex flex-wrap gap-2">{pages.map(([page,label]) =>
-        <Link key={page} to={`/${projectId}/evaluation/${page}`} className="rounded-md px-3 py-2 text-sm" activeProps={{className:'bg-primary/10 text-primary'}}>{label}</Link>)}</nav>
-    </div></header><main id="main-content" className="mx-auto max-w-7xl p-6"><Outlet/></main>
-  </div></WorkbenchProvider>;
+      <nav aria-label="Evaluation navigation" className="flex flex-wrap gap-2">{pages.filter(([page])=>admin||page==='catalog'||page==='reports').map(([page,label]) =>
+        <Link key={page} to={`/$projectId/evaluation/${page}`} params={{projectId}} className="rounded-md px-3 py-2 text-sm" activeProps={{className:'bg-primary/10 text-primary'}}>{label}</Link>)}</nav><button className="ml-auto rounded border px-3 py-1.5 text-sm" onClick={()=>{setAdmin(!admin);router.navigate({to:'/$projectId/evaluation/catalog',params:{projectId}});}}>{admin?'Switch to operator':'Manage workspace'}</button>
+    </div></header><main id="main-content" className="mx-auto max-w-7xl p-4">{admin||!['datasets','scorers','environments'].some(page=>location.pathname.endsWith('/'+page))?<Outlet/>:<EvalPage/>}</main>
+  </div></WorkbenchProvider></AdminViewContext>;
 }
 const root = createRootRoute({component: Shell, notFoundComponent: () => <p>Page not found.</p>});
 const home = createRoute({getParentRoute:()=>root,path:'/',beforeLoad:()=>{throw redirect({to:'/$projectId/evaluation/catalog',params:{projectId:evaluationRuntime().projectId}});}});
@@ -29,7 +32,7 @@ const environments = createRoute({getParentRoute:()=>root,path:'$projectId/evalu
 const scorers = createRoute({getParentRoute:()=>root,path:'$projectId/evaluation/scorers',component:ScorersPage});
 const reports = createRoute({getParentRoute:()=>root,path:'$projectId/evaluation/reports',
   validateSearch:(search:Record<string,unknown>)=>({evaluationId:typeof search.evaluationId==='string'?search.evaluationId:''}),
-  component:()=>{const {evaluationId}=reports.useSearch();const navigate=reports.useNavigate();return <ReportsPage evaluationId={evaluationId} onSelect={id=>void navigate({search:{evaluationId:id}})}/>;}});
+  component:()=>{const {evaluationId}=reports.useSearch();return <ReportsPage evaluationId={evaluationId} onSelect={id=>router.history.push(`/${encodeURIComponent(evaluationRuntime().projectId)}/evaluation/reports?evaluationId=${encodeURIComponent(id)}`)}/>;}});
 const router = createRouter({routeTree:root.addChildren([home,catalog,datasets,environments,scorers,reports])});
 
 async function start() {
