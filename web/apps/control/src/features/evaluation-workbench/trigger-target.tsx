@@ -1,4 +1,5 @@
 import {CriteriaSummary} from "./criteria-ui";
+
 import {readCriteria} from "./criteria";
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {useCurrentProjectId} from '@/hooks/use-project';
@@ -13,7 +14,10 @@ function DatasetUpload({projectId,selection,schema,onReady}:{projectId:string;se
  const ready=useCallback((value:RunUpload|null)=>onReady(selection.dataset_id,value),[onReady,selection.dataset_id]);
  return <RunUploadInput projectId={projectId} datasetId={selection.dataset_id} version={selection.dataset_version} fields={schema.fields.map(f=>f.name)} onReady={ready}/>;
 }
-export function TriggerTargetDialog({targetId,onClose,onStarted}:{targetId:string;onClose():void;onStarted?(id:string):void}) {
+export function TriggerTargetDialog(props:{targetId:string;onClose():void;onStarted?(id:string):void}) {
+ return <LegacyTriggerTargetDialog {...props}/>;
+}
+function LegacyTriggerTargetDialog({targetId,onClose,onStarted}:{targetId:string;onClose():void;onStarted?(id:string):void}) {
  const projectId=useCurrentProjectId();const {state,setState}=useWorkbench();
  const [config,setConfig]=useState<TargetRunConfig|null>(null);
  const [selected,setSelected]=useState<Selection[]>([]);
@@ -24,7 +28,7 @@ export function TriggerTargetDialog({targetId,onClose,onStarted}:{targetId:strin
   let active=true;
   executionApi<TargetRunConfig>(projectId,`targets/${encodeURIComponent(targetId)}/config`).then(c=>{
    if(active){setConfig(c);setSelected(c.datasets ?? [{dataset_id:c.dataset_id,dataset_version:c.dataset_version}]);}
-  }).catch(e=>{if(active)setError(e.status===404?'Save this target’s Config before triggering an evaluation.':e.message);});
+  }).catch(e=>{if(active)setError(e.status===404?'Configure this evaluation before triggering a run.':e.message);});
   return()=>{active=false;};
  },[projectId,targetId]);
  const target=state.targets.find(t=>t.id===targetId);
@@ -40,6 +44,7 @@ export function TriggerTargetDialog({targetId,onClose,onStarted}:{targetId:strin
    }catch(e){setError((e as Error).message);submitted.current=false;}finally{setBusy(false);}
   }}>{busy?'Starting…':'Run evaluation'}</Button></div></>}>
   <Field label="Evaluation name" hint="Optional. Leave blank to use the target name and current time (Asia/Shanghai)."><Input value={name} disabled={busy} placeholder={`${target?.name??targetId} + current time`} onChange={e=>{setName(e.target.value);key.current=crypto.randomUUID();}} /></Field>
+  {config&&<div className="rounded border bg-muted/20 p-3 text-xs">Target: {target?.guardrail_id??targetId} · Environment: {state.environments.find(e=>e.id===config.environment_id)?.versions.find(v=>v.version===config.environment_version)?.name??config.environment_id} · v{config.environment_version}</div>}
   <fieldset disabled={busy||!config} className="space-y-3">
    <legend className="mb-3 text-sm font-medium">Datasets · {selected.length} selected</legend>
    <p className="text-sm text-muted-foreground">Choose from the datasets saved in Target configuration. Versions, environment and scorers are fixed by that configuration.</p>
@@ -48,13 +53,13 @@ export function TriggerTargetDialog({targetId,onClose,onStarted}:{targetId:strin
     if(!d)return <p key={ref.dataset_id} role="alert">Configured dataset {ref.dataset_id} is unavailable. Update Target configuration.</p>;
     const selection=selected.find(s=>s.dataset_id===d.id);
     const version=d.versions.find(v=>v.version===ref.dataset_version);
-    return <div key={d.id} className="space-y-3 rounded-lg border p-4">
+    return <div key={d.id} className="space-y-3 rounded-lg border p-3">
      <div className="flex items-center justify-between gap-4"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!selection} disabled={!selection&&selected.length>=20} onChange={e=>{
       setSelected(rows=>e.target.checked?[...rows,{dataset_id:d.id,dataset_version:ref.dataset_version}]:rows.filter(s=>s.dataset_id!==d.id));key.current=crypto.randomUUID();
      }}/>{d.draft.name}</label>
      <span className="text-sm text-muted-foreground">v{ref.dataset_version}</span></div>
      <p className="text-sm">{version?.objective||'No evaluation purpose defined.'}</p>
-     <p className="text-xs text-muted-foreground">Scorers: {(config?.scorer_selection==='dataset'?version?.scorerIds:config?.scorer_ids)?.map(id=>state.scorers.find(s=>s.id===id)?.draft.name??id).join(', ')||'None configured'}</p>
+     <p className="text-xs text-muted-foreground">Scorers: {config?.guardrail_bindings?.find(b=>b.dataset_id===d.id) ? (()=>{const b=config.guardrail_bindings!.find(b=>b.dataset_id===d.id)!;return `${state.scorers.find(s=>s.id===b.scorer_id)?.draft.name??b.scorer_id} · v${b.scorer_version} · ${b.aspect_name}`;})() : (config?.scorer_selection==='dataset'?version?.scorerIds:config?.scorer_ids)?.map(id=>state.scorers.find(s=>s.id===id)?.draft.name??id).join(', ')||'None configured'}</p>
      {selection&&version&&config?.data_source==='upload'&&<DatasetUpload projectId={projectId} selection={selection} schema={version} onReady={ready}/>}
     </div>;
    })}

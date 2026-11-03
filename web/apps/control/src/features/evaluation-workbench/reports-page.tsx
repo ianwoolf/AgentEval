@@ -1,4 +1,6 @@
+import {TraceViewer} from './trace-viewer';
 import {aspectLabels} from "./criteria";
+import {GuardrailReport} from './guardrail-report';
 import { ReportConfig } from "./report-config";
 import { useEffect, useState } from "react";
 import { useCurrentProjectId } from "@/hooks/use-project";
@@ -603,20 +605,22 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
   const scorerKeys = [...new Set(datasetSummaries.flatMap(d=>d.scores.map(s=>JSON.stringify([s.scorer_id,s.scorer_version]))))];
   return <Frame title={run.name} description="Live evaluation · Persisted sample results">
     <div className="flex items-center justify-between"><Button variant="ghost" onClick={onBack}><ArrowLeft/>All reports</Button><Pill>{run.status}</Pill></div>
-    <Tabs items={['Overview','Samples','Configuration']} active={reportTab} onChange={setReportTab}/>
+    <Tabs items={['Overview','Samples','Traces','Configuration']} active={reportTab} onChange={setReportTab}/>
+    {reportTab==='Traces'&&<TraceViewer evaluationId={remote.experiment_id} running={run.status==='RUNNING'}/>}
+    {reportTab==='Overview'&&remote.execution_mode==='guardrail'&&<GuardrailReport evaluationId={remote.experiment_id} running={run.status==='RUNNING'}/>}
     {error&&<div role="alert" className="text-sm text-destructive">Sample loading failed: {error} <Button variant="outline" onClick={()=>setRetry(v=>v+1)}>Retry</Button></div>}
-    {reportTab==='Overview'&&<section className="space-y-2"><h2 className="font-semibold">Results by dataset and aspect</h2><p className="text-xs text-muted-foreground">Aspect score = sample pass rate across all required scorers. Scorer score = mean on a 0–1 scale. Errors count as not passed.</p>
+    {reportTab==='Overview'&&remote.execution_mode!=='guardrail'&&<section className="space-y-2"><h2 className="font-semibold">Results by dataset and aspect</h2><p className="text-xs text-muted-foreground">Aspect score = sample pass rate across all required scorers. Scorer score = mean on a 0–1 scale. Errors count as not passed.</p>
     <Table><thead><tr><th>Dataset</th><th>Aspect</th><th>Aspect score</th><th>Scorer · version</th><th>Scorer score</th><th>Evidence</th></tr></thead><tbody>{aspectReport.bindings.map(b=>{const d=datasetSummaries.find(d=>d.dataset_id===b.dataset_id);const a=aspectReport.dataset_aspects?.find(a=>a.dataset_id===b.dataset_id&&a.aspect===b.aspect);const score=d?.scores.find(s=>s.scorer_id===b.id&&(!s.scorer_version||String(s.scorer_version)===String(b.version)));return <tr key={b.dataset_id+b.id}><td>{d?.name??remote.datasets?.find(d=>d.dataset_id===b.dataset_id)?.name??b.dataset_id}</td><td>{aspectLabels[b.aspect as keyof typeof aspectLabels]??'Unclassified'}</td><td>{a?.pass_rate==null?'—':`${(a.pass_rate*100).toFixed(1)}%`}<p className="text-xs text-muted-foreground">{a?`${a.passed}/${a.evaluated} passed · ${a.source}`:'Not evaluated'}</p></td><td>{b.name} · v{b.version??'?'}</td><td>{score?score.average.toFixed(3):'—'}</td><td><Button variant="link" onClick={()=>{setDatasetFilter(b.dataset_id);setReportTab('Samples');}}>View samples</Button></td></tr>;})}</tbody></Table>
     {!aspectReport.bindings.length&&<p className="text-sm text-muted-foreground">Historical scorer definitions unavailable. {remote.scorer_ids.join(', ')} — unclassified.</p>}
     </section>}
     {reportTab==='Configuration'&&<details open className="rounded-lg border p-3"><summary className="cursor-pointer text-sm">Recorded scoring configuration</summary>{aspectReport.bindings.map(b=><details key={b.dataset_id+b.id} className="mt-2 text-xs"><summary>{b.name} · v{b.version??'?'} · {b.dataset_id}</summary><pre className="max-h-60 overflow-auto whitespace-pre-wrap">{JSON.stringify(b.definition,null,2)}</pre></details>)}</details>}
     {remote.feature_modes?.scoring_enabled === false && <p role="status" className="rounded-lg border border-amber-500/30 p-3 text-sm">Demo scores — illustrative only. These results do not measure evaluation quality.</p>}
-    {reportTab==='Overview'&&remote.feature_modes?.effective_reflection_mode === 'mock' && <details aria-label="Reflection" className="rounded-lg border p-3 space-y-2"><summary className="cursor-pointer text-sm">Demo reflection</summary>
+    {reportTab==='Overview'&&remote.execution_mode!=='guardrail'&&remote.feature_modes?.effective_reflection_mode === 'mock' && <details aria-label="Reflection" className="rounded-lg border p-3 space-y-2"><summary className="cursor-pointer text-sm">Demo reflection</summary>
       <h2 className="font-medium">Reflection</h2>
       <p className="text-sm text-muted-foreground">Demo reflection — illustrative only</p>
       <p className="text-sm">This report demonstrates how findings and recommendations will appear. Review sample evidence and scoring criteria before drawing quality conclusions.</p>
     </details>}
-    {reportTab==='Overview'&&<section aria-label="Evaluation overview" className="overflow-hidden rounded-xl border bg-card">
+    {reportTab==='Overview'&&remote.execution_mode!=='guardrail'&&<section aria-label="Evaluation overview" className="overflow-hidden rounded-xl border bg-card">
       <div role="status" aria-live="polite" className="flex flex-wrap items-center justify-between gap-3 border-b bg-muted/20 px-4 py-3">
         <div className="flex flex-wrap items-center gap-3"><Pill tone={run.status==='COMPLETED'?'good':run.status==='FAILED'?'bad':'neutral'}>{run.status === "RUNNING" ? remote.phase : run.status}</Pill><h2 className="text-sm font-medium">{run.status === "RUNNING" ? "Evaluation in progress" : run.status === "FAILED" ? "Evaluation failed" : run.status === "CANCELLED" ? "Evaluation cancelled" : "Evaluation completed"}</h2></div>
         <span className="text-xs text-muted-foreground">{remote.completed}{remote.sample_count!==undefined?` / ${remote.sample_count}`:''} samples processed{run.status==='RUNNING'?' · Refreshes every 3 seconds':''}</span>

@@ -92,7 +92,7 @@ export function validateEnvironment(config: EnvironmentConfig) {
 export function validateScorerSource(d: Scorer["draft"]) {
   const repo = d.repoUrl?.trim() ?? "";
   if (
-    !/^(https?:\/\/[^\s/]+\/\S+|ssh:\/\/[^\s/]+\/\S+|[^\s@]+@[^\s:]+:\S+)$/.test(
+    repo !== "local-fixture://guardrail-scorer-git" && !/^(https?:\/\/[^\s/]+\/\S+|ssh:\/\/[^\s/]+\/\S+|[^\s@]+@[^\s:]+:\S+)$/.test(
       repo,
     )
   )

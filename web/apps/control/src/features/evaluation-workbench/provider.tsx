@@ -14,7 +14,7 @@ import { executionApi, executionPages, fromRemote, type RemoteRun } from "./remo
 import { evaluationRuntime } from './runtime';
 const initialState = () => ({ ...createFixtures(), ...(evaluationRuntime().standalone ? {evaluations: []} : {}), datasets: [], environments: [], targets: [], scorers: [] });
 const Context = createContext<{
-  archiveResource(collection:"datasets"|"scorers"|"environments",id:string):Promise<void>;
+  archiveResource(collection:"datasets"|"scorers"|"environments"|"targets",id:string):Promise<void>;
   state: WorkbenchState;
   setState: Dispatch<SetStateAction<WorkbenchState>>;
   saveScorer(scorer: Scorer): Promise<Scorer>;
@@ -104,7 +104,7 @@ export function WorkbenchProvider({ children }: { children: ReactNode }) {
       ? s.targets.map(t=>t.id===saved.id?saved:t) : [...s.targets,saved]}));
     return saved;
   }
-  async function archiveResource(collection:"datasets"|"scorers"|"environments",id:string) {
+  async function archiveResource(collection:"datasets"|"scorers"|"environments"|"targets",id:string) {
     await executionApi(projectId,`catalog/${collection}/${encodeURIComponent(id)}`,{method:'DELETE'});
     setState(s=>({...s,[collection]:s[collection].filter(v=>v.id!==id)}));
   }

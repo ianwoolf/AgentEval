@@ -154,3 +154,61 @@ Target configuration now owns a multi-select `datasets` list with pinned version
 Trigger defaults to all configured selections and permits only a nonempty subset;
 versions cannot be changed in Trigger. The target trigger API rejects unconfigured
 dataset/version pairs, including for legacy single-dataset configurations.
+
+
+### 2026-11-02: Guardrail 专项评测设计与实施入口
+
+用户已授权实施。已完成基础数据契约/统计函数和示例 scorer；独立 mock Guardrail 已部署。主链路与专项 UI 尚未完成，当前页面不会出现专项改版。
+
+- 设计：[Guardrail 专项评测](designs/2026-11-02-guardrail-evaluation.md)。
+- 进度与恢复：[实施计划](designs/2026-11-02-guardrail-evaluation-plan.md)。
+- 最新配置、测试证据与待办以实施计划的“当前运行配置与用户可见状态”一节为准。下一步补齐发布绑定/Git artifact readiness，再接 Trigger/proxy/runner/report/UI。
+- 实施时每完成一个子任务就更新台账；中断前记录下一操作、测试、部署及未提交状态。
+- 本专项 Trigger 选择 target + datasets + environment；dataset 自带 scorer/aspect。普通 dataset 不变。
+- 注意 model=none 不能跳过 Guardrail 调用；Git scorer 必须与持有 token 的 proxy 隔离。
+- 本节和新设计优先于旧文档中本专项的 dataset 子集限制、共享 scorer 或纯通过率描述。
+
+- 当前 UI/API/runner 镜像仍为 update-score-20261102；独立 mock 镜像为 evaluation-mock-guardrail:scan-20261102。
+- Mock ID=mock-guardrail，集群 Service evaluation-mock-guardrail:8002，路径 /runtime/v1/endpoints/mock-guardrail/backend/v1/scans。
+- Mock token 已存在 Kubernetes Secret evaluation-mock-guardrail/token，不在文档保存明文。
+- mock/scorer 可先用于联调，无需等待真实服务；当前尚未建立专项 target/dataset/scorer/environment 关联，model=none 要求尚未接入专项 runner。
+
+
+### 2026-11-03 · Guardrail mock 端到端已打通
+
+最新状态见实施计划末尾 2026-11-03 日志。Mock Guardrail Scan 的紧凑 Trigger 与报告已部署，浏览器触发 8 条样本完成；API/runner guardrail-20261103，UI guardrail-20261103-r3。通用 Git 构建和专用 dataset 创建编辑仍待完成。不要按旧段落认定 UI 未部署，也不要把本次 mock 验收当成全部设计完成。
+
+
+### 2026-11-03 Git scorer configuration alignment
+
+Added Git execution metadata (repository/full commit/script/timeout), UI verification, backend source/type consistency checks, deployed-artifact verification on new version publication, and commit verification for every execution. A deployment registry (`EVAL_GIT_SCORER_ARTIFACTS`) resolves source identity to a separately deployed service. The existing fixture remains available through its previous URL/commit configuration. Git Scan classification draft migrated and v2 published; published v1 remains immutable. Direct Guardrail binding resolution now reads pinned scorer versions rather than accepting only the hardcoded fixture version, with explicit legacy v1 compatibility.
+
+This is a predeployed artifact implementation: no automatic remote Git clone, source inspection, image build, dependency installation, or deployment. Registry source identity is operator-attested; health checks verify the service commit. Do not describe it as validating a live Git remote/script. General numeric scoring expects score/reason; Guardrail artifacts return classification fields.
+
+Local API and future workers: evaluation-worker:git-execution-20261103-r2; UI: evaluation-ui:git-execution-20261103. Fixed source overlay deployment by setting PYTHONPATH=/app/src; earlier overlay images without this setting still loaded the installed package. Backend regressions: 196 passed, 5 skipped. UI production build passed. Artifact verification and new v2 binding resolution passed. Actual Kubernetes run eval-ae924cf060bd895157c58e2e completed 8/8 against the existing dataset-pinned v1; stored report exp-ae924cf060bd895157c58e2eb5e131b1 contains two aspects, each TP/FP/TN/FN=1 and errors=0. The full-run acceptance is legacy compatibility; v2 resolution was verified separately.
+
+
+### 2026-11-03 Runner-local Git correction (supersedes predeployed artifact design above)
+
+Git scoring now fetches the pinned repository/commit inside the runner, caches source per process, and executes Python JSON stdin/stdout scripts per sample with timeout and a clean environment. API verification fetches source and checks script existence without executing it. Both generic scoring and Guardrail use git_scorers.execute; no scorer HTTP service or artifact registry remains in the runtime. Public HTTPS repositories supported; private Git credentials/dependency installation not implemented. Container is the execution boundary, not a hardened untrusted-code sandbox. Git fetch/script failure points log events. Backend regression tests: 196 passed, 5 skipped, including actual local HTTP Git fetch, commit/path failure, checkout reuse, credential env removal, and timeout. UI build passed.
+
+Local images: evaluation-worker:runner-git-20261103-r2; evaluation-ui:runner-git-20261103. Mock Git source is evaluation-scorer-git:20261103, served by evaluation-scorer-git:8080/scorer.git. It is a Git source server only. Old evaluation-guardrail-scorer-79fe034 was stopped before acceptance. New actual run eval-d4e825aec0d9e0131ae80033 / experiment exp-d4e825aec0d9e0131ae800332fcc858c confirms worker git.scorer.fetch and git.scorer.execute events. Final report verified COMPLETED, 8/8 processed, 0 errors; injection and benign aspects each TP/FP/TN/FN=1. Old scorer HTTP Deployment/Service and obsolete manifest removed after successful acceptance.
+
+
+### 2026-11-03 Runner SSH Git support
+
+Added EVAL_GIT_SSH_SECRET_NAME, EVAL_GIT_SSH_SECRET_KEY and EVAL_GIT_SSH_KNOWN_HOSTS_CONFIGMAP to the API ConfigMap; Job builder projects selected Secret entry and trusted known_hosts ConfigMap into runner read-only volumes. Private key is not mounted into the API or placed in a ConfigMap/image. SSH URLs supported, host-key verification remains enabled, temporary key mode0600, clean scorer subprocess env. API SSH verification explicitly defers checkout checks to runner. Images include openssh-client. Regression: 198 passed, 5 skipped. Deployed API/future runner image evaluation-worker:runner-ssh-20261103.
+
+Created/pushed backend branch codex/git-scorer-ssh-fixture, commit 04d17e4876856417a801b500d23507976d4aafc4, containing scripts/git-scorer-fixtures/scan_classification.py plus README and exact Git/Docker exclusions for .test/test_rsa and .test/test_rsa.pub. Existing implementation changes remain uncommitted in the working tree. Neither key is tracked or published. Created evaluation-git-ssh Secret from the user's local private-key file and evaluation-git-known-hosts ConfigMap using preexisting trusted GitHub entries.
+
+Git Scan classification v3 pins this SSH source/commit. Acceptance dataset guardrail-ssh-acceptance-060eee81 pins v3. Actual Job eval-4cd4f1eccaa8ccd92279ab8c / experiment exp-4cd4f1eccaa8ccd92279ab8c37a200ed: logs verify GitHub SSH fetch completed once and four script executions completed. Final stored report verified COMPLETED, 4/4 processed, errors=0, TP/FP/TN/FN each 1.
+
+
+### 2026-11-03 Retire local Git fixture source
+
+Migrated all current dataset drafts/latest versions referencing Git Scan classification v1/v2 to v3. Published guardrail-benign-demo v2 and guardrail-injection-demo v3. No current Target configs needed pin changes. Historical versions remain immutable; rerunning old local-fixture versions requires migration to the latest dataset version. Removed evaluation-scorer-git Deployment/Service, its manifest, and EVAL_GIT_FIXTURE_URL/EVAL_GUARDRAIL_SCORER_COMMIT from the active API ConfigMap and services.yaml. Migration backup: data/local-deploy/before-scorer-v3-migration.json in the UI workspace.
+
+
+## 2026-11-03: unified Dataset-first workflow
+
+Implemented Dataset publication independent of scorer, evaluation-owned pinned dataset/scorer/aspect bindings, atomic Configure and subset-only Trigger. See [workflow-unification.md](workflow-unification.md) for storage/API changes, deployment images and two successful real Runner acceptance runs. Docker Hub 2.3.2 remains the previous release.

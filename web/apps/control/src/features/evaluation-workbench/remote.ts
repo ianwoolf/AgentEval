@@ -2,6 +2,7 @@ import { getAuthToken } from "@/lib/auth-token";
 import type { Evaluation, EvaluationSnapshot } from "./contracts";
 import { evaluationRuntime } from './runtime';
 export interface RemoteRun {
+  execution_mode?: 'legacy' | 'guardrail';
   feature_modes?: {scoring_enabled:boolean;reflection_enabled:boolean;effective_reflection_mode:'real'|'mock'};
   datasets?: Array<{dataset_id:string;dataset_version:number;name:string;sample_count:number;objective?:string;scorer_ids?:string[]}>;
   scorer_selection?: 'shared'|'dataset';
@@ -42,9 +43,16 @@ export async function executionPages<T>(project: string, path: string): Promise<
 }
 
 export interface TargetRunConfig {
+ execution_mode?: 'legacy'|'guardrail';
+ guardrail_bindings?: EvaluationBinding[];
  scorer_selection?: 'shared'|'dataset';
  datasets?: Array<{dataset_id:string;dataset_version:number}>;
  id: string; revision: string; dataset_id: string; dataset_version: number;
  environment_id: string; environment_version: number; model_id: string;
  data_source: "published" | "upload"; scoring_mode: "mock" | "installed"; scorer_ids: string[];
+}
+
+export interface EvaluationBinding {
+ dataset_id:string; dataset_version:number; scorer_id:string; scorer_version:number;
+ aspect_id:string; aspect_name:string; label_mapping:Record<string,'safe'|'unsafe'>;
 }

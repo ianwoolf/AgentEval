@@ -29,6 +29,7 @@ export function DatasetsPage() {
   const { state, saveDataset } = useWorkbench();
   const [selected, setSelected] = useState<Dataset | null>(null);
   const [search, setSearch] = useState("");
+  const [targetFilter, setTargetFilter] = useState("");
   const save = (dataset: Dataset) => saveDataset(dataset);
   if (selected)
     return (
@@ -39,7 +40,9 @@ export function DatasetsPage() {
         onBack={() => setSelected(null)}
       />
     );
+  const usedBy = (id:string) => state.targets.filter(t=>t.evaluation_config?.datasets?.some(d=>d.dataset_id===id));
   const datasets = state.datasets.filter((d) =>
+    (!targetFilter || (targetFilter === "__unassigned" ? !usedBy(d.id).length : usedBy(d.id).some(t=>t.id===targetFilter))) &&
     `${d.draft.name} ${d.draft.objective} ${d.draft.tags.join(" ")}`
       .toLowerCase()
       .includes(search.toLowerCase()),
@@ -87,6 +90,7 @@ export function DatasetsPage() {
         </Button>
       }
     >
+      <div className="flex flex-wrap items-center gap-3">
       <Input
         aria-label="Search datasets"
         placeholder="Search name, objective or tags…"
@@ -94,6 +98,13 @@ export function DatasetsPage() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+      <Select aria-label="Filter by evaluation" className="w-64" value={targetFilter} onChange={(e) => setTargetFilter(e.target.value)}>
+        <option value="">All evaluations</option>
+        <option value="__unassigned">Not used by an evaluation</option>
+        {state.targets.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+      </Select>
+      <span className="text-xs text-muted-foreground">{datasets.length} datasets</span>
+      </div>
       {datasets.length ? (
         <Table>
           <thead>
@@ -102,8 +113,8 @@ export function DatasetsPage() {
               <th>Purpose & acceptance criteria</th>
               <th>Draft records</th>
               <th>Published</th>
+              <th>Used by evaluations</th>
               <th>Tags</th>
-              <th>Assigned scorers</th>
               <th />
             </tr>
           </thead>
@@ -126,7 +137,7 @@ export function DatasetsPage() {
                     </div>
                   </div>
                 </td>
-                <td className="min-w-80 max-w-lg"><p className="mb-3 font-medium">{d.draft.objective}</p><p className="text-xs text-muted-foreground">Coverage: {datasetCoverage(d.draft,state.scorers).join(", ")||"No scorers assigned"}</p></td>
+                <td className="max-w-sm"><p className="font-medium">{d.draft.objective}</p><p className="text-xs text-muted-foreground">{d.draft.evaluation_type==='guardrail'?'Guardrail classification':'Generic'}</p></td>
                 <td>{d.draft.rows.length}</td>
                 <td>
                   <Pill>
@@ -135,10 +146,8 @@ export function DatasetsPage() {
                       : "Draft only"}
                   </Pill>
                 </td>
-                <td>{d.draft.tags.join(", ") || "—"}</td>
-                <td>{d.draft.scorerIds?.length
-                  ? d.draft.scorerIds.map((id) => state.scorers.find((s) => s.id === id)?.draft.name ?? `${id} (missing from catalog)`).join(", ")
-                  : "No scorers assigned"}</td>
+                <td><div className="flex flex-wrap gap-1">{usedBy(d.id).map(t=><Pill key={t.id}>{t.name}</Pill>)}{!usedBy(d.id).length&&'—'}</div></td>
+                <td><TagBadges tags={d.draft.tags}/></td>
                 <td>
                   <Button variant="ghost" onClick={() => setSelected(clone(d))}>
                     Manage
@@ -168,7 +177,8 @@ function DatasetEditor({
 }) {
   const { state } = useWorkbench();
   const [dataset, setDataset] = useState(() => clone(initial));
-  const [tab, setTab] = useState("Overview");
+  const [tab, setTab] = useState("Configuration");
+  const [tagsText, setTagsText] = useState("");
   const [metadata, setMetadata] = useState(
     JSON.stringify(initial.draft.metadata, null, 2),
   );
@@ -205,11 +215,12 @@ function DatasetEditor({
       }
       let next = {
         ...dataset,
-        draft: { ...d, name: d.name.trim(), metadata: parsed },
+        draft: { ...d, name: d.name.trim(), metadata: parsed, tags: Array.from(new Set([...d.tags, ...tagsText.split(",").map((tag) => tag.trim()).filter(Boolean)])) },
       };
       if (publish) next = publishDataset(next);
       const saved = await onSave(next);
       setDataset(saved);
+      setTagsText("");
       setError("");
       setNotice(
         publish
@@ -251,36 +262,38 @@ function DatasetEditor({
       )}
       <Tabs
         items={[
-          "Overview",
-          "Fields",
-          "Scorers",
-          `Data (${d.rows.length})`,
+          "Configuration",
+          "Data & fields",
           `Versions (${dataset.versions.length})`,
         ]}
         active={
           tab.startsWith("Data")
-            ? `Data (${d.rows.length})`
+            ? "Data & fields"
             : tab.startsWith("Versions")
               ? `Versions (${dataset.versions.length})`
               : tab
         }
         onChange={setTab}
       />
-      {tab === "Overview" && (
-        <div className="grid max-w-4xl gap-5 sm:grid-cols-2">
+      {tab === "Configuration" && (
+        <div className="grid max-w-5xl gap-3 sm:grid-cols-2">
+          <Field label="Evaluation type" hint="Publish data first. Select scorers and aspects later in Evaluation Configure."><Select value={d.evaluation_type??'generic'} onChange={e=>update({evaluation_type:e.target.value as 'generic'|'guardrail',guardrail:undefined,scorerIds:[]})}><option value="generic">Generic</option><option value="guardrail">Guardrail classification</option></Select></Field>
+          {d.evaluation_type==='guardrail'&&<div className="self-end"><Button variant="outline" onClick={()=>update({fields:[{name:'input',role:'input',type:'string',required:true,description:''},{name:'label',role:'reference',type:'string',required:true,description:''},{name:'strategy',role:'metadata',type:'string',required:true,description:''}]})}>Use input / label / strategy fields</Button></div>}
           <Field label="Name *">
             <Input
               value={d.name}
               onChange={(e) => update({ name: e.target.value })}
             />
           </Field>
-          <Field label="Tags" hint="Separate tags with commas.">
-            <Input
-              value={d.tags.join(", ")}
-              onChange={(e) =>
-                update({ tags: e.target.value.split(",").map((t) => t.trim()) })
-              }
-            />
+          <Field label="Tags" hint="Press Enter or comma to add. Paste comma-separated tags.">
+            <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5 focus-within:ring-2 focus-within:ring-primary/30">
+              <TagBadges tags={d.tags} onRemove={(tag) => update({tags: d.tags.filter(t => t !== tag)})} />
+              <input aria-label="Add tag" className="min-w-24 flex-1 bg-transparent text-sm outline-none" placeholder="Add tag…" value={tagsText}
+                onChange={e => {setTagsText(e.target.value); setNotice("Unsaved draft changes");}}
+                onKeyDown={e => {if (e.key === "Enter" || e.key === ",") {e.preventDefault(); update({tags: Array.from(new Set([...d.tags, ...tagsText.split(",").map(t => t.trim()).filter(Boolean)]))}); setTagsText("");}}}
+                onBlur={() => {if(tagsText.trim()) {update({tags: Array.from(new Set([...d.tags, ...tagsText.split(",").map(t => t.trim()).filter(Boolean)]))}); setTagsText("");}}}
+              />
+            </div>
           </Field>
           <div className="sm:col-span-2">
             <Field
@@ -293,18 +306,16 @@ function DatasetEditor({
               />
             </Field>
           </div>
-          <div className="sm:col-span-2">
+          <details className="sm:col-span-2 rounded border p-3"><summary className="cursor-pointer text-xs font-medium">Description & advanced metadata</summary>
             <Field label="Description">
               <Textarea
                 value={d.description}
                 onChange={(e) => update({ description: e.target.value })}
               />
             </Field>
-          </div>
-          <div className="sm:col-span-2">
             <Field label="Custom metadata (JSON object)">
               <Textarea
-                className="min-h-32 font-mono text-xs"
+                className="min-h-20 font-mono text-xs"
                 value={metadata}
                 onChange={(e) => {
                   setMetadata(e.target.value);
@@ -312,10 +323,10 @@ function DatasetEditor({
                 }}
               />
             </Field>
-          </div>
+          </details>
         </div>
       )}
-      {tab === "Fields" && (
+      {tab === "Data & fields" && (
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Fields define the import schema. Renaming a field does not rewrite
@@ -430,41 +441,6 @@ function DatasetEditor({
             <Plus />
             Add field
           </Button>
-        </div>
-      )}
-      {tab === "Scorers" && (
-        <div className="max-w-4xl space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Choose the checks this dataset should run. Each scorer explains the behavior, expected outcome and evidence it needs. Dataset-specific mode requires at least one scorer.
-            Save the draft, then publish a version to use these choices in Eval.
-            Real scoring requires an installed compatible engine. Demo scoring produces illustrative values.
-          </p>
-          {(d.scorerIds??[]).filter(id=>!state.scorers.some(s=>s.id===id)).map(id=><div key={id} className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/40 p-3"><div><p className="font-mono text-sm">{id} · Missing from catalog</p><p className="text-xs text-muted-foreground">Legacy or demo reference. No current scoring definition is available. Remove it or select a published scorer below, then save the draft.</p></div><Button variant="outline" onClick={()=>update({scorerIds:(d.scorerIds??[]).filter(v=>v!==id)})}>Remove missing reference</Button></div>)}
-          {state.scorers.map((scorer) => (
-            <label key={scorer.id} className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 text-sm">
-              <input
-                type="checkbox"
-                disabled={!scorer.versions.length || !scorer.enabled}
-                className="mt-1"
-                checked={d.scorerIds?.includes(scorer.id) ?? false}
-                onChange={(e) => update({ scorerIds: e.target.checked
-                  ? [...(d.scorerIds ?? []), scorer.id]
-                  : (d.scorerIds ?? []).filter((id) => id !== scorer.id) })}
-              />
-              <span className="flex-1">
-                <span className="font-medium">{scorer.draft.name}</span>
-                <span className="mt-1 block text-muted-foreground">{scorer.draft.description}</span><CriteriaSummary criteria={scorer.draft.criteria}/>
-              </span>
-              <Select aria-label={`Version for ${scorer.draft.name}`} value={String((d.metadata.evaluation as {scorers?:Record<string,{version?:string}>}|undefined)?.scorers?.[scorer.id]?.version??scorer.versions.at(-1)?.version??'')} onChange={e=>{
-                const current=JSON.parse(metadata); const evaluation=current.evaluation??{};const scorers=evaluation.scorers??{};
-                const v=scorer.versions.find(v=>String(v.version)===e.target.value);
-                const next={...current,evaluation:{...evaluation,scorers:{...scorers,[scorer.id]:{...scorers[scorer.id],version:e.target.value,threshold:v?.threshold??.8}}}};
-                update({metadata:next});setMetadata(JSON.stringify(next,null,2));
-              }}>{scorer.versions.map(v=><option key={v.version} value={v.version}>v{v.version}</option>)}</Select>
-              <Pill>{!scorer.enabled ? "Disabled" : scorer.versions.length ? `v${scorer.versions.at(-1)!.version}` : "Draft only"}</Pill>
-            </label>
-          ))}
-          {!state.scorers.length && <Empty>Create a scorer in Scorers to configure this dataset.</Empty>}
         </div>
       )}
       {tab.startsWith("Data") && (
@@ -640,4 +616,8 @@ function DatasetEditor({
       )}
     </Frame>
   );
+}
+
+function TagBadges({tags, onRemove}: {tags: string[]; onRemove?: (tag: string) => void}) {
+  return <div className="flex flex-wrap gap-1.5">{Array.from(new Set(tags.filter(Boolean))).map(tag => <span key={tag} className="inline-flex max-w-full items-center gap-1 rounded-md border border-primary/15 bg-primary/10 px-2 py-0.5 text-xs text-primary"><span className="break-all">{tag}</span>{onRemove && <button type="button" aria-label={`Remove tag ${tag}`} className="rounded px-1 hover:bg-primary/15 focus-visible:outline focus-visible:outline-2" onClick={() => onRemove(tag)}>×</button>}</span>)}</div>;
 }

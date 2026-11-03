@@ -32,3 +32,4 @@ web/.env
 # Presentation generation caches.
 /.codex-ppt/
 /output/.build/
+.test

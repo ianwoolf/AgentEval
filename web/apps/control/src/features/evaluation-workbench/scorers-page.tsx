@@ -1,3 +1,5 @@
+import {executionApi} from "./remote";
+import {useCurrentProjectId} from "@/hooks/use-project";
 import {DeleteResource} from './delete-resource';
 import {ExecutionEditor,defaultExecution} from "./execution-editor";
 import {aspectLabels} from "./criteria";
@@ -94,7 +96,7 @@ export function ScorersPage() {
             <th>Published</th>
             <th>Threshold</th>
             <th>Status</th>
-            <th>Datasets</th>
+            <th>Used by evaluations</th>
             <th />
           </tr>
         </thead>
@@ -135,7 +137,7 @@ export function ScorersPage() {
               <td>≥ {s.versions.at(-1)?.threshold ?? s.draft.threshold}</td>
               <td>
                 <Pill tone={s.enabled ? "good" : "neutral"}>
-                  {!s.enabled?"Disabled":s.draft.execution?"Configured":"Needs configuration"}
+                  {!s.enabled?"Disabled":s.draft.execution?(s.draft.execution.engine==="git"?"Git configured":"Configured"):"Needs configuration"}
                 </Pill>
               </td>
               <td><DatasetUsage datasets={state.datasets} scorerId={s.id} /></td>
@@ -176,24 +178,11 @@ export function ScorersPage() {
   );
 }
 function DatasetUsage({ datasets, scorerId }: { datasets: Dataset[]; scorerId: string }) {
-  const usage = datasets.flatMap((dataset) => {
-    const draft = dataset.draft.scorerIds?.includes(scorerId);
-    const versions = dataset.versions.filter((v) => v.scorerIds?.includes(scorerId));
-    return draft || versions.length ? [{ dataset, draft, versions }] : [];
-  });
-  return usage.length ? (
-    <ul className="space-y-2 text-sm">
-      {usage.map(({ dataset, draft, versions }) => (
-        <li key={dataset.id}>
-          <p className="font-medium">{dataset.draft.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {[...(draft ? ["Draft"] : []), ...versions.map((v) => `v${v.version}`)].join(" · ")}
-          </p>
-        </li>
-      ))}
-    </ul>
-  ) : <p className="text-sm text-muted-foreground">No explicit dataset links</p>;
+  const {state}=useWorkbench();
+  const usage=state.targets.flatMap(t=>(t.evaluation_config?.guardrail_bindings??[]).filter(b=>b.scorer_id===scorerId).map(b=>({target:t,binding:b})));
+  return usage.length ? <ul className="space-y-1 text-xs">{usage.map(({target,binding})=><li key={`${target.id}:${binding.dataset_id}`}><span className="font-medium">{target.name}</span> · {datasets.find(d=>d.id===binding.dataset_id)?.draft.name??binding.dataset_id} v{binding.dataset_version} · scorer v{binding.scorer_version}</li>)}</ul> : <p className="text-xs text-muted-foreground">Not used by a configured evaluation</p>;
 }
+
 function ScorerEditor({
   initial,
   onSave,
@@ -224,6 +213,7 @@ function ScorerEditor({
     setTestResult(null);
   };
   const [saving,setSaving]=useState(false);
+  const project=useCurrentProjectId();
   const [executionValid,setExecutionValid]=useState(true);
   const save = async (publish: boolean) => {
     setSaving(true);
@@ -232,6 +222,8 @@ function ScorerEditor({
       if (!d.name.trim()) throw new Error("Name is required.");
       if (!Number.isFinite(d.threshold) || d.threshold < 0 || d.threshold > 1)
         throw new Error("Threshold must be between 0 and 1.");
+      if(d.execution?.engine==='git')d.execution={...d.execution,repo_url:d.repoUrl??'',script_path:d.scriptPath??''};
+      if(publish && d.execution?.engine==='git')await executionApi(project,'scorers/actions/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
       if(publish && !d.execution) throw new Error("Configure an execution engine before publishing.");
       if(!d.criteria)scorer.draft.criteria={aspect:'custom',subject:'Target output',expectation:'Configured check passes',requirements:'Use executable configuration',evidence:'Configured inputs'};
       await onSave(publish ? publishScorer(scorer) : scorer);
@@ -256,7 +248,7 @@ function ScorerEditor({
       onClose={onClose}
     >
       <Tabs
-        items={["Definition", "Execution", "Versions", "Datasets"]}
+        items={["Definition", "Execution", "Versions", "Usage"]}
         active={tab}
         onChange={setTab}
       />
@@ -278,7 +270,7 @@ function ScorerEditor({
               }
             >
               <option value="LLM_JUDGE">LLM judge</option>
-              <option value="CODE" disabled>Python script (unavailable)</option>
+              <option value="CODE">Python script (Git)</option>
               <option value="RULE">Rule</option>
             </Select>
           </Field>
@@ -301,7 +293,7 @@ function ScorerEditor({
               <div className="sm:col-span-2">
                 <Field
                   label="Git repository *"
-                  hint="HTTPS or SSH Git address. This demo does not fetch repositories."
+                  hint="HTTPS or SSH Git address. The runner fetches the pinned commit for each evaluation."
                 >
                   <Input
                     placeholder="https://github.com/org/scorers.git"
@@ -313,7 +305,7 @@ function ScorerEditor({
               <div className="sm:col-span-2">
                 <Field
                   label="Script path *"
-                  hint="Relative to the repository root, e.g. scorers/guardrail.py. Inputs: input, output, reference. Output: score (0–1), reason."
+                  hint="Relative to the repository root, e.g. scorers/guardrail.py. Inputs: input, output, reference. Generic output: score (0–1), reason. Guardrail output: expected, predicted, outcome (TP/FP/TN/FN), reason."
                 >
                   <Input
                     placeholder="scorers/guardrail.py"
@@ -417,11 +409,10 @@ function ScorerEditor({
           ))}
         </div>
       )}
-      {tab === "Datasets" && (
+      {tab === "Usage" && (
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Datasets that explicitly select this scorer, including saved drafts and published versions.
-            Datasets allowing all scorers are not listed. Configure these links in Datasets → Scorers.
+            Read-only references from saved evaluation configurations. Pair datasets and scorers in Evaluation → Configure.
           </p>
           <DatasetUsage datasets={state.datasets} scorerId={scorer.id} />
         </div>

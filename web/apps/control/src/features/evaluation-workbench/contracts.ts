@@ -10,11 +10,20 @@ export interface Field {
   description: string;
 }
 export interface DatasetContent {
+  evaluation_type?: 'generic' | 'guardrail';
+  guardrail?: {
+    label_mapping: Record<string, 'safe' | 'unsafe'>;
+    scorer_id: string;
+    scorer_version: number;
+    aspect_id: string;
+    aspect_name: string;
+  };
   scorerIds?: string[];
   name: string;
   objective: string;
   description: string;
   tags: string[];
+  targets?: string[];
   metadata: Record<string, Value>;
   fields: Field[];
   rows: Row[];
@@ -80,6 +89,9 @@ export interface Scorer {
   versions: ScorerVersion[];
 }
 export interface Target {
+  evaluation_config?: import("./remote").TargetRunConfig;
+  guardrail_id?: string | null;
+  revision?: string;
   id: string;
   provider?: "f5" | "nemo guardrail";
   name: string;

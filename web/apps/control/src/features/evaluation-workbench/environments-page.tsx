@@ -13,7 +13,6 @@ import {
   JsonPreview,
   Modal,
   Pill,
-  Section,
   Select,
   Textarea,
 } from "./ui";
@@ -22,7 +21,7 @@ export const defaultEnvironment: EnvironmentConfig = {
   description: "",
   type: "SANDBOX",
   modelId: "glm-dev",
-  guardrailId: "guardrail-privacy",
+  guardrailId: "",
   runner: { id: "openshell", concurrency: 1 },
   network: [],
   readOnlyPaths: ["/app", "/datasets"],
@@ -49,11 +48,11 @@ export function EnvironmentsPage() {
         </Button>
       }
     >
-      <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-5">
+      <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
         <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" />
         <div>
           <h2 className="font-medium">Evaluation-managed traffic</h2>
-          <p className="mt-1 max-w-4xl text-sm leading-6 text-muted-foreground">
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
             LLM and Guardrail requests are designed to be intercepted and routed
             through the evaluation proxy for recording and controlled
             evaluation. CPU and memory are applied to the evaluation worker as both
@@ -62,17 +61,19 @@ export function EnvironmentsPage() {
           </p>
         </div>
       </div>
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid items-stretch gap-4 lg:grid-cols-2">
         {state.environments.map((env) => {
           const v = env.versions.at(-1)!;
           return (
-            <Section
-              key={env.id}
-              title={v.name}
-              description={v.description}
-              action={<Pill>Sandbox · v{v.version}</Pill>}
-            >
-              <div className="space-y-4">
+            <article key={env.id} className="flex min-w-0 flex-col overflow-hidden rounded-lg border bg-card">
+              <header className="border-b px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="min-w-0 truncate text-sm font-semibold" title={v.name}>{v.name}</h2>
+                  <span className="shrink-0"><Pill>Sandbox · v{v.version}</Pill></span>
+                </div>
+                <p className="mt-1 line-clamp-2 h-10 text-xs leading-5 text-muted-foreground" title={v.description}>{v.description || "No description"}</p>
+              </header>
+              <div className="flex flex-1 flex-col gap-3 px-4 py-3">
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div>
                     <p className="text-xs text-muted-foreground">CPU</p>
@@ -87,20 +88,20 @@ export function EnvironmentsPage() {
                     <p className="mt-1 font-medium">{v.timeoutSeconds}s</p>
                   </div>
                 </div>
-                <div className="space-y-2 border-y py-4 text-sm">
-                  <p className="flex items-center gap-2">
-                    <Network className="size-4 text-muted-foreground" />
+                <div className="space-y-1.5 border-y py-2.5 text-xs">
+                  <p className="flex items-start gap-2 break-words">
+                    <Network className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                     {v.network.length
                       ? `${v.network.length} allowed network hosts`
                       : "Network denied by default"}
                   </p>
-                  <p className="flex items-center gap-2">
-                    <FolderLock className="size-4 text-muted-foreground" />
+                  <p className="flex items-start gap-2 break-words">
+                    <FolderLock className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                     {v.readOnlyPaths.length} read-only ·{" "}
                     {v.writablePaths.length} writable paths
                   </p>
-                  <p className="flex items-center gap-2">
-                    <Terminal className="size-4 text-muted-foreground" />
+                  <p className="flex items-start gap-2 break-words">
+                    <Terminal className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                     {v.commands.join(", ") || "No process commands allowed"}
                   </p>
                 </div>
@@ -108,7 +109,7 @@ export function EnvironmentsPage() {
                   <Pill>LLM proxy</Pill>
                   <Pill>Guardrail proxy</Pill>
                 </div>
-                <div className="flex justify-end gap-2">
+                <div className="mt-auto flex flex-wrap justify-end gap-1 border-t pt-2">
                   <DeleteResource collection="environments" id={env.id} name={v.name}/><Button variant="ghost" onClick={() => setHistory(env)}>
                     Versions
                   </Button>
@@ -120,7 +121,7 @@ export function EnvironmentsPage() {
                   </Button>
                 </div>
               </div>
-            </Section>
+            </article>
           );
         })}
       </div>
@@ -162,6 +163,8 @@ function EnvironmentEditor({
   onSave(e: Environment): Promise<void>;
   onClose(): void;
 }) {
+  const { state } = useWorkbench();
+  const guardrails = state.targets.filter((target) => target.kind === "GUARDRAIL");
   const [config, setConfig] = useState<EnvironmentConfig>(() => {
     const value = clone(initial.versions.at(-1) ?? defaultEnvironment);
     return { ...value, runner: { ...value.runner, id: "openshell" } };
@@ -225,11 +228,20 @@ function EnvironmentEditor({
             <option value="none">none</option>
           </Select>
         </Field>
-        <Field label="Guardrail ID">
-          <Input
+        <Field label="Guardrail ID" hint="Choose a Guardrail target from the target catalog.">
+          <Select
             value={config.guardrailId ?? ""}
             onChange={(e) => patch({ guardrailId: e.target.value })}
-          />
+          >
+            <option value="" disabled>Select a Guardrail target</option>
+            {config.guardrailId && !guardrails.some((target) => target.id === config.guardrailId) && (
+              <option value={config.guardrailId} disabled>{config.guardrailId} (unavailable)</option>
+            )}
+            {guardrails.map((target) => (
+              <option key={target.id} value={target.id}>{target.name} · {target.id}</option>
+            ))}
+          </Select>
+          {!guardrails.length && <p className="text-xs text-muted-foreground">No Guardrail targets available. Add a target on the Evaluation page first.</p>}
         </Field>
         <Field label="执行环境">
           <Input value="OpenShell" disabled />
