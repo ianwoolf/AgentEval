@@ -1,3 +1,4 @@
+import {GuardrailScoreDashboard,type GuardrailSummary} from "./guardrail-score-dashboard";
 import {useEffect, useState} from 'react';
 import {useCurrentProjectId} from '@/hooks/use-project';
 import {executionApi, executionPages} from './remote';
@@ -21,6 +22,7 @@ const percent=(value:number|null)=>value==null?'—':`${(value*100).toFixed(1)}%
 
 export function GuardrailReport({evaluationId,running}:{evaluationId:string;running:boolean}) {
   const project=useCurrentProjectId();
+  const [reportSummary,setReportSummary]=useState<GuardrailSummary>({});
   const [bindings,setBindings]=useState<BindingResult[]>([]),[requests,setRequests]=useState<RequestEvidence[]>([]);
   const [binding,setBinding]=useState('ALL'),[outcome,setOutcome]=useState('ALL'),[strategy,setStrategy]=useState('ALL');
   const [detail,setDetail]=useState<RequestEvidence|null>(null),[error,setError]=useState('');
@@ -28,8 +30,9 @@ export function GuardrailReport({evaluationId,running}:{evaluationId:string;runn
     let active=true;let timer:ReturnType<typeof setTimeout>;
     async function refresh(){
       try {
-        const report=await executionApi<{binding_results?:BindingResult[]}>(project,`reports/${encodeURIComponent(evaluationId)}?limit=1`);
+        const report=await executionApi<GuardrailSummary & {binding_results?:BindingResult[]}>(project,`reports/${encodeURIComponent(evaluationId)}?limit=1`);
         if(!active)return;
+        setReportSummary(report);
         setBindings(report.binding_results??[]);
         if(report.binding_results?.length){
           const rows=await executionPages<RequestEvidence>(project,`experiments/${encodeURIComponent(evaluationId)}/samples`);
@@ -50,9 +53,10 @@ export function GuardrailReport({evaluationId,running}:{evaluationId:string;runn
   return <section className="space-y-3" aria-label="Guardrail results">
     <div className="flex items-center justify-between"><h2 className="font-semibold">Guardrail aspects</h2><span className="text-xs text-muted-foreground">{running?'Provisional results · ':''}Cost is mock · Positive means unsafe</span></div>
     <ErrorText message={error}/>
-    <Table><thead><tr><th>Aspect / dataset</th><th>Scorer</th><th>Progress</th><th>TP</th><th>FP</th><th>TN</th><th>FN</th><th>Errors</th><th>F1</th><th>P95</th><th>Cost (mock)</th></tr></thead>
+    <GuardrailScoreDashboard report={reportSummary} evaluationId={evaluationId}/>
+    <details className="rounded-lg border px-3 py-2"><summary className="cursor-pointer text-xs font-medium">Aspect breakdown · {bindings.length} bindings</summary><div className="mt-2"><Table><thead><tr><th>Aspect / dataset</th><th>Scorer</th><th>Progress</th><th>TP</th><th>FP</th><th>TN</th><th>FN</th><th>Errors</th><th>F1</th><th>P95</th><th>Cost (mock)</th></tr></thead>
       <tbody>{bindings.map(b=><tr key={b.binding_id}><td><Button variant="link" onClick={()=>setBinding(b.binding_id)}>{b.aspect_name}</Button><p className="text-xs text-muted-foreground">{b.dataset_id} · v{b.dataset_version}</p></td><td>{b.scorer_id} · v{b.scorer_version}</td><td>{b.processed}/{b.processed+b.pending}</td><td>{b.TP}</td><td>{b.FP}</td><td>{b.TN}</td><td>{b.FN}</td><td>{b.errors}</td><td>{percent(b.f1)}</td><td>{b.latency.p95_ms==null?'—':`${b.latency.p95_ms.toFixed(1)} ms`}</td><td>${b.cost.amount.toFixed(4)}</td></tr>)}</tbody>
-    </Table>
+    </Table></div></details>
     <div className="flex flex-wrap gap-2">
       <Select aria-label="Guardrail aspect" value={binding} onChange={e=>setBinding(e.target.value)}><option value="ALL">All aspects</option>{bindings.map(b=><option key={b.binding_id} value={b.binding_id}>{b.aspect_name} · {b.dataset_id}</option>)}</Select>
       <Select aria-label="Classification" value={outcome} onChange={e=>setOutcome(e.target.value)}>{['ALL','TP','FP','TN','FN','ERROR'].map(v=><option key={v} value={v}>{v==='ALL'?'All outcomes':v}</option>)}</Select>

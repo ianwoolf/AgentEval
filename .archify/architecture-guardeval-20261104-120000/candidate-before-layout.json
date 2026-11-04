@@ -1,0 +1,548 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "AgentEval · Guardrail 测评架构与数据流",
+    "locale": "zh-CN",
+    "output": ".archify/architecture-guardeval-20261104-120000/guardrail-evaluation.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@github.com:ianwoolf/AgentEval.git",
+      "revision": "4952ead4d97c558f3b5e8d78553d28a9a71dc23d",
+      "link_mode": "local-only"
+    },
+    "views": [
+      {
+        "id": "evaluation",
+        "label": "执行与打分",
+        "focus": [
+          "ui",
+          "api",
+          "runtime",
+          "dataset",
+          "runner",
+          "guardrail",
+          "git",
+          "script",
+          "collector",
+          "es"
+        ],
+        "note": "当前 K8s 路径：固定数据版本，逐条请求 Guardrail，再运行 Git scorer。"
+      },
+      {
+        "id": "telemetry",
+        "label": "Trace 与报告",
+        "focus": [
+          "runner",
+          "guardrail",
+          "collector",
+          "es",
+          "api",
+          "ui",
+          "langsmith"
+        ],
+        "note": "ES 当前已实现；LangSmith 仅为 exporter 扩展位置。"
+      },
+      {
+        "id": "openshell-view",
+        "label": "OpenShell 可选路径",
+        "focus": [
+          "api",
+          "openshell",
+          "runner",
+          "guardrail"
+        ],
+        "note": "OpenShell CLI gateway 入口存在，当前 UI Trigger 使用直接 Kubernetes Job。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "AgentEval UI",
+      "sublabel": "发布数据 · 配置 · Trigger · Report",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        230,
+        76
+      ],
+      "sources": [
+        {
+          "path": "web/apps/control/src/features/evaluation-workbench/evaluation-configurator.tsx",
+          "line": 1,
+          "end_line": 63
+        },
+        {
+          "path": "web/apps/control/src/features/evaluation-workbench/reports-page.tsx",
+          "line": 1,
+          "end_line": 687
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Evaluation API",
+      "sublabel": "固定版本 · 子集校验 · 运行快照",
+      "pos": [
+        420,
+        40
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/target_configs.py",
+          "line": 1,
+          "end_line": 149
+        },
+        {
+          "path": "evaluation-backend/src/evaluation_backend/runs.py",
+          "line": 1,
+          "end_line": 330
+        }
+      ]
+    },
+    {
+      "id": "runtime",
+      "type": "cloud",
+      "label": "K8s Job / Docker",
+      "sublabel": "当前部署：Kubernetes Job",
+      "pos": [
+        830,
+        40
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/k8s_job.py",
+          "line": 1,
+          "end_line": 101
+        },
+        {
+          "path": "evaluation-backend/src/evaluation_backend/runs.py",
+          "line": 1,
+          "end_line": 330
+        }
+      ],
+      "tag": "当前启用"
+    },
+    {
+      "id": "registry",
+      "type": "security",
+      "label": "实例配置 + Secret",
+      "sublabel": "Provider / ID / endpoint / token 引用",
+      "pos": [
+        420,
+        240
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/guardrail_registry.py",
+          "line": 1,
+          "end_line": 79
+        },
+        {
+          "path": "evaluation-backend/src/evaluation_backend/guardrail_runs.py",
+          "line": 1,
+          "end_line": 99
+        }
+      ]
+    },
+    {
+      "id": "openshell",
+      "type": "cloud",
+      "label": "OpenShell",
+      "sublabel": "已有 gateway / policy 执行入口",
+      "pos": [
+        830,
+        240
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/openshell_runner.py",
+          "line": 1,
+          "end_line": 113
+        }
+      ],
+      "tag": "可选入口 · 当前未启用"
+    },
+    {
+      "id": "dataset",
+      "type": "database",
+      "label": "Guardrail Dataset",
+      "sublabel": "input · label · strategy / 固定版本",
+      "pos": [
+        40,
+        440
+      ],
+      "size": [
+        230,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/upload_api.py",
+          "line": 1,
+          "end_line": 68
+        },
+        {
+          "path": "evaluation-backend/src/evaluation_backend/guardrail_worker.py",
+          "line": 1,
+          "end_line": 102
+        }
+      ]
+    },
+    {
+      "id": "runner",
+      "type": "backend",
+      "label": "Evaluation Runner",
+      "sublabel": "直连 Guardrail · Model=None",
+      "pos": [
+        420,
+        440
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/guardrail_worker.py",
+          "line": 1,
+          "end_line": 102
+        },
+        {
+          "path": "evaluation-backend/src/evaluation_backend/proxy_entrypoint.py",
+          "line": 1,
+          "end_line": 98
+        }
+      ]
+    },
+    {
+      "id": "git",
+      "type": "external",
+      "label": "Git Scorer Repository",
+      "sublabel": "SSH 拉取 · 固定 commit SHA",
+      "pos": [
+        830,
+        440
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/git_scorers.py",
+          "line": 1,
+          "end_line": 118
+        }
+      ]
+    },
+    {
+      "id": "guardrail",
+      "type": "security",
+      "label": "Guardrail",
+      "sublabel": "配置实例 / Mock Scan Server",
+      "pos": [
+        420,
+        655
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/guardrail_worker.py",
+          "line": 1,
+          "end_line": 102
+        },
+        {
+          "path": "evaluation-backend/src/evaluation_backend/mock_guardrail.py",
+          "line": 1,
+          "end_line": 93
+        }
+      ],
+      "tag": "被测对象"
+    },
+    {
+      "id": "script",
+      "type": "backend",
+      "label": "Git Python Script",
+      "sublabel": "stdin JSON → TP / FP / TN / FN",
+      "pos": [
+        830,
+        655
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/git_scorers.py",
+          "line": 1,
+          "end_line": 118
+        },
+        {
+          "path": "evaluation-backend/src/evaluation_backend/guardrail_worker.py",
+          "line": 1,
+          "end_line": 102
+        }
+      ],
+      "tag": "Runner 内执行"
+    },
+    {
+      "id": "es",
+      "type": "database",
+      "label": "Elasticsearch",
+      "sublabel": "配置 / 数据集 / 样本分数 / traces",
+      "pos": [
+        40,
+        870
+      ],
+      "size": [
+        230,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/storage/elastic.py",
+          "line": 1,
+          "end_line": 371
+        }
+      ]
+    },
+    {
+      "id": "collector",
+      "type": "backend",
+      "label": "Runner-local Collector",
+      "sublabel": "HTTP 样本反馈 + OTLP traces",
+      "pos": [
+        420,
+        870
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/collector.py",
+          "line": 1,
+          "end_line": 111
+        },
+        {
+          "path": "evaluation-backend/src/evaluation_backend/proxy_entrypoint.py",
+          "line": 1,
+          "end_line": 98
+        }
+      ]
+    },
+    {
+      "id": "langsmith",
+      "type": "external",
+      "label": "LangSmith",
+      "sublabel": "Collector exporter 预留位置",
+      "pos": [
+        830,
+        870
+      ],
+      "size": [
+        220,
+        76
+      ],
+      "sources": [
+        {
+          "path": "evaluation-backend/src/evaluation_backend/collector.py",
+          "line": 1,
+          "end_line": 111
+        }
+      ],
+      "tag": "尚未实现"
+    }
+  ],
+  "connections": [
+    {
+      "id": "ui-api-0",
+      "from": "ui",
+      "to": "api",
+      "label": "配置 / Trigger / Report",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-runtime-1",
+      "from": "api",
+      "to": "runtime",
+      "label": "创建异步任务",
+      "variant": "emphasis"
+    },
+    {
+      "id": "registry-api-2",
+      "from": "registry",
+      "to": "api",
+      "label": "实例目录",
+      "variant": "default"
+    },
+    {
+      "id": "runtime-runner-3",
+      "from": "runtime",
+      "to": "runner",
+      "label": "启动容器",
+      "variant": "emphasis"
+    },
+    {
+      "id": "openshell-runner-4",
+      "from": "openshell",
+      "to": "runner",
+      "label": "可选 sandbox 执行",
+      "variant": "dashed"
+    },
+    {
+      "id": "api-openshell-5",
+      "from": "api",
+      "to": "openshell",
+      "label": "可选 CLI 路径",
+      "variant": "dashed"
+    },
+    {
+      "id": "api-dataset-6",
+      "from": "api",
+      "to": "dataset",
+      "label": "版本样本接口",
+      "variant": "default"
+    },
+    {
+      "id": "dataset-runner-7",
+      "from": "dataset",
+      "to": "runner",
+      "label": "input / label / strategy",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-runner-8",
+      "from": "api",
+      "to": "runner",
+      "label": "快照 + 受保护 detail",
+      "variant": "default"
+    },
+    {
+      "id": "runner-git-9",
+      "from": "runner",
+      "to": "git",
+      "label": "fetch 固定 SHA",
+      "variant": "default"
+    },
+    {
+      "id": "git-script-10",
+      "from": "git",
+      "to": "script",
+      "label": "checkout script.py",
+      "variant": "default"
+    },
+    {
+      "id": "runner-script-11",
+      "from": "runner",
+      "to": "script",
+      "label": "input + label + output",
+      "variant": "emphasis"
+    },
+    {
+      "id": "script-runner-12",
+      "from": "script",
+      "to": "runner",
+      "label": "JSON 四象限",
+      "variant": "emphasis"
+    },
+    {
+      "id": "runner-guardrail-13",
+      "from": "runner",
+      "to": "guardrail",
+      "label": "HTTP POST /scans",
+      "variant": "emphasis"
+    },
+    {
+      "id": "guardrail-runner-14",
+      "from": "guardrail",
+      "to": "runner",
+      "label": "output + request ID",
+      "variant": "emphasis"
+    },
+    {
+      "id": "runner-collector-15",
+      "from": "runner",
+      "to": "collector",
+      "label": "分数 / 耗时 / OTLP",
+      "variant": "emphasis"
+    },
+    {
+      "id": "collector-es-16",
+      "from": "collector",
+      "to": "es",
+      "label": "写入反馈与 spans",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-es-17",
+      "from": "api",
+      "to": "es",
+      "label": "读写资源 / 查询报告",
+      "variant": "default"
+    },
+    {
+      "id": "collector-langsmith-18",
+      "from": "collector",
+      "to": "langsmith",
+      "label": "未来 exporter",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Guardrail Dataset × Git Scorer = Aspect",
+      "items": [
+        "Dataset 先独立发布：input、label、strategy。Evaluation 再绑定 dataset/scorer 固定版本、aspect 与 label_mapping。",
+        "Runner 发送 input，取得 Scan output；Git script 接收 input、label、strategy、output，返回 expected/predicted/outcome/reason。",
+        "unsafe 为正类：TP 正确拦截，FP 误拦截，TN 正确放行，FN 漏检。每组结果独立汇总。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "OpenShell / LangSmith 的真实状态",
+      "items": [
+        "当前部署由 API 创建 Kubernetes Job；OpenShell 是另一个显式 gateway/policy CLI 执行入口，不是当前 Job 的隐含安全边界。",
+        "Python runner-local Collector 已实现 Elasticsearch；选择 LangSmith exporter 当前会抛出 NotImplementedError。虚线表示可选或待实现路径。",
+        "图据 2026-11-04 本地工作树绘制；证据为独立源码快照，不冒充已发布远端 commit。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "持久化、Trace 与凭据",
+      "items": [
+        "ES 三类索引保存资源/运行、样本/分数、traces；UI 通过 API 查询，不直接访问 ES。",
+        "OTel 配置启用时发送标准 OTLP spans；样本和评分反馈另外通过 Collector HTTP 接口写入。cost 当前为 mock。",
+        "Guardrail token 通过受保护 detail 获取；Git SSH key 从 Secret 挂载；script 子进程不继承 API/Guardrail/Collector 凭据。"
+      ]
+    }
+  ]
+}

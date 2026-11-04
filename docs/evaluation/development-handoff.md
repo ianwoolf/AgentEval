@@ -227,3 +227,55 @@ Added standalone stdout JSON request started/completed/failed events; filters he
 ## 2026-11-04: release 2.3.3
 
 Release sources are the currently deployed UI guardrail-registry-20261104, worker guardrail-registry-20261104 and Mock request-logs-20261104. Upgrade instructions and a server-dry-run-validated strategic Deployment patch are under docs/evaluation/releases/2.3.3.md and 2.3.3-api-patch.json. The release requires the Guardrail registry ConfigMap and API mount in addition to service/Runner image updates. Existing storage and token Secrets are reused.
+
+
+## 2026-11-04: report totals, dataset charts and report comparison
+
+Implemented micro-averaged Precision/Recall/Accuracy/F1 totals, per-dataset totals, grouped/single-metric charts, average/P50/P95 Guardrail latency, run-owned Guardrail identity and persisted report comparison. See [report-metrics.md](report-metrics.md). Local UI/API/Runner images are report-metrics-20261104; Mock unchanged. 215 backend tests and 2 UI tests passed, build and deployed ES-backed report verification passed. Docker Hub 2.3.3 unchanged.
+
+
+## 2026-11-04: per-run Guardrail selection and version-scoped comparison
+
+Provider/instance selection moved from Configure to Trigger. Guardrail runs use all pinned datasets in saved order; runtime context records evaluation_config_id/version. Report header Compare lists report IDs and execution times only for matching config/version. Old individual reports/samples/traces/Jobs were removed with explicit user confirmation before tests; resources remain. Three successful new acceptance reports verify different Providers and version isolation. See [trigger-run-target.md](trigger-run-target.md). Current UI/worker images: trigger-target-20261104, Docker Hub unchanged.
+
+
+## 2026-11-04: inline score deltas and paired dataset charts
+
+Removed separate overall comparison table. Overall cards show signed percentage-point deltas (green positive, red negative, neutral zero), selected-report values remain visible. Matching dataset IDs and versions are paired Current/Selected series in one metric-grouped chart; mismatches split into two charts and separate dataset tables. Five focused UI tests and build passed. UI image report-inline-compare-20261104; API/Runner and Mock unchanged.
+
+
+## 2026-11-04: eight named aspect datasets and per-column labels
+
+Added scripts/seed_guardrail_aspects.py (standard-library API seed, dry-run/output/prefix options, existing IDs skipped). Published 8 synthetic aspect datasets v1, 24 rows each; backend contract validated and repeat seed confirmed no overwrite. Metadata prefills Evaluation aspect names. Report chart metric titles move above groups and each column labels its dataset below; repetitive legend removed, comparison Current/Selected remains explicit. UI image aspect-labels-20261104. See scripts/seed_guardrail_aspects.md.
+
+
+## 2026-11-04 — Case concurrency and compact report charts
+
+Implemented environment runner concurrency propagation (EVAL_CONCURRENCY/report snapshot), one global Guardrail case pool across datasets, single-writer persistence, thread-local HTTP clients and locked/preloaded Git artifacts. Kubernetes Jobs explicitly use parallelism=1 and completions=1. Environment UI now labels this Case concurrency. Backend regression: 225 passed, 5 skipped. Frontend chart regression: 6 passed; production build passed.
+
+Report grouped columns now fit container width without horizontal scrolling, use thinner bars and rotated/truncated dataset labels with full-name tooltips. Local images: evaluation-worker:case-concurrency-20261104, evaluation-ui:compact-concurrency-20261104. See case-concurrency.md for semantics and migration.
+
+Live acceptance completed: `case-concurrency-1c4c5b13`, Job `eval-cfa324f4bf935d3b3e910b79`, experiment `exp-cfa324f4bf935d3b3e910b793bdda039`. One execution Pod, parallelism/completions 1/1, environment concurrency 3, two datasets × four cases, report COMPLETED with 8 processed / 0 errors / 0 pending. API and UI rollouts succeeded. UI port-forward restored on 127.0.0.1:18082; visually verified eight dataset labels are rotated, legible and all four metric groups fit without horizontal scrolling.
+
+
+## 2026-11-04 — Fix stalled concurrent evaluations
+
+Failed run `eval-c24a83aefcef4c280372229e` (192 cases / concurrency 5) exited because Collector `/v1/traces` performed synchronous per-span ES writes on the ASGI event loop. A trace batch blocked typed feedback for ~43 seconds and Runner hit its 30-second ReadTimeout.
+
+Fix: move synchronous OTLP ingestion to Starlette's thread pool; resolve target metadata once per batch; Elasticsearch `put_traces` uses one NDJSON `_bulk` call with refresh wait per batch and validates item failures. Runner feedback timeout is now 300 seconds. Coalesce experiment progress updates by case concurrency; samples still persist individually and final progress always flushes. Local API/worker image `evaluation-worker:collector-batch-r2-20261104`. No UI/Secret changes. Regression suite before final timeout assertion: 227 passed / 5 skipped; final focused collector + concurrency tests: 7 passed.
+
+User changed Evaluation configuration during diagnosis; validation uses an independent configuration copied from the failed run snapshot. Validation Job `eval-ce2a952101356e4604a426e9`, experiment `exp-ce2a952101356e4604a426e9a9a43383` (8 pinned datasets / 192 cases / concurrency 5). Original report preserved.
+
+Final backend regression after timeout/progress changes: **228 passed, 5 skipped**. Validation has passed the original timeout point and continues persisting samples; OTLP trace batch response time is now ~1 second.
+
+Full-scale validation completed successfully: Job `eval-ce2a952101356e4604a426e9` completed 1/1 in 6m21s; report `exp-ce2a952101356e4604a426e9a9a43383` shows **192 processed / 0 errors / 0 pending**. No feedback transport timeout or worker failure found in validation logs. The 300-second value is the Runner feedback request timeout, not the entire evaluation duration.
+
+
+## 2026-11-04 — Docker Hub release 2.3.5
+
+Published the exact images running in local Kubernetes:
+- `ianwoolf/evaluation-ui:2.3.5` ← `evaluation-ui:compact-concurrency-20261104`; digest `sha256:7b409a081be2291385291e2af07b08e6c8faa9ba66657b6da1c52fef50a1eb04`.
+- `ianwoolf/evaluation-worker:2.3.5` ← `evaluation-worker:collector-batch-r2-20261104`; digest `sha256:964f549ec2f38f4469037ad88e4ff7e341ccc90351c14365d0b5591faceab32f`.
+- `ianwoolf/evaluation-mock-guardrail:2.3.5` ← `evaluation-mock-guardrail:random-20261104`; digest `sha256:899c2bb2b20700ccd0e3fca97a17f6d10a0d011b118e9c5ad6c517037ec359dc`.
+
+UI includes compact rotated dataset labels and report comparison. Worker includes one-Pod case concurrency, nonblocking bulk trace ingestion and 300-second feedback timeout. Mock content matches its prior 2.3.4 image. Publishing did not change local deployment configuration or Secrets. For remote upgrades, update UI/API/Mock image references plus EVAL_WORKER_IMAGE so newly triggered Jobs also use worker:2.3.5; preserve existing runtime configuration and Secrets.

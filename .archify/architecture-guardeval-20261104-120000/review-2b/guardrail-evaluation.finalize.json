@@ -1,0 +1,467 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-11-04T06:32:43.543Z",
+  "specification": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+    "sha256": "bfec1b1b6a8fdd410108a53c5c0a17e43879fafb7295761e4357172eabb821c2",
+    "bytes": 13177
+  },
+  "artifact": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+    "sha256": "ff5a490dbed8ec90ea2606927f02606920d571d1a2a5285d402742c0f06c8dad",
+    "bytes": 868175
+  },
+  "stages": {
+    "validate": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": null,
+      "command": [
+        "C:\\Users\\o_lyn\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "C:\\zzz\\code\\ai\\AgentEval\\data\\local-deploy\\archify-tool\\archify\\bin\\archify.mjs",
+        "deliver",
+        "architecture",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "deliver",
+        "receiptId": "ff7c989d-22f4-4da3-ab6a-9ae839a66be7",
+        "stage": "check",
+        "type": "architecture",
+        "input": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+        "output": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "error": "Final artifact check failed; the previous artifact was preserved.",
+        "diagnostics": [
+          {
+            "code": "composition/desktop-readability",
+            "severity": "error",
+            "message": "Final artifact failed composition/desktop-readability.",
+            "subject": {
+              "check": "composition"
+            },
+            "evidence": {
+              "owner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "viewportWidth": 1440,
+              "viewportHeight": 900,
+              "availableDiagramWidth": 930,
+              "budgetBasis": "legacy-930",
+              "readerContract": "declared-wide-v1",
+              "requestedTargetPx": 7.5,
+              "requestedTargetMet": false,
+              "budgetLimit": "legacy",
+              "viewBoxWidth": 1270,
+              "scale": 0.7322834645669292,
+              "text": "配置 / Trigger / Report",
+              "detail": "edge",
+              "sourceFontPx": 8,
+              "projectedFontPx": 5.858267716535433,
+              "minimumProjectedFontPx": 6
+            },
+            "supportedFixes": [
+              "Preserve the semantic text and any supplied coordinates, routes, sides, channels, and labels. Compactly reflow automatic spacing and empty corridors so the complete viewBox width is at most 1240px (current 1270px; 8px source text at 930px desktop budget). If supplied geometry fixes that width, use a renderer-supported semantic text-size setting or renderer-level fix instead. Position-only label controls cannot repair its projection."
+            ]
+          }
+        ],
+        "provenance": "failed",
+        "checker": {
+          "ok": false,
+          "file": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+          "artifact": {
+            "sha256": "afd9ae6b5d50809a02bbbb3aa182ff4cb4e22ac64682c203fb817c4a4eaea89a",
+            "bytes": 868394
+          },
+          "checks": [
+            {
+              "name": "single_svg",
+              "ok": true,
+              "details": [
+                "found 1 <svg> block(s)"
+              ]
+            },
+            {
+              "name": "finite_svg",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "orthogonal_arrows",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "label_route_clearance",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "relationship_crossings",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "relationship_corridors",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "container_border_runs",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "route_rhythm",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "legend_clearance",
+              "ok": true,
+              "details": []
+            }
+          ],
+          "composition": {
+            "schemaVersion": 1,
+            "profile": "showcase",
+            "status": "fail",
+            "summary": {
+              "errors": 1,
+              "warnings": 0
+            },
+            "metrics": {
+              "properCrossings": 0,
+              "resolvedCrossovers": 5,
+              "ambiguousCorridors": 0,
+              "arrowheadCollisions": 0,
+              "containerBorderRuns": 0,
+              "labelRouteClearanceIssues": 0,
+              "labelCanvasOverflowIssues": 0,
+              "minLabelRouteClearance": 5,
+              "desktopReadabilityIssues": 1,
+              "viewportHeightIssues": 0,
+              "minProjectedNodeTextPx": 5.858267716535433,
+              "maxBends": 6,
+              "routesOverSuggestedBends": 3,
+              "maxStretch": 1.148,
+              "routesOverSuggestedStretch": 0,
+              "minSegmentPx": 24,
+              "minInteriorSegmentPx": 24.1,
+              "shortSegmentCount": 0,
+              "shortEndpointSegmentCount": 0,
+              "shortInteriorSegmentCount": 0,
+              "microSegmentCount": 0
+            },
+            "suggestedLimits": {
+              "bendsPerRelationship": 2,
+              "stretch": 1.35,
+              "segmentPx": 16,
+              "microSegmentPx": 8
+            },
+            "routeReview": {
+              "crossings": [
+                {
+                  "left": {
+                    "id": "registry-api-2",
+                    "from": "registry",
+                    "to": "api",
+                    "label": "实例目录",
+                    "collectionIndex": 2,
+                    "artifactIndex": 3
+                  },
+                  "right": {
+                    "id": "api-es-17",
+                    "from": "api",
+                    "to": "es",
+                    "label": "读写资源 / 查询报告",
+                    "collectionIndex": 17,
+                    "artifactIndex": 18
+                  },
+                  "point": [
+                    544,
+                    140
+                  ],
+                  "sharedNode": "api"
+                },
+                {
+                  "left": {
+                    "id": "openshell-runner-4",
+                    "from": "openshell",
+                    "to": "runner",
+                    "label": "可选 sandbox 执行",
+                    "collectionIndex": 4,
+                    "artifactIndex": 5
+                  },
+                  "right": {
+                    "id": "api-es-17",
+                    "from": "api",
+                    "to": "es",
+                    "label": "读写资源 / 查询报告",
+                    "collectionIndex": 17,
+                    "artifactIndex": 18
+                  },
+                  "point": [
+                    358.1000000000001,
+                    671
+                  ]
+                },
+                {
+                  "left": {
+                    "id": "api-openshell-5",
+                    "from": "api",
+                    "to": "openshell",
+                    "label": "可选 CLI 路径",
+                    "collectionIndex": 5,
+                    "artifactIndex": 6
+                  },
+                  "right": {
+                    "id": "dataset-runner-7",
+                    "from": "dataset",
+                    "to": "runner",
+                    "label": "input / label / strategy",
+                    "collectionIndex": 7,
+                    "artifactIndex": 8
+                  },
+                  "point": [
+                    296.6000000000001,
+                    544
+                  ]
+                },
+                {
+                  "left": {
+                    "id": "dataset-runner-7",
+                    "from": "dataset",
+                    "to": "runner",
+                    "label": "input / label / strategy",
+                    "collectionIndex": 7,
+                    "artifactIndex": 8
+                  },
+                  "right": {
+                    "id": "api-es-17",
+                    "from": "api",
+                    "to": "es",
+                    "label": "读写资源 / 查询报告",
+                    "collectionIndex": 17,
+                    "artifactIndex": 18
+                  },
+                  "point": [
+                    358.1000000000001,
+                    544
+                  ]
+                },
+                {
+                  "left": {
+                    "id": "api-runner-8",
+                    "from": "api",
+                    "to": "runner",
+                    "label": "快照 + 受保护 detail",
+                    "collectionIndex": 8,
+                    "artifactIndex": 9
+                  },
+                  "right": {
+                    "id": "api-es-17",
+                    "from": "api",
+                    "to": "es",
+                    "label": "读写资源 / 查询报告",
+                    "collectionIndex": 17,
+                    "artifactIndex": 18
+                  },
+                  "point": [
+                    558,
+                    140
+                  ],
+                  "sharedNode": "api"
+                }
+              ],
+              "detours": [
+                {
+                  "relationship": {
+                    "id": "api-openshell-5",
+                    "from": "api",
+                    "to": "openshell",
+                    "label": "可选 CLI 路径",
+                    "collectionIndex": 5,
+                    "artifactIndex": 6
+                  },
+                  "bends": 4,
+                  "stretch": 1
+                },
+                {
+                  "relationship": {
+                    "id": "api-runner-8",
+                    "from": "api",
+                    "to": "runner",
+                    "label": "快照 + 受保护 detail",
+                    "collectionIndex": 8,
+                    "artifactIndex": 9
+                  },
+                  "bends": 4,
+                  "stretch": 1
+                },
+                {
+                  "relationship": {
+                    "id": "api-es-17",
+                    "from": "api",
+                    "to": "es",
+                    "label": "读写资源 / 查询报告",
+                    "collectionIndex": 17,
+                    "artifactIndex": 18
+                  },
+                  "bends": 6,
+                  "stretch": 1.148
+                }
+              ]
+            },
+            "leadingSpace": {
+              "measured": true,
+              "emptyTopPx": 40,
+              "emptyTopRatio": 0.039,
+              "occupiedTop": 40,
+              "viewBoxTop": 0,
+              "canvasHeight": 1014,
+              "typicalNodeHeight": 76,
+              "reviewSuggested": false
+            },
+            "desktopReadability": {
+              "budgetBasis": "legacy-930",
+              "readerContract": "declared-wide-v1",
+              "availableDiagramWidth": 930,
+              "actualBudgetPx": 930,
+              "limit": "legacy",
+              "requestedTargetPx": 7.5,
+              "requestedTargetMet": false,
+              "hardFloorPx": 6,
+              "hardFloorMet": false,
+              "minimumOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumSourceTextPx": 8,
+              "minimumProjectedTextPx": 5.858267716535433,
+              "semanticTextCount": 45
+            },
+            "issues": [
+              {
+                "severity": "error",
+                "code": "composition/desktop-readability",
+                "owner": {
+                  "kind": "edge",
+                  "id": "ui-api-0",
+                  "from": "ui",
+                  "to": "api"
+                },
+                "viewportWidth": 1440,
+                "viewportHeight": 900,
+                "availableDiagramWidth": 930,
+                "budgetBasis": "legacy-930",
+                "readerContract": "declared-wide-v1",
+                "requestedTargetPx": 7.5,
+                "requestedTargetMet": false,
+                "budgetLimit": "legacy",
+                "viewBoxWidth": 1270,
+                "scale": 0.7322834645669292,
+                "text": "配置 / Trigger / Report",
+                "detail": "edge",
+                "sourceFontPx": 8,
+                "projectedFontPx": 5.858267716535433,
+                "minimumProjectedFontPx": 6
+              }
+            ]
+          }
+        },
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      },
+      "execution": "embedded-in-deliver"
+    },
+    "deliver": {
+      "status": "not-run",
+      "execution": "blocked-by-validate"
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "diagnostics": [
+    {
+      "code": "composition/desktop-readability",
+      "severity": "error",
+      "message": "Final artifact failed composition/desktop-readability.",
+      "subject": {
+        "check": "composition"
+      },
+      "evidence": {
+        "owner": {
+          "kind": "edge",
+          "id": "ui-api-0",
+          "from": "ui",
+          "to": "api"
+        },
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "availableDiagramWidth": 930,
+        "budgetBasis": "legacy-930",
+        "readerContract": "declared-wide-v1",
+        "requestedTargetPx": 7.5,
+        "requestedTargetMet": false,
+        "budgetLimit": "legacy",
+        "viewBoxWidth": 1270,
+        "scale": 0.7322834645669292,
+        "text": "配置 / Trigger / Report",
+        "detail": "edge",
+        "sourceFontPx": 8,
+        "projectedFontPx": 5.858267716535433,
+        "minimumProjectedFontPx": 6
+      },
+      "supportedFixes": [
+        "Preserve the semantic text and any supplied coordinates, routes, sides, channels, and labels. Compactly reflow automatic spacing and empty corridors so the complete viewBox width is at most 1240px (current 1270px; 8px source text at 930px desktop budget). If supplied geometry fixes that width, use a renderer-supported semantic text-size setting or renderer-level fix instead. Position-only label controls cannot repair its projection."
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-2b\\guardrail-evaluation.finalize.json",
+    "summaryReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-2b\\guardrail-evaluation.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "validate",
+  "finishedAt": "2026-11-04T06:32:45.860Z",
+  "durationMs": 2316,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-04T06:31:12.785Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

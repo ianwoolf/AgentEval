@@ -12,14 +12,16 @@ const version={version:1,name:'Safety data',evaluation_type:'guardrail',objectiv
 const config={id:'evaluation-a',revision:'10:1',execution_mode:'guardrail',datasets:[{dataset_id:'selected',dataset_version:1}],dataset_id:'selected',dataset_version:1,environment_id:'env',environment_version:1,data_source:'published',scoring_mode:'installed',scorer_selection:'dataset',guardrail_bindings:[{dataset_id:'selected',dataset_version:1,scorer_id:'git',scorer_version:1,aspect_id:'safety',aspect_name:'Safety',label_mapping:{safe:'safe',unsafe:'unsafe'}}]};
 beforeEach(()=>{mock.api.mockReset();mock.setState.mockReset();mock.state={targets:[{id:'evaluation-a',name:'Evaluation A',kind:'GUARDRAIL',guardrail_id:'gr',provider:'f5',version:1,revision:'10:1'}],datasets:[{id:'selected',draft:version,versions:[version]},{id:'outside',draft:{...version,name:'Outside dataset'},versions:[{...version,name:'Outside dataset'}]}],scorers:[{id:'git',enabled:true,draft:{name:'Classifier'},versions:[{version:1,execution:{engine:'git'}}]}],environments:[{id:'env',versions:[{version:1,name:'Isolated',modelId:'none',cpuMillicores:500,memoryMiB:512,timeoutSeconds:60}]}],evaluations:[]};});
 afterEach(cleanup);
-it('Trigger shows only configured datasets and posts a pinned subset with revision',async()=>{
- mock.api.mockImplementation(async(_p,path)=>path.endsWith('/config')?config:{id:'run',snapshot:{}});
+it('Trigger fixes datasets and selects the per-run Provider and instance',async()=>{
+ mock.api.mockImplementation(async(_p,path)=>path==='guardrail-instances'?{providers:[{id:'f5',name:'F5',instances:[{id:'gr',name:'Guardrail',enabled:true,address:'https://guard.test/scans'}]}]}:path.endsWith('/config')?config:{id:'run',snapshot:{}});
  const started=vi.fn();render(<TriggerTargetDialog targetId="evaluation-a" onClose={()=>{}} onStarted={started}/>);
  await screen.findByText('Safety data');expect(screen.queryByText('Outside dataset')).toBeNull();
- expect(screen.queryByRole('combobox')).toBeNull();
+ expect(screen.queryByRole('checkbox')).toBeNull();
+ await userEvent.selectOptions(screen.getByLabelText('Provider *'),'f5');
+ await userEvent.selectOptions(screen.getByLabelText('Guardrail instance *'),'gr');
  await userEvent.click(screen.getByRole('button',{name:'Run evaluation'}));
  const call=mock.api.mock.calls.find(c=>c[1].endsWith('/runs'))!;
- expect(JSON.parse(call[2].body)).toMatchObject({config_revision:'10:1',datasets:[{dataset_id:'selected',dataset_version:1}]});
+ expect(JSON.parse(call[2].body)).toMatchObject({provider:'f5',guardrail_id:'gr',config_revision:'10:1',datasets:[{dataset_id:'selected',dataset_version:1}]});
  await waitFor(()=>expect(started).toHaveBeenCalledWith('run'));
 });
 it('Configure saves target, pinned scorer bindings and environment in one request',async()=>{
@@ -32,22 +34,22 @@ it('Configure saves target, pinned scorer bindings and environment in one reques
  await userEvent.click(screen.getByRole('button',{name:'Save',exact:true}));
  const call=mock.api.mock.calls.find(c=>c[1].endsWith('/configuration'))!;
  const body=JSON.parse(call[2].body);
- expect(body.revision).toBe('10:1');expect(body.target.guardrail_id).toBe('gr');
+ expect(body.revision).toBe('10:1');expect(body.target.guardrail_id).toBeNull();expect(body.target.provider).toBeNull();
  expect(body.config.guardrail_bindings[0]).toMatchObject({dataset_id:'selected',scorer_id:'git',scorer_version:1});
  expect(body.config.environment_version).toBe(1);expect(body.config.execution_mode).toBe('guardrail');
  await waitFor(()=>expect(saved).toHaveBeenCalled());
 });
 it('clears the instance when provider changes and requires a configured selection',async()=>{
- mock.api.mockResolvedValue({revision:'1',providers:[{id:'f5',name:'F5',instances:[{id:'first',name:'First',address:'https://f5.test/scans',enabled:true}]},{id:'nemo guardrail',name:'NeMo',instances:[{id:'second',name:'Second',address:'https://nemo.test/scans',enabled:true}]}]});
- render(<EvaluationConfigurator onClose={()=>{}} onSaved={()=>{}}/>);
+ const registry={revision:'1',providers:[{id:'f5',name:'F5',instances:[{id:'first',name:'First',address:'https://f5.test/scans',enabled:true}]},{id:'nemo guardrail',name:'NeMo',instances:[{id:'second',name:'Second',address:'https://nemo.test/scans',enabled:true}]}]};
+ mock.api.mockImplementation(async(_p,path)=>path==='guardrail-instances'?registry:config);
+ render(<TriggerTargetDialog targetId="evaluation-a" onClose={()=>{}}/>);
  const user=userEvent.setup();await screen.findByRole('option',{name:'F5'});
  expect(screen.getByLabelText('Guardrail instance *')).toHaveProperty('disabled',true);
- await user.type(screen.getByLabelText('Evaluation name *'),'Safety');
  await user.selectOptions(screen.getByLabelText('Provider *'),'f5');
  await user.selectOptions(screen.getByLabelText('Guardrail instance *'),'first');
- expect(screen.getByRole('button',{name:'Next'})).toHaveProperty('disabled',false);
+ expect(screen.getByRole('button',{name:'Run evaluation'})).toHaveProperty('disabled',false);
  await user.selectOptions(screen.getByLabelText('Provider *'),'nemo guardrail');
  expect(screen.getByLabelText('Guardrail instance *')).toHaveProperty('value','');
  expect(screen.queryByRole('option',{name:'First · first'})).toBeNull();
- expect(screen.getByRole('button',{name:'Next'})).toHaveProperty('disabled',true);
+ expect(screen.getByRole('button',{name:'Run evaluation'})).toHaveProperty('disabled',true);
 });

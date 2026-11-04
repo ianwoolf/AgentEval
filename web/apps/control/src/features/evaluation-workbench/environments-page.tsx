@@ -228,11 +228,11 @@ function EnvironmentEditor({
             <option value="none">none</option>
           </Select>
         </Field>
-        <div className="self-center rounded border bg-muted/20 p-3 text-xs text-muted-foreground">Select the Guardrail provider and instance in Evaluation → Configure. This environment controls execution resources.</div>
+        <div className="self-center rounded border bg-muted/20 p-3 text-xs text-muted-foreground">Select the Guardrail provider and instance when triggering an evaluation. This environment controls execution resources.</div>
         <Field label="执行环境">
           <Input value="OpenShell" disabled />
         </Field>
-        <Field label="Runner concurrency">
+        <Field label="Case concurrency">
           <Input
             type="number"
             min={1}
@@ -252,6 +252,7 @@ function EnvironmentEditor({
             }
           />
         </Field>
+        <p className="text-xs text-muted-foreground">Maximum cases running at once across all datasets, within one execution pod.</p>
         {list(
           "network",
           "Network allowlist",

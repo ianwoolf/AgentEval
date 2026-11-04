@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+    "sha256": "f546aa1ec38459316205a0b95dc4f6c80d9b4ceaa77340aee10490a990cc143f",
+    "bytes": 13720
+  },
+  "artifact": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+    "sha256": "ff5a490dbed8ec90ea2606927f02606920d571d1a2a5285d402742c0f06c8dad",
+    "bytes": 868175
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.finalize.json",
+    "summaryReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.finalize-summary.json",
+    "browserCheckReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-04T06:31:12.785Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 7919,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 8,
+      "routesOverSuggestedBends": 5,
+      "routesOverSuggestedStretch": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "runtime-runner-3",
+            "from": "runtime",
+            "to": "runner",
+            "label": "启动容器",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "api-openshell-5",
+            "from": "api",
+            "to": "openshell",
+            "label": "可选 CLI 路径",
+            "collectionIndex": 5,
+            "artifactIndex": 6
+          },
+          "point": [
+            693.8000000000001,
+            271
+          ]
+        },
+        {
+          "left": {
+            "id": "api-dataset-6",
+            "from": "api",
+            "to": "dataset",
+            "label": "版本样本接口",
+            "collectionIndex": 6,
+            "artifactIndex": 7
+          },
+          "right": {
+            "id": "api-runner-8",
+            "from": "api",
+            "to": "runner",
+            "label": "快照 + 受保护 detail",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "point": [
+            396.00000000000006,
+            140
+          ],
+          "sharedNode": "api"
+        },
+        {
+          "left": {
+            "id": "api-dataset-6",
+            "from": "api",
+            "to": "dataset",
+            "label": "版本样本接口",
+            "collectionIndex": 6,
+            "artifactIndex": 7
+          },
+          "right": {
+            "id": "api-es-17",
+            "from": "api",
+            "to": "es",
+            "label": "读写资源 / 查询报告",
+            "collectionIndex": 17,
+            "artifactIndex": 18
+          },
+          "point": [
+            155,
+            164.5
+          ],
+          "sharedNode": "api"
+        },
+        {
+          "left": {
+            "id": "api-runner-8",
+            "from": "api",
+            "to": "runner",
+            "label": "快照 + 受保护 detail",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "right": {
+            "id": "api-es-17",
+            "from": "api",
+            "to": "es",
+            "label": "读写资源 / 查询报告",
+            "collectionIndex": 17,
+            "artifactIndex": 18
+          },
+          "point": [
+            396.00000000000006,
+            164.5
+          ],
+          "sharedNode": "api"
+        },
+        {
+          "left": {
+            "id": "runner-git-9",
+            "from": "runner",
+            "to": "git",
+            "label": "fetch 固定 SHA",
+            "collectionIndex": 9,
+            "artifactIndex": 10
+          },
+          "right": {
+            "id": "script-runner-12",
+            "from": "script",
+            "to": "runner",
+            "label": "JSON 四象限",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "point": [
+            735.0000000000001,
+            540
+          ],
+          "sharedNode": "runner"
+        },
+        {
+          "left": {
+            "id": "runner-script-11",
+            "from": "runner",
+            "to": "script",
+            "label": "input + label + output",
+            "collectionIndex": 11,
+            "artifactIndex": 12
+          },
+          "right": {
+            "id": "script-runner-12",
+            "from": "script",
+            "to": "runner",
+            "label": "JSON 四象限",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "point": [
+            734.9999999999999,
+            631
+          ],
+          "sharedNode": "runner"
+        },
+        {
+          "left": {
+            "id": "runner-guardrail-13",
+            "from": "runner",
+            "to": "guardrail",
+            "label": "HTTP POST /scans",
+            "collectionIndex": 13,
+            "artifactIndex": 14
+          },
+          "right": {
+            "id": "runner-collector-15",
+            "from": "runner",
+            "to": "collector",
+            "label": "分数 / 耗时 / OTLP",
+            "collectionIndex": 15,
+            "artifactIndex": 16
+          },
+          "point": [
+            410.19999999999993,
+            693
+          ],
+          "sharedNode": "runner"
+        },
+        {
+          "left": {
+            "id": "guardrail-runner-14",
+            "from": "guardrail",
+            "to": "runner",
+            "label": "output + request ID",
+            "collectionIndex": 14,
+            "artifactIndex": 15
+          },
+          "right": {
+            "id": "runner-collector-15",
+            "from": "runner",
+            "to": "collector",
+            "label": "分数 / 耗时 / OTLP",
+            "collectionIndex": 15,
+            "artifactIndex": 16
+          },
+          "point": [
+            513.9000000000003,
+            573.5000000000001
+          ],
+          "sharedNode": "runner"
+        }
+      ],
+      "detours": [
+        {
+          "relationship": {
+            "id": "runtime-runner-3",
+            "from": "runtime",
+            "to": "runner",
+            "label": "启动容器",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "bends": 3,
+          "stretch": 1
+        },
+        {
+          "relationship": {
+            "id": "api-runner-8",
+            "from": "api",
+            "to": "runner",
+            "label": "快照 + 受保护 detail",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "bends": 3,
+          "stretch": 1.105,
+          "directCorridorBlockers": [
+            {
+              "id": "registry",
+              "label": "实例配置 + Secret",
+              "box": [
+                420,
+                240,
+                220,
+                76
+              ]
+            }
+          ]
+        },
+        {
+          "relationship": {
+            "id": "runner-git-9",
+            "from": "runner",
+            "to": "git",
+            "label": "fetch 固定 SHA",
+            "collectionIndex": 9,
+            "artifactIndex": 10
+          },
+          "bends": 3,
+          "stretch": 1.156
+        },
+        {
+          "relationship": {
+            "id": "runner-collector-15",
+            "from": "runner",
+            "to": "collector",
+            "label": "分数 / 耗时 / OTLP",
+            "collectionIndex": 15,
+            "artifactIndex": 16
+          },
+          "bends": 4,
+          "stretch": 1.677,
+          "directCorridorBlockers": [
+            {
+              "id": "guardrail",
+              "label": "Guardrail",
+              "box": [
+                420,
+                655,
+                220,
+                76
+              ]
+            }
+          ]
+        },
+        {
+          "relationship": {
+            "id": "api-es-17",
+            "from": "api",
+            "to": "es",
+            "label": "读写资源 / 查询报告",
+            "collectionIndex": 17,
+            "artifactIndex": 18
+          },
+          "bends": 4,
+          "stretch": 1.21
+        }
+      ],
+      "truncated": false
+    },
+    "hints": [
+      "runner has 5 relationships facing its right side, which fits 4 ports: make that side at least 88px, or move some of those neighbours so they face another side of runner.",
+      "runtime → runner crosses api → openshell: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "api → dataset and api → runner cross next to api: move node dataset or runner so the two reach api from different sides (for example one level with it, one directly above or below it).",
+      "api → dataset and api → es cross next to api: move node dataset or es so the two reach api from different sides (for example one level with it, one directly above or below it).",
+      "api → runner and api → es cross next to api: move node runner or es so the two reach api from different sides (for example one level with it, one directly above or below it).",
+      "runner → git and script → runner cross next to runner: move node git or script so the two reach runner from different sides (for example one level with it, one directly above or below it).",
+      "runner → script and script → runner cross next to runner: move node script or script so the two reach runner from different sides (for example one level with it, one directly above or below it).",
+      "runner → guardrail and runner → collector cross next to runner: move node guardrail or collector so the two reach runner from different sides (for example one level with it, one directly above or below it)."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

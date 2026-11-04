@@ -66,13 +66,13 @@ export function EvalPage() {
         <p className="text-sm text-muted-foreground">{targets.length} target{targets.length === 1 ? "" : "s"}</p>
       </div>
       <Table>
-        <thead><tr><th>Evaluation</th><th>Type</th><th>Provider</th><th>Version</th><th>Configuration</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Evaluation</th><th>Type</th><th>Run target</th><th>Version</th><th>Configuration</th><th>Actions</th></tr></thead>
         <tbody>
           {targets.map((target) => (
             <tr key={target.id}>
-              <td><div className="flex items-center gap-3"><ShieldCheck className="size-5 text-primary" /><div><p className="font-medium">{target.name}</p><p className="mt-1 font-mono text-xs text-muted-foreground">{target.id}</p><p className="mt-1 text-xs text-muted-foreground">Target ID: {target.guardrail_id ?? target.id}</p></div></div></td>
+              <td><div className="flex items-center gap-3"><ShieldCheck className="size-5 text-primary" /><div><p className="font-medium">{target.name}</p><p className="mt-1 font-mono text-xs text-muted-foreground">{target.id}</p><p className="mt-1 text-xs text-muted-foreground">Provider / instance selected per run</p></div></div></td>
               <td><Pill>Guardrail</Pill></td>
-              <td>{target.provider === "f5" ? "F5" : target.provider === "nemo guardrail" ? "NeMo Guardrail" : "—"}</td>
+              <td>Select in Trigger</td>
               <td>v{target.version}</td>
               <td className="max-w-md text-xs text-muted-foreground">{target.evaluation_config ? `${target.evaluation_config.datasets?.length ?? 1} datasets · ${target.evaluation_config.environment_id} v${target.evaluation_config.environment_version}` : "Configure datasets, scorers and environment"}</td>
               <td><div className="flex gap-2">

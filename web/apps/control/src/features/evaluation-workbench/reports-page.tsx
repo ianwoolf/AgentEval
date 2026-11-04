@@ -604,7 +604,7 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
   const visibleSamples = samples.filter(s=>datasetFilter==='ALL'||(s.dataset_id??run.snapshot.datasetId)===datasetFilter);
   const scorerKeys = [...new Set(datasetSummaries.flatMap(d=>d.scores.map(s=>JSON.stringify([s.scorer_id,s.scorer_version]))))];
   return <Frame title={run.name} description="Live evaluation · Persisted sample results">
-    <div className="flex items-center justify-between"><Button variant="ghost" onClick={onBack}><ArrowLeft/>All reports</Button><Pill>{run.status}</Pill></div>
+    <div className="flex items-center justify-between"><Button variant="ghost" onClick={onBack}><ArrowLeft/>All reports</Button><div className="flex items-center gap-2"><div id="guardrail-report-controls"/><Pill>{run.status}</Pill></div></div>
     <Tabs items={['Overview','Samples','Traces','Configuration']} active={reportTab} onChange={setReportTab}/>
     {reportTab==='Traces'&&<TraceViewer evaluationId={remote.experiment_id} running={run.status==='RUNNING'}/>}
     {reportTab==='Overview'&&remote.execution_mode==='guardrail'&&<GuardrailReport evaluationId={remote.experiment_id} running={run.status==='RUNNING'}/>}

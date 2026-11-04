@@ -55,7 +55,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: nginx
-          image: evaluation-ui:guardrail-registry-20261104
+          image: evaluation-ui:compact-concurrency-20261104
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

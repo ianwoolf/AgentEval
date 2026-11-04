@@ -43,6 +43,7 @@ export async function executionPages<T>(project: string, path: string): Promise<
 }
 
 export interface TargetRunConfig {
+ version?:number;
  execution_mode?: 'legacy'|'guardrail';
  guardrail_bindings?: EvaluationBinding[];
  scorer_selection?: 'shared'|'dataset';

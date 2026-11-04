@@ -7,7 +7,7 @@ import {executionApi,fromRemote,type RemoteRun,type TargetRunConfig} from './rem
 import {useWorkbench} from './provider';
 import {RunUploadInput,type RunUpload} from './run-upload';
 import type {DatasetVersion} from './contracts';
-import {Button,ErrorText,Field,Input,Modal} from './ui';
+import {Button,ErrorText,Field,Input,Modal,Select} from './ui';
 
 type Selection = {dataset_id:string;dataset_version:number;upload_id?:string|undefined};
 function DatasetUpload({projectId,selection,schema,onReady}:{projectId:string;selection:Selection;schema:DatasetVersion;onReady(id:string,value:RunUpload|null):void}) {
@@ -19,6 +19,10 @@ export function TriggerTargetDialog(props:{targetId:string;onClose():void;onStar
 }
 function LegacyTriggerTargetDialog({targetId,onClose,onStarted}:{targetId:string;onClose():void;onStarted?(id:string):void}) {
  const projectId=useCurrentProjectId();const {state,setState}=useWorkbench();
+ const [registry,setRegistry]=useState<{providers:Array<{id:string;name:string;instances:Array<{id:string;name:string;enabled:boolean;address:string}>}>}>({providers:[]});
+ const [provider,setProvider]=useState(''),[guardrail,setGuardrail]=useState('');
+ useEffect(()=>{let active=true;executionApi<typeof registry>(projectId,'guardrail-instances').then(r=>{if(active)setRegistry(r);}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[projectId]);
+ const instance=registry.providers.find(p=>p.id===provider)?.instances.find(i=>i.id===guardrail&&i.enabled);
  const [config,setConfig]=useState<TargetRunConfig|null>(null);
  const [selected,setSelected]=useState<Selection[]>([]);
  const [name,setName]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
@@ -33,30 +37,29 @@ function LegacyTriggerTargetDialog({targetId,onClose,onStarted}:{targetId:string
  },[projectId,targetId]);
  const target=state.targets.find(t=>t.id===targetId);
  const allowed=config?.datasets ?? (config?[{dataset_id:config.dataset_id,dataset_version:config.dataset_version}]:[]);
- const valid=selected.length>0&&selected.every(s=>state.datasets.some(d=>d.id===s.dataset_id&&d.versions.some(v=>v.version===s.dataset_version))&&(config?.data_source!=='upload'||s.upload_id));
- return <Modal title="Trigger evaluation" description={`Run ${target?.name??targetId} on one or more datasets using its saved environment and scorers.`} onClose={onClose} footer={<>
+ const valid=(config?.execution_mode!=='guardrail'||!!instance)&&selected.length>0&&selected.every(s=>state.datasets.some(d=>d.id===s.dataset_id&&d.versions.some(v=>v.version===s.dataset_version))&&(config?.data_source!=='upload'||s.upload_id));
+ return <Modal title="Trigger evaluation" description={`Run ${target?.name??targetId} using all datasets, environment and scorers pinned to this configuration version.`} onClose={onClose} footer={<>
   <ErrorText message={error}/><div className="flex justify-end gap-2"><Button variant="outline" onClick={onClose}>Cancel</Button>
   <Button disabled={busy||!config||!valid} onClick={async()=>{
    if(submitted.current||!config||!valid)return;submitted.current=true;setBusy(true);setError('');
    try{
-    const run=await executionApi<RemoteRun>(projectId,`targets/${encodeURIComponent(targetId)}/runs`,{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':key.current},body:JSON.stringify({name,config_revision:config.revision,datasets:selected})});
+    const run=await executionApi<RemoteRun>(projectId,`targets/${encodeURIComponent(targetId)}/runs`,{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':key.current},body:JSON.stringify({name,config_revision:config.revision,datasets:selected,...(config.execution_mode==='guardrail'?{provider,guardrail_id:guardrail}:{})})});
     setState(s=>({...s,evaluations:[fromRemote(run),...s.evaluations.filter(e=>e.id!==run.id)]}));onClose();onStarted?.(run.id);
    }catch(e){setError((e as Error).message);submitted.current=false;}finally{setBusy(false);}
   }}>{busy?'Starting…':'Run evaluation'}</Button></div></>}>
   <Field label="Evaluation name" hint="Optional. Leave blank to use the target name and current time (Asia/Shanghai)."><Input value={name} disabled={busy} placeholder={`${target?.name??targetId} + current time`} onChange={e=>{setName(e.target.value);key.current=crypto.randomUUID();}} /></Field>
-  {config&&<div className="rounded border bg-muted/20 p-3 text-xs">Target: {target?.guardrail_id??targetId} · Environment: {state.environments.find(e=>e.id===config.environment_id)?.versions.find(v=>v.version===config.environment_version)?.name??config.environment_id} · v{config.environment_version}</div>}
+  {config&&<div className="rounded border bg-muted/20 p-3 text-xs">Evaluation: {target?.name??targetId} · v{config.version??target?.version} · Environment: {state.environments.find(e=>e.id===config.environment_id)?.versions.find(v=>v.version===config.environment_version)?.name??config.environment_id} · v{config.environment_version}</div>}
+  {config?.execution_mode==='guardrail'&&<div className="grid gap-3 sm:grid-cols-2"><Field label="Provider *"><Select disabled={busy} value={provider} onChange={e=>{setProvider(e.target.value);setGuardrail('');key.current=crypto.randomUUID();}}><option value="">Select provider</option>{registry.providers.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</Select></Field><Field label="Guardrail instance *"><Select disabled={busy||!provider} value={guardrail} onChange={e=>{setGuardrail(e.target.value);key.current=crypto.randomUUID();}}><option value="">Select instance</option>{registry.providers.find(p=>p.id===provider)?.instances.map(i=><option key={i.id} value={i.id} disabled={!i.enabled}>{i.name||i.id} · {i.id}{!i.enabled?' (disabled)':''}</option>)}</Select></Field>{instance&&<p className="sm:col-span-2 break-all text-xs text-muted-foreground">{instance.address}</p>}</div>}
   <fieldset disabled={busy||!config} className="space-y-3">
    <legend className="mb-3 text-sm font-medium">Datasets · {selected.length} selected</legend>
-   <p className="text-sm text-muted-foreground">Choose from the datasets saved in Target configuration. Versions, environment and scorers are fixed by that configuration.</p>
+   <p className="text-sm text-muted-foreground">All datasets are fixed for this Evaluation version. Only Provider, Guardrail instance and run name vary between runs.</p>
    {allowed.map(ref=>{
     const d=state.datasets.find(d=>d.id===ref.dataset_id);
     if(!d)return <p key={ref.dataset_id} role="alert">Configured dataset {ref.dataset_id} is unavailable. Update Target configuration.</p>;
     const selection=selected.find(s=>s.dataset_id===d.id);
     const version=d.versions.find(v=>v.version===ref.dataset_version);
     return <div key={d.id} className="space-y-3 rounded-lg border p-3">
-     <div className="flex items-center justify-between gap-4"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!selection} disabled={!selection&&selected.length>=20} onChange={e=>{
-      setSelected(rows=>e.target.checked?[...rows,{dataset_id:d.id,dataset_version:ref.dataset_version}]:rows.filter(s=>s.dataset_id!==d.id));key.current=crypto.randomUUID();
-     }}/>{d.draft.name}</label>
+     <div className="flex items-center justify-between gap-4"><span className="text-sm font-medium">{d.draft.name}</span>
      <span className="text-sm text-muted-foreground">v{ref.dataset_version}</span></div>
      <p className="text-sm">{version?.objective||'No evaluation purpose defined.'}</p>
      <p className="text-xs text-muted-foreground">Scorers: {config?.guardrail_bindings?.find(b=>b.dataset_id===d.id) ? (()=>{const b=config.guardrail_bindings!.find(b=>b.dataset_id===d.id)!;return `${state.scorers.find(s=>s.id===b.scorer_id)?.draft.name??b.scorer_id} · v${b.scorer_version} · ${b.aspect_name}`;})() : (config?.scorer_selection==='dataset'?version?.scorerIds:config?.scorer_ids)?.map(id=>state.scorers.find(s=>s.id===id)?.draft.name??id).join(', ')||'None configured'}</p>
