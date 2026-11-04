@@ -21,7 +21,7 @@ export const defaultEnvironment: EnvironmentConfig = {
   description: "",
   type: "SANDBOX",
   modelId: "glm-dev",
-  guardrailId: "",
+  guardrailId: "none",
   runner: { id: "openshell", concurrency: 1 },
   network: [],
   readOnlyPaths: ["/app", "/datasets"],
@@ -228,21 +228,7 @@ function EnvironmentEditor({
             <option value="none">none</option>
           </Select>
         </Field>
-        <Field label="Guardrail ID" hint="Choose a Guardrail target from the target catalog.">
-          <Select
-            value={config.guardrailId ?? ""}
-            onChange={(e) => patch({ guardrailId: e.target.value })}
-          >
-            <option value="" disabled>Select a Guardrail target</option>
-            {config.guardrailId && !guardrails.some((target) => target.id === config.guardrailId) && (
-              <option value={config.guardrailId} disabled>{config.guardrailId} (unavailable)</option>
-            )}
-            {guardrails.map((target) => (
-              <option key={target.id} value={target.id}>{target.name} · {target.id}</option>
-            ))}
-          </Select>
-          {!guardrails.length && <p className="text-xs text-muted-foreground">No Guardrail targets available. Add a target on the Evaluation page first.</p>}
-        </Field>
+        <div className="self-center rounded border bg-muted/20 p-3 text-xs text-muted-foreground">Select the Guardrail provider and instance in Evaluation → Configure. This environment controls execution resources.</div>
         <Field label="执行环境">
           <Input value="OpenShell" disabled />
         </Field>

@@ -212,3 +212,18 @@ Migrated all current dataset drafts/latest versions referencing Git Scan classif
 ## 2026-11-03: unified Dataset-first workflow
 
 Implemented Dataset publication independent of scorer, evaluation-owned pinned dataset/scorer/aspect bindings, atomic Configure and subset-only Trigger. See [workflow-unification.md](workflow-unification.md) for storage/API changes, deployment images and two successful real Runner acceptance runs. Docker Hub 2.3.2 remains the previous release.
+
+
+## 2026-11-04: provider-scoped Guardrail instance registry
+
+Implemented configured Provider -> Instance selection, read-only endpoint summary, explicit invalid-selection states, server-side instance validation and run-scoped connection snapshot. K8s adds evaluation-guardrails ConfigMap and EVAL_GUARDRAIL_REGISTRY; Compose adds guardrails JSON and guardrail_token file secret. See [guardrail-instance-registry.md](guardrail-instance-registry.md) for compatibility, deployment and completed acceptance run.
+
+
+## 2026-11-04: Mock Guardrail request logs
+
+Added standalone stdout JSON request started/completed/failed events; filters health/ready, excludes credentials and input content, correlates X-Request-ID and traceparent. Deployed evaluation-mock-guardrail:request-logs-20261104. Two focused tests passed. Real run eval-3d2f2b7113806d0643e4d314 completed four samples; all four POSTs appear in Mock logs with status 200 and blocked/cleared outcomes, with zero probe request logs. Docker Hub not updated.
+
+
+## 2026-11-04: release 2.3.3
+
+Release sources are the currently deployed UI guardrail-registry-20261104, worker guardrail-registry-20261104 and Mock request-logs-20261104. Upgrade instructions and a server-dry-run-validated strategic Deployment patch are under docs/evaluation/releases/2.3.3.md and 2.3.3-api-patch.json. The release requires the Guardrail registry ConfigMap and API mount in addition to service/Runner image updates. Existing storage and token Secrets are reused.

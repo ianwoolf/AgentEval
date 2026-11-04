@@ -23,7 +23,7 @@ it('Trigger shows only configured datasets and posts a pinned subset with revisi
  await waitFor(()=>expect(started).toHaveBeenCalledWith('run'));
 });
 it('Configure saves target, pinned scorer bindings and environment in one request',async()=>{
- mock.api.mockImplementation(async(_p,path,opts)=>path.endsWith('/config')?config:{...JSON.parse(opts.body).target,revision:'11:1'});
+ mock.api.mockImplementation(async(_p,path,opts)=>path==='guardrail-instances'?{revision:'1',providers:[{id:'f5',name:'F5',instances:[{id:'gr',name:'Guardrail',address:'https://guard.test/scans',enabled:true}]}]}:path.endsWith('/config')?config:{...JSON.parse(opts.body).target,revision:'11:1'});
  const saved=vi.fn();render(<EvaluationConfigurator initial={mock.state.targets[0]} onClose={()=>{}} onSaved={saved}/>);
  await waitFor(()=>expect(screen.queryByText('Loading configuration…')).toBeNull());
  await userEvent.click(screen.getByRole('button',{name:'Next'}));
@@ -36,4 +36,18 @@ it('Configure saves target, pinned scorer bindings and environment in one reques
  expect(body.config.guardrail_bindings[0]).toMatchObject({dataset_id:'selected',scorer_id:'git',scorer_version:1});
  expect(body.config.environment_version).toBe(1);expect(body.config.execution_mode).toBe('guardrail');
  await waitFor(()=>expect(saved).toHaveBeenCalled());
+});
+it('clears the instance when provider changes and requires a configured selection',async()=>{
+ mock.api.mockResolvedValue({revision:'1',providers:[{id:'f5',name:'F5',instances:[{id:'first',name:'First',address:'https://f5.test/scans',enabled:true}]},{id:'nemo guardrail',name:'NeMo',instances:[{id:'second',name:'Second',address:'https://nemo.test/scans',enabled:true}]}]});
+ render(<EvaluationConfigurator onClose={()=>{}} onSaved={()=>{}}/>);
+ const user=userEvent.setup();await screen.findByRole('option',{name:'F5'});
+ expect(screen.getByLabelText('Guardrail instance *')).toHaveProperty('disabled',true);
+ await user.type(screen.getByLabelText('Evaluation name *'),'Safety');
+ await user.selectOptions(screen.getByLabelText('Provider *'),'f5');
+ await user.selectOptions(screen.getByLabelText('Guardrail instance *'),'first');
+ expect(screen.getByRole('button',{name:'Next'})).toHaveProperty('disabled',false);
+ await user.selectOptions(screen.getByLabelText('Provider *'),'nemo guardrail');
+ expect(screen.getByLabelText('Guardrail instance *')).toHaveProperty('value','');
+ expect(screen.queryByRole('option',{name:'First · first'})).toBeNull();
+ expect(screen.getByRole('button',{name:'Next'})).toHaveProperty('disabled',true);
 });

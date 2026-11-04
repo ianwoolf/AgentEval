@@ -1,0 +1,40 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "volumes": [
+          {
+            "name": "guardrails",
+            "configMap": {
+              "name": "evaluation-guardrails"
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "api",
+            "image": "ianwoolf/evaluation-worker:2.3.3",
+            "volumeMounts": [
+              {
+                "name": "guardrails",
+                "mountPath": "/guardrails",
+                "readOnly": true
+              }
+            ],
+            "env": [
+              {
+                "name": "EVAL_MOCK_GUARDRAIL_TOKEN",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "name": "evaluation-mock-guardrail",
+                    "key": "token"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
