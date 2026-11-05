@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-11-05T03:50:12.759Z",
+  "specification": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+    "sha256": "e097a53481cbf4b25e07064fe0dd28f21c6dbfccd7a6c382ca7908fe1510adc1",
+    "bytes": 14327
+  },
+  "artifact": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+    "sha256": "8f742de4c26c2d25be789bcbe1de16d7205d9b20db2e5a40bf87c73e80ba5fd0",
+    "bytes": 859825
+  },
+  "stages": {
+    "validate": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": null,
+      "command": [
+        "C:\\Users\\o_lyn\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "C:\\zzz\\code\\ai\\AgentEval\\data\\local-deploy\\archify-tool\\archify\\bin\\archify.mjs",
+        "deliver",
+        "architecture",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "deliver",
+        "receiptId": "4bf59dc9-94bc-4ac8-bc77-d083242b747e",
+        "stage": "render",
+        "type": "architecture",
+        "input": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+        "output": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "error": "Could not resolve evidence repository root \"C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence\": ENOENT: no such file or directory, lstat 'C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence'",
+        "diagnostics": [
+          {
+            "code": "repository-evidence/root-unreadable",
+            "severity": "error",
+            "message": "Could not resolve evidence repository root \"C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence\": ENOENT: no such file or directory, lstat 'C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence'",
+            "subject": {
+              "surface": "repository-evidence",
+              "repoRoot": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence"
+            },
+            "evidence": {
+              "reason": "ENOENT: no such file or directory, lstat 'C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence'"
+            },
+            "supportedFixes": [
+              "pass one readable local repository directory"
+            ]
+          }
+        ],
+        "provenance": "failed",
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      },
+      "execution": "embedded-in-deliver"
+    },
+    "deliver": {
+      "status": "not-run",
+      "execution": "blocked-by-validate"
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "diagnostics": [
+    {
+      "code": "repository-evidence/root-unreadable",
+      "severity": "error",
+      "message": "Could not resolve evidence repository root \"C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence\": ENOENT: no such file or directory, lstat 'C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence'",
+      "subject": {
+        "surface": "repository-evidence",
+        "repoRoot": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence"
+      },
+      "evidence": {
+        "reason": "ENOENT: no such file or directory, lstat 'C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\evidence'"
+      },
+      "supportedFixes": [
+        "pass one readable local repository directory"
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-8\\guardrail-evaluation.finalize.json",
+    "summaryReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-8\\guardrail-evaluation.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "validate",
+  "finishedAt": "2026-11-05T03:50:13.794Z",
+  "durationMs": 1035,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-04T06:31:12.785Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

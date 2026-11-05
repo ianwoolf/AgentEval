@@ -2,15 +2,10 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "AgentEval - Guardrail Evaluation Architecture",
+    "title": "AgentEval - Platform Integration and Guardrail Evaluation",
     "locale": "en",
     "output": ".archify/architecture-guardeval-20261104-120000/guardrail-evaluation.html",
     "quality_profile": "showcase",
-    "repository": {
-      "url": "git@github.com:ianwoolf/AgentEval.git",
-      "revision": "4952ead4d97c558f3b5e8d78553d28a9a71dc23d",
-      "link_mode": "local-only"
-    },
     "views": [
       {
         "id": "evaluation",
@@ -24,7 +19,9 @@
           "script",
           "collector",
           "es",
-          "guardrail-proxy"
+          "guardrail-proxy",
+          "guardrail-management",
+          "ai-factory"
         ],
         "note": "Pinned datasets flow through Guardrail instances and Git scorers inside a Kubernetes Job."
       },
@@ -42,6 +39,17 @@
           "guardrail-proxy"
         ],
         "note": "Collector writes to Elasticsearch today. LangSmith is a planned exporter."
+      },
+      {
+        "id": "platform-integration",
+        "label": "Platform Integration",
+        "focus": [
+          "guardrail-management",
+          "ai-factory",
+          "api",
+          "ui"
+        ],
+        "note": "Guardrail Management already exists. AI Factory / Other AI Platforms is not implemented."
       }
     ]
   },
@@ -53,23 +61,11 @@
       "sublabel": "Publish / Configure / Trigger / Report",
       "pos": [
         40,
-        40
+        270
       ],
       "size": [
         230,
         76
-      ],
-      "sources": [
-        {
-          "path": "web/apps/control/src/features/evaluation-workbench/evaluation-configurator.tsx",
-          "line": 1,
-          "end_line": 63
-        },
-        {
-          "path": "web/apps/control/src/features/evaluation-workbench/reports-page.tsx",
-          "line": 1,
-          "end_line": 687
-        }
       ]
     },
     {
@@ -79,23 +75,11 @@
       "sublabel": "Version pins / validation / snapshots",
       "pos": [
         420,
-        40
+        270
       ],
       "size": [
         220,
         76
-      ],
-      "sources": [
-        {
-          "path": "evaluation-backend/src/evaluation_backend/target_configs.py",
-          "line": 1,
-          "end_line": 149
-        },
-        {
-          "path": "evaluation-backend/src/evaluation_backend/runs.py",
-          "line": 1,
-          "end_line": 330
-        }
       ]
     },
     {
@@ -105,23 +89,11 @@
       "sublabel": "input / label / strategy / version",
       "pos": [
         40,
-        320
+        550
       ],
       "size": [
         230,
         76
-      ],
-      "sources": [
-        {
-          "path": "evaluation-backend/src/evaluation_backend/upload_api.py",
-          "line": 1,
-          "end_line": 68
-        },
-        {
-          "path": "evaluation-backend/src/evaluation_backend/guardrail_worker.py",
-          "line": 1,
-          "end_line": 102
-        }
       ]
     },
     {
@@ -131,23 +103,11 @@
       "sublabel": "Per-sample orchestration / Model=None",
       "pos": [
         700,
-        240
+        470
       ],
       "size": [
         220,
         76
-      ],
-      "sources": [
-        {
-          "path": "evaluation-backend/src/evaluation_backend/guardrail_worker.py",
-          "line": 1,
-          "end_line": 102
-        },
-        {
-          "path": "evaluation-backend/src/evaluation_backend/proxy_entrypoint.py",
-          "line": 1,
-          "end_line": 98
-        }
       ],
       "tag": "Inside K8s Job"
     },
@@ -158,23 +118,11 @@
       "sublabel": "External provider-selected instance",
       "pos": [
         700,
-        700
+        930
       ],
       "size": [
         220,
         76
-      ],
-      "sources": [
-        {
-          "path": "evaluation-backend/src/evaluation_backend/guardrail_worker.py",
-          "line": 1,
-          "end_line": 102
-        },
-        {
-          "path": "evaluation-backend/src/evaluation_backend/mock_guardrail.py",
-          "line": 1,
-          "end_line": 93
-        }
       ],
       "tag": "Target instance / Mock supported"
     },
@@ -185,23 +133,11 @@
       "sublabel": "script.py / pinned commit",
       "pos": [
         970,
-        500
+        730
       ],
       "size": [
         180,
         90
-      ],
-      "sources": [
-        {
-          "path": "evaluation-backend/src/evaluation_backend/git_scorers.py",
-          "line": 1,
-          "end_line": 118
-        },
-        {
-          "path": "evaluation-backend/src/evaluation_backend/guardrail_worker.py",
-          "line": 1,
-          "end_line": 102
-        }
       ],
       "tag": "Fetched and executed by Runner"
     },
@@ -212,18 +148,11 @@
       "sublabel": "Resources / runs / scores / traces",
       "pos": [
         40,
-        700
+        930
       ],
       "size": [
         230,
         76
-      ],
-      "sources": [
-        {
-          "path": "evaluation-backend/src/evaluation_backend/storage/elastic.py",
-          "line": 1,
-          "end_line": 371
-        }
       ]
     },
     {
@@ -233,23 +162,11 @@
       "sublabel": "HTTP feedback + OTLP traces",
       "pos": [
         420,
-        440
+        670
       ],
       "size": [
         220,
         76
-      ],
-      "sources": [
-        {
-          "path": "evaluation-backend/src/evaluation_backend/collector.py",
-          "line": 1,
-          "end_line": 111
-        },
-        {
-          "path": "evaluation-backend/src/evaluation_backend/proxy_entrypoint.py",
-          "line": 1,
-          "end_line": 98
-        }
       ],
       "tag": "Inside Runner container"
     },
@@ -260,18 +177,11 @@
       "sublabel": "Planned Collector exporter",
       "pos": [
         350,
-        930
+        1160
       ],
       "size": [
         220,
         76
-      ],
-      "sources": [
-        {
-          "path": "evaluation-backend/src/evaluation_backend/collector.py",
-          "line": 1,
-          "end_line": 111
-        }
       ],
       "tag": "Not implemented"
     },
@@ -283,23 +193,39 @@
       "tag": "Runner-internal logic",
       "pos": [
         700,
-        440
+        670
       ],
       "size": [
         220,
         76
+      ]
+    },
+    {
+      "id": "guardrail-management",
+      "type": "frontend",
+      "label": "Guardrail Management",
+      "pos": [
+        270,
+        40
       ],
-      "sources": [
-        {
-          "path": "evaluation-backend/src/evaluation_backend/guardrail_worker.py",
-          "line": 13,
-          "end_line": 60
-        },
-        {
-          "path": "evaluation-backend/src/evaluation_backend/guardrail_runs.py",
-          "line": 83,
-          "end_line": 99
-        }
+      "size": [
+        310,
+        86
+      ]
+    },
+    {
+      "id": "ai-factory",
+      "type": "external",
+      "label": "AI Factory / Other AI Platforms",
+      "sublabel": "Benchmarking / quality / safety / release gates",
+      "tag": "Not implemented",
+      "pos": [
+        720,
+        40
+      ],
+      "size": [
+        320,
+        86
       ]
     }
   ],
@@ -401,6 +327,20 @@
       "to": "runner",
       "label": "Scan output / latency",
       "variant": "emphasis"
+    },
+    {
+      "id": "platform-gm",
+      "from": "guardrail-management",
+      "to": "api",
+      "label": "Guardrail evaluation integration",
+      "variant": "default"
+    },
+    {
+      "id": "platform-factory",
+      "from": "ai-factory",
+      "to": "api",
+      "label": "Evaluation API integration",
+      "variant": "dashed"
     }
   ],
   "cards": [
@@ -430,7 +370,16 @@
         "Three ES index families store resources/runs, samples/scores and traces. UI queries through Evaluation API.",
         "When OTel is configured, Runner exports standard OTLP spans. Typed sample and score feedback uses the Collector HTTP API. Cost is currently mock.",
         "Guardrail credentials use a protected run-detail endpoint. Git SSH keys are mounted from Secrets. Script subprocesses do not inherit API, Guardrail or Collector credentials.",
-        "Based on a local working-tree evidence snapshot from 2026-11-04, not a published remote release commit."
+        "Architecture overview based on the previously reviewed implementation. Upstream platform connections are proposed integration points; source snapshot links are unavailable in this copy."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Upstream platform integration",
+      "items": [
+        "Guardrail Management is an existing upstream management system. AI Factory and other AI platforms are not implemented.",
+        "Proposed flow: upstream platform submits or references an evaluation configuration, triggers a run and queries status, reports and request details through Evaluation API.",
+        "The solid Guardrail Management connection represents the current integration. The dashed AI Factory / Other AI Platforms connection represents a not-implemented extension."
       ]
     }
   ],
@@ -452,6 +401,15 @@
         "script"
       ],
       "pad": 26
+    },
+    {
+      "kind": "region",
+      "label": "Upstream Management Platforms - integration options",
+      "wraps": [
+        "guardrail-management",
+        "ai-factory"
+      ],
+      "pad": 20
     }
   ]
 }

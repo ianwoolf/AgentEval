@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 3.2.0">
   <meta name="archify-reader-contract" content="declared-wide-v1">
-  <title>AgentEval - Guardrail Evaluation Architecture Diagram</title>
+  <title>AgentEval - Platform Integration and Guardrail Evaluation Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -5194,17 +5194,17 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
            data-preset-badge-blueprint="BLUEPRINT / REV 01"
            data-preset-badge-editorial="EDITORIAL / FIELD NOTE">
         <div class="pulse-dot"></div>
-        <h1>AgentEval - Guardrail Evaluation Architecture</h1>
+        <h1>AgentEval - Platform Integration and Guardrail Evaluation</h1>
       </div>
     </div>
 
-    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"git@github.com:ianwoolf/AgentEval","revision":"4952ead4d97c558f3b5e8d78553d28a9a71dc23d","shortRevision":"4952ead","label":"ianwoolf/AgentEval","linkMode":"local-only"},"referenceCount":18,"nodes":{"ui":[{"path":"web/apps/control/src/features/evaluation-workbench/evaluation-configurator.tsx","line":1,"endLine":63},{"path":"web/apps/control/src/features/evaluation-workbench/reports-page.tsx","line":1,"endLine":687}],"api":[{"path":"evaluation-backend/src/evaluation_backend/target_configs.py","line":1,"endLine":149},{"path":"evaluation-backend/src/evaluation_backend/runs.py","line":1,"endLine":330}],"dataset":[{"path":"evaluation-backend/src/evaluation_backend/upload_api.py","line":1,"endLine":68},{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102}],"runner":[{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102},{"path":"evaluation-backend/src/evaluation_backend/proxy_entrypoint.py","line":1,"endLine":98}],"guardrail":[{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102},{"path":"evaluation-backend/src/evaluation_backend/mock_guardrail.py","line":1,"endLine":93}],"script":[{"path":"evaluation-backend/src/evaluation_backend/git_scorers.py","line":1,"endLine":118},{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102}],"es":[{"path":"evaluation-backend/src/evaluation_backend/storage/elastic.py","line":1,"endLine":371}],"collector":[{"path":"evaluation-backend/src/evaluation_backend/collector.py","line":1,"endLine":111},{"path":"evaluation-backend/src/evaluation_backend/proxy_entrypoint.py","line":1,"endLine":98}],"langsmith":[{"path":"evaluation-backend/src/evaluation_backend/collector.py","line":1,"endLine":111}],"guardrail-proxy":[{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":13,"endLine":60},{"path":"evaluation-backend/src/evaluation_backend/guardrail_runs.py","line":83,"endLine":99}]}}</script>
+
     <script id="archify-i18n-data" type="application/json">{"locale":"en","messages":{"viewer.kind.frontend":"Frontend","viewer.kind.backend":"Backend","viewer.kind.database":"Database","viewer.kind.cloud":"Cloud","viewer.kind.security":"Security","viewer.kind.messagebus":"Message bus","viewer.kind.external":"External","viewer.kind.neutral":"Neutral","viewer.kind.node":"Node","viewer.kind.start":"Start","viewer.kind.active":"Active","viewer.kind.waiting":"Waiting","viewer.kind.decision":"Decision","viewer.kind.success":"Success","viewer.kind.failure":"Failure","viewer.toolbar.actions":"Diagram actions","viewer.theme.toggle.title":"Toggle theme (T)","viewer.theme.toggle":"Toggle color theme","viewer.theme.dark":"Dark","viewer.theme.light":"Light","viewer.preset.choose.title":"Choose visual style (S cycles)","viewer.preset.choose":"Choose visual style","viewer.preset.style":"Style","viewer.preset.menu":"Visual style","viewer.preset.identity":"Visual identity","viewer.preset.cycles":"to cycle","viewer.preset.classic":"Classic","viewer.preset.classic.short":"Classic","viewer.preset.classic.hint":"Stable technical default","viewer.preset.flow":"Signal Flow","viewer.preset.flow.short":"Flow","viewer.preset.flow.hint":"Motion-forward presentation","viewer.preset.blueprint":"Blueprint","viewer.preset.blueprint.hint":"Engineering review","viewer.preset.editorial":"Editorial","viewer.preset.editorial.hint":"Publication and launch notes","viewer.preset.badge.signalFlow":"SIGNAL FLOW","viewer.preset.badge.blueprint":"BLUEPRINT / REV 01","viewer.preset.badge.editorial":"EDITORIAL / FIELD NOTE","viewer.preset.badge.editorialPlate":"ARCHIFY / PLATE 04","viewer.preset.current":"Visual style: {style}. Choose visual style","viewer.motion.live":"Live","viewer.motion.still":"Still","viewer.motion.pause":"Pause motion","viewer.motion.resume":"Resume motion","viewer.motion.reduced":"Motion paused by reduced-motion preference","viewer.motion.hidden":"Motion paused while this page is hidden","viewer.motion.yielding":"Pause motion; currently yielding to {owner}","viewer.motion.yielding.title":"Live preview enabled · yielding to {owner}","viewer.owner.route":"Route Probe","viewer.owner.lens":"Semantic Lens","viewer.owner.relationship":"Relationship Preview","viewer.owner.intent":"Intent Trace","viewer.owner.focus":"semantic focus","viewer.owner.legend":"legend preview","viewer.owner.reader":"reader interaction","viewer.present.enter":"Enter presentation stage","viewer.present.enter.title":"Presentation stage (F)","viewer.present.exit":"Exit presentation stage","viewer.present.exit.title":"Exit presentation stage (F or Escape)","viewer.present.present":"Present","viewer.present.exit.label":"Exit","viewer.export.button":"Export","viewer.export.button.title":"Export diagram (E)","viewer.export.diagram":"Export diagram","viewer.export.menu":"Export","viewer.export.subtitle":"Portable, clean outputs","viewer.export.share":"Share","viewer.export.shareCard":"Share Card","viewer.export.routeShareCard":"Route Share Card","viewer.export.reachShareCard":"Reach Share Card","viewer.export.copyDiagram":"Copy diagram","viewer.export.clipboardPng":"PNG to clipboard","viewer.export.raster":"Raster images","viewer.export.image":"Image","viewer.export.lossless":"Lossless image","viewer.export.compact":"Compact image","viewer.export.modern":"Modern image","viewer.export.vectorMotion":"Vector and motion","viewer.export.vectorMotion.heading":"Vector \u0026 motion","viewer.export.editable":"Editable vector","viewer.export.svg.auto":"SVG · Auto","viewer.export.svg.auto.hint":"Matches host theme","viewer.export.svg.light":"SVG · Light","viewer.export.svg.light.hint":"Always light","viewer.export.svg.dark":"SVG · Dark","viewer.export.svg.dark.hint":"Always dark","viewer.export.motion6s":"6s motion","viewer.export.unsupported":"Not supported by this browser","viewer.export.clipboardUnsupported":"Clipboard image write not supported by this browser","viewer.export.clipboardUnsupported.short":"Clipboard image write not supported in this browser.","viewer.export.motionUnavailable":"Motion capture unavailable in this browser","viewer.export.webmUnavailable":"WebM unavailable in this browser","viewer.export.failed":"Export failed: {message}","viewer.export.unknownVariant":"Unknown Share Card variant: {variant}","viewer.export.routeRequired":"Trace a route before exporting a Route Share Card","viewer.export.reachRequired":"Trace authored reach before exporting a Reach Share Card","viewer.export.unknown":"unknown","viewer.export.routeFailed":"Route Share Card export failed: {message}","viewer.export.reachFailed":"Reach Share Card export failed: {message}","viewer.export.copyFailed":"Copy failed: {message}","viewer.export.copiedPng":"Copied PNG to clipboard","viewer.export.downloadedRoute":"Downloaded Route Share Card","viewer.export.downloadedReach":"Downloaded Reach Share Card","viewer.export.downloadedWebm":"Downloaded WebM","viewer.export.recording":"Recording 6 seconds of motion…","viewer.export.card.routeSummary.one":"Path: {source} → {target} · {count} step","viewer.export.card.routeSummary.other":"Path: {source} → {target} · {count} steps","viewer.export.card.reachSummary":"Authored {direction} from {origin} · {nodes} · {links} · max {hops}","viewer.export.card.node.one":"{count} node","viewer.export.card.node.other":"{count} nodes","viewer.export.card.link.one":"{count} link","viewer.export.card.link.other":"{count} links","viewer.export.card.hop.one":"{count} hop","viewer.export.card.hop.other":"{count} hops","viewer.export.card.routeBadge":"ARCHIFY · ROUTE · {hops}","viewer.export.card.reachBadge":"ARCHIFY · {direction} REACH","viewer.export.direction.upstream":"Upstream","viewer.export.direction.downstream":"Downstream","viewer.export.error.canvasUnavailable":"Canvas unavailable for {label}","viewer.export.error.contextUnavailable":"2D canvas context unavailable for {label}","viewer.export.error.toBlobUnavailable":"canvas.toBlob unavailable for {label}","viewer.export.error.toBlobNull":"canvas.toBlob returned no data for {label}","viewer.export.error.variantsCombined":"Share Card variants cannot be combined","viewer.export.error.viewerState":"Share Card export could not remove temporary viewer state","viewer.export.error.routeState":"Route Card export could not preserve the resolved route safely","viewer.export.error.reachState":"Reach Card export could not preserve authored reach safely","viewer.export.error.webmRequirements":"WebM motion export requires a trace animation and browser MediaRecorder support","viewer.export.error.mediaRecorder":"MediaRecorder failed","viewer.export.error.emptyWebm":"MediaRecorder produced an empty WebM","viewer.export.error.webmBackground":"SVG background could not be loaded for WebM export","viewer.guide.title":"Explore this system","viewer.focus.selectedNodes":"{count} selected nodes","viewer.guide.eyebrow":"Diagram guide","viewer.guide.close":"Close diagram guide","viewer.guide.inspecting":"Inspecting compiled semantics","viewer.guide.actions":"Diagram exploration actions","viewer.guide.find":"Find any node","viewer.guide.find.hint":"Search labels, responsibilities, kinds, and stable IDs.","viewer.guide.route":"Trace a route","viewer.guide.route.aria":"Trace a directed route","viewer.guide.route.hint":"Ask how two semantic nodes connect in authored direction.","viewer.guide.map":"See the whole system","viewer.guide.map.hint":"Open Semantic Radar with a live viewport and stable nodes.","viewer.guide.lens":"Compare semantic kinds","viewer.guide.lens.hint":"Count roles, reveal their traffic, and compare direct authored links.","viewer.guide.present":"Enter Presentation Stage","viewer.guide.present.hint":"Give the live diagram the viewport without changing export.","viewer.guide.shortcuts":"Additional keyboard shortcuts","viewer.guide.shortcut.export":"Export","viewer.guide.shortcut.theme":"Theme","viewer.guide.shortcut.style":"Style","viewer.guide.shortcut.reset":"Reset","viewer.guide.shortcut.zoomIn":"Zoom in","viewer.guide.shortcut.zoomOut":"Zoom out","viewer.guide.shortcut.close":"Close","viewer.guide.credit":"Find Archify useful? A star on GitHub helps","viewer.guide.star":"Star","viewer.guide.facts":"{nodes} · {relationships}","viewer.guide.fact.node.one":"{count} semantic node","viewer.guide.fact.node.other":"{count} semantic nodes","viewer.guide.fact.relationship.one":"{count} relationship","viewer.guide.fact.relationship.other":"{count} relationships","viewer.guide.open":"Open diagram guide","viewer.finder.title":"Find a node","viewer.finder.close":"Close node finder","viewer.finder.placeholder":"Search labels or IDs","viewer.finder.search":"Search diagram nodes","viewer.finder.results":"Diagram nodes","viewer.finder.empty":"No matching nodes","viewer.finder.result.focus":"Focus {label}","viewer.finder.result.routeStart":"Choose {label} as route start","viewer.finder.result.routeTarget":"Choose {label} as route destination, {links}","viewer.finder.status.empty":"No matching nodes","viewer.finder.status.count.one":"{count} matching node","viewer.finder.status.count.other":"{count} matching nodes","viewer.finder.noun.nodes":"nodes","viewer.finder.link.one":"{count} link","viewer.finder.link.other":"{count} links","viewer.finder.result.focus.one":"Focus {label}, {count} related connection","viewer.finder.result.focus.other":"Focus {label}, {count} related connections","viewer.finder.status.filtered":"{visible} of {available} {noun}","viewer.finder.status.all":"{available} {noun}","viewer.passport.eyebrow":"Semantic passport","viewer.passport.metadata":"Node metadata","viewer.passport.evidence":"Verified source evidence","viewer.passport.verified":"Verified source","viewer.passport.verificationScope":"Verified against local Git at the pinned revision. Remote access has not been checked.","viewer.passport.reach":"Authored reach","viewer.passport.reach.trace":"Trace authored reachability","viewer.passport.upstream":"Upstream","viewer.passport.downstream":"Downstream","viewer.passport.upstream.trace":"Trace upstream authored reachability","viewer.passport.downstream.trace":"Trace downstream authored reachability","viewer.passport.close":"Close semantic passport","viewer.passport.move":"Move semantic passport. Drag, use arrow keys, or press Home to reset.","viewer.passport.copy":"Copy link","viewer.passport.copy.focus":"Copy link to focused node","viewer.passport.relations":"Relations","viewer.passport.relations.show":"Show connected relationships","viewer.passport.relations.hide":"Hide connected relationships","viewer.passport.relations.list":"Connected relationships","viewer.passport.copyRelation":"Copy relation","viewer.passport.copyNode":"Copy node","viewer.passport.copyPinned":"Copy link to pinned relationship","viewer.passport.copySource":"Copy link to source node","viewer.passport.copy.focused.success":"Focused node link copied","viewer.passport.copy.pinned.success":"Pinned relationship link copied","viewer.passport.copy.focused.failed":"Could not copy focused node link","viewer.passport.copy.pinned.failed":"Could not copy pinned relationship link","viewer.passport.relationship.none":"No connected relationships","viewer.passport.relationship.count.one":"{count} relation","viewer.passport.relationship.count.other":"{count} relations","viewer.passport.relationship.show.one":"Show {count} connected relationship","viewer.passport.relationship.show.other":"Show {count} connected relationships","viewer.passport.relationship.summary":"{out} outgoing · {in} incoming{loops}","viewer.passport.relationship.loops":" · {count} loop","viewer.passport.relationship.explorer":"Direct relationship explorer","viewer.passport.relationship.help":"Use arrow keys to explore relationships. Press Enter or Space to pin details; Escape clears.","viewer.passport.relationship.loopsBack":"loops back","viewer.passport.relationship.connectsTo":"connects to","viewer.passport.relationship.connectsFrom":"connects from","viewer.passport.relationship.pinned":"Pinned relationship · {from} → {to} · {label}","viewer.passport.relationship.inspect":"Inspect relationship {index} of {total}: {from} to {to}, {label}. Press Enter for details.","viewer.passport.relationship.group.out":"Outgoing","viewer.passport.relationship.group.in":"Incoming","viewer.passport.relationship.group.loop":"Self loops","viewer.passport.relationship.row":"{group}: {relationship}, {neighbor}","viewer.passport.relationship.direction.out":"OUT →","viewer.passport.relationship.direction.in":"← IN","viewer.passport.relationship.direction.loop":"LOOP","viewer.passport.sourceCount.one":"{count} verified source reference","viewer.passport.sourceCount.other":"{count} verified source references","viewer.passport.repository.open":"Open verified repository revision {revision}","viewer.passport.source.open":"Open verified source {path} at revision {revision}","viewer.passport.source.openLink":"Open ↗","viewer.passport.reach.upstream.one":"Trace {count} upstream authored node","viewer.passport.reach.upstream.other":"Trace {count} upstream authored nodes","viewer.passport.reach.downstream.one":"Trace {count} downstream authored node","viewer.passport.reach.downstream.other":"Trace {count} downstream authored nodes","viewer.passport.reach.noUpstream":"No upstream authored nodes","viewer.passport.reach.noDownstream":"No downstream authored nodes","viewer.passport.reach.status":"{direction} · {nodes} nodes · {links} links · max {hops} hops","viewer.route.eyebrow":"Path","viewer.route.start":"Click where the path starts","viewer.route.start.find":"Find start","viewer.route.start.find.aria":"Find a route start","viewer.route.copy":"Copy link","viewer.route.copy.aria":"Copy link to traced route","viewer.route.clear":"Clear","viewer.route.clear.aria":"Clear route probe","viewer.route.traced":"Path","viewer.route.pickTwo":"Click two nodes on the diagram","viewer.route.pickOne":"Click a node on the diagram","viewer.route.controls":"Route journey controls","viewer.route.previous":"Previous route position","viewer.route.play":"Play route journey","viewer.route.pause":"Pause route journey","viewer.route.replay":"Replay route journey","viewer.route.next":"Next route position","viewer.route.journey":"Journey","viewer.route.pause.label":"Pause","viewer.route.replay.label":"Replay","viewer.route.overview":"Overview","viewer.route.overview.aria":"Show complete route overview","viewer.route.instructions":"Click a start, then an end. Paths follow the arrows.","viewer.route.destination":"Where does the path from {label} end?","viewer.route.destination.find":"Find target","viewer.route.destination.find.aria":"Find a reachable route destination","viewer.route.differentDestination":"Choose a different destination","viewer.route.distinct":"Pick two different nodes.","viewer.route.unreachable":"Cannot reach {label} from here","viewer.route.unreachable.detail":"{target} cannot be reached from {source} along the arrows. Pick a highlighted node.","viewer.route.start.instructions":"Next, pick the end. Only nodes you can reach will light up.","viewer.route.copy.success":"Traced route link copied","viewer.route.copy.failed":"Could not copy traced route link","viewer.route.position":"Route position {index} of {total}: {label}","viewer.route.step":"Step {index} of {total} · {phase} · {label}","viewer.route.motionRequired":"Automatic journey requires Live motion","viewer.route.trigger.clear":"Clear traced route","viewer.route.overview.status":"{nodes} · {hops} · shortest path","viewer.route.overview.node.one":"{count} node","viewer.route.overview.node.other":"{count} nodes","viewer.route.overview.hop.one":"{count} step","viewer.route.overview.hop.other":"{count} steps","viewer.route.phase.playing":"Playing","viewer.route.phase.complete":"Complete","viewer.route.phase.inspecting":"Inspecting","viewer.route.destination.count.one":"{count} reachable node is highlighted. Click it.","viewer.route.destination.count.other":"{count} reachable nodes are highlighted. Click one.","viewer.route.noOutgoing":"No arrows lead out of this node. Clear it and pick another start.","viewer.route.result.title":"{source} to {target}","viewer.route.finder.source.title":"Choose route start","viewer.route.finder.source.placeholder":"Search route sources","viewer.route.finder.source.empty":"No matching route sources","viewer.route.finder.source.results":"Nodes that can start a route","viewer.route.finder.source.noun":"route sources","viewer.route.finder.source.badge":"start","viewer.route.finder.target.title":"Destination from {label}","viewer.route.finder.target.placeholder":"Search reachable destinations","viewer.route.finder.target.empty":"No matching reachable destinations","viewer.route.finder.target.results":"Reachable route destinations","viewer.route.finder.target.noun":"reachable destinations","viewer.route.hop.one":"{count} hop","viewer.route.hop.other":"{count} hops","viewer.lens.eyebrow":"Semantic lens","viewer.lens.title":"Compare system roles","viewer.lens.close":"Close semantic lens","viewer.lens.instruction":"Choose up to two semantic kinds. One reveals its real traffic; two compare only direct authored relationships.","viewer.lens.kinds":"Semantic kinds","viewer.lens.choose":"Choose a kind to inspect its nodes and touching relationships.","viewer.lens.copy":"Copy link to semantic lens","viewer.lens.clear":"Clear semantic lens","viewer.lens.open":"Open semantic lens","viewer.lens.openActive":"Open active semantic lens","viewer.lens.legend":"Semantic legend","viewer.lens.legend.inspect.one":"Inspect {label}, {count} node","viewer.lens.legend.inspect.other":"Inspect {label}, {count} nodes","viewer.lens.kind.count.one":"{label}, {count} node","viewer.lens.kind.count.other":"{label}, {count} nodes","viewer.lens.compare.one":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationship","viewer.lens.compare.other":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationships","viewer.lens.single":"{nodes} · {relationships} · connected peers remain visible","viewer.lens.node.one":"{count} {label} node","viewer.lens.node.other":"{count} {label} nodes","viewer.lens.relationship.one":"{count} touching relationship","viewer.lens.relationship.other":"{count} touching relationships","viewer.radar.title":"Semantic radar","viewer.radar.building":"Building overview","viewer.radar.openFull":"Open full semantic radar","viewer.radar.open":"Open radar","viewer.radar.close":"Close semantic radar","viewer.radar.surface":"Diagram overview. Click a node to focus it, or use arrow keys to pan.","viewer.radar.click":"Click node","viewer.radar.drag":"Drag to pan","viewer.radar.space":"Semantic radar needs more MAP space.","viewer.radar.nodes":"Semantic diagram radar nodes","viewer.radar.focus":"Focus {label} from Semantic Radar","viewer.radar.status":"{count} nodes · {viewport}","viewer.radar.fullMap":"{count} nodes · full map","viewer.radar.compacted":"Radar compacted to avoid covering the Semantic Passport or MAP controls.","viewer.radar.cancelWaiting":"Cancel semantic radar waiting for more MAP space","viewer.radar.needsSpace":"Semantic radar needs more visible MAP space","viewer.radar.viewport.full":"full map","viewer.radar.viewport.width":"{percent}% width","viewer.radar.viewport.scale":"{percent}% viewport","viewer.nav.controls":"Diagram view controls","viewer.nav.route":"Trace a directed route","viewer.nav.route.title":"Trace route (R)","viewer.nav.route.short":"ROUTE","viewer.nav.radar":"Open semantic radar","viewer.nav.radar.title":"Semantic radar (M)","viewer.nav.radar.short":"MAP","viewer.nav.lens":"Open semantic lens","viewer.nav.lens.title":"Semantic lens (L)","viewer.nav.lens.short":"LENS","viewer.nav.find":"Find a node","viewer.nav.find.title":"Find a node (/)","viewer.outline.title":"Node index","viewer.rail.show":"Notes \u0026 index","viewer.rail.controls":"Side panel","viewer.rail.collapse":"Collapse side panel","viewer.rail.bottom":"Move panel below the diagram","viewer.rail.right":"Move panel beside the diagram","viewer.nav.guide":"Open diagram guide","viewer.nav.guide.title":"Diagram guide (?)","viewer.nav.zoomOut":"Zoom out","viewer.nav.zoomOut.title":"Zoom out (-)","viewer.nav.reset":"Reset diagram view","viewer.nav.reset.title":"Reset view (0)","viewer.nav.read":"READ","viewer.nav.zoomIn":"Zoom in","viewer.nav.zoomIn.title":"Zoom in (+)","viewer.nav.camera":"{hint}. Reset diagram view","viewer.nav.camera.title":"{semantic}{hint} · reset view (0)","viewer.nav.camera.semantic":"Semantic camera active · ","viewer.nav.level.map":"MAP","viewer.nav.level.read":"READ","viewer.nav.level.full":"FULL","viewer.nav.level.auto":"AUTO","viewer.nav.detail.map":"Zoom in to reveal relationship labels and node context","viewer.nav.detail.read":"Zoom in again to reveal tags and annotations","viewer.nav.detail.full":"Full diagram detail","viewer.intent.summary":"{label}. {out} outgoing, {in} incoming{loops}. {total} connections. Press Enter for details.","viewer.intent.loops":", {count} self loop","viewer.common.copied":"Copied","viewer.common.copyFailed":"Copy failed","viewer.common.copyLink":"Copy link","viewer.common.clear":"Clear","viewer.common.close":"Close"}}</script>
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / PLATE 04">
-      <svg viewBox="0 0 1232 1074" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase" data-node-ui="" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
-        <title id="archify-diagram-title">AgentEval - Guardrail Evaluation Architecture</title>
+      <svg viewBox="0 0 1232 1304" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase" data-node-ui="" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
+        <title id="archify-diagram-title">AgentEval - Platform Integration and Guardrail Evaluation</title>
         <desc id="archify-diagram-description">An architecture diagram generated by Archify.</desc>
         <!-- Definitions -->
         <defs>
@@ -5250,283 +5250,332 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="K8s Job - Evaluation Runner container" x="394" y="214" width="552" height="322" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="K8s Job - Evaluation Runner container" x="394" y="444" width="552" height="322" rx="12" class="c-region" stroke-width="1"/>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" data-composition-frame-label="Git Repo - Scorer source" x="944" y="474" width="232" height="136" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" data-composition-frame-label="Git Repo - Scorer source" x="944" y="704" width="232" height="136" rx="12" class="c-region" stroke-width="1"/>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="2" data-composition-frame-label="Upstream Management Platforms - integration options" x="250" y="16" width="810" height="130" rx="12" class="c-region" stroke-width="1"/>
 
         <!-- Connection paths (before components for correct z-order) -->
         <g data-graph-role="automatic-crossover" style="--step:0">
-          <path data-graph-role="automatic-crossover-underlay" d="M 270 69.95 L 420 69.95" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="ui" data-edge-to="api" data-edge-label="Configure / Trigger / Report" data-edge-key="0" data-edge-id="ui-api-0" data-composition-points="270,69.95;420,69.95" data-composition-crossover="halo" data-composition-independent="true" d="M 270 69.95 L 420 69.95" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 270 299.95 L 420 299.95" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="ui" data-edge-to="api" data-edge-label="Configure / Trigger / Report" data-edge-key="0" data-edge-id="ui-api-0" data-composition-points="270,299.95;420,299.95" data-composition-crossover="halo" data-composition-independent="true" d="M 270 299.95 L 420 299.95" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:1">
-          <path data-graph-role="automatic-crossover-underlay" d="M 436 116 L 436 328 Q 436 336 428 336 L 270 336" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="api" data-edge-to="dataset" data-edge-label="Versioned samples" data-edge-key="1" data-edge-id="api-dataset-6" data-composition-points="436,116;436,336;270,336" data-composition-crossover="halo" data-composition-independent="true" d="M 436 116 L 436 328 Q 436 336 428 336 L 270 336" class="a-default" data-animate="edge" style="--step:1" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 436 346 L 436 558 Q 436 566 428 566 L 270 566" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="api" data-edge-to="dataset" data-edge-label="Versioned samples" data-edge-key="1" data-edge-id="api-dataset-6" data-composition-points="436,346;436,566;270,566" data-composition-crossover="halo" data-composition-independent="true" d="M 436 346 L 436 558 Q 436 566 428 566 L 270 566" class="a-default" data-animate="edge" style="--step:1" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:2">
-          <path data-graph-role="automatic-crossover-underlay" d="M 270 365 L 477 365 Q 485 365 485 357 L 485 286 Q 485 278 493 278 L 700 278" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="dataset" data-edge-to="runner" data-edge-label="input / label / strategy" data-edge-key="2" data-edge-id="dataset-runner-7" data-composition-points="270,365;485,365;485,278;700,278" data-composition-crossover="halo" data-composition-independent="true" d="M 270 365 L 477 365 Q 485 365 485 357 L 485 286 Q 485 278 493 278 L 700 278" class="a-emphasis" data-animate="edge" style="--step:2" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 270 595 L 477 595 Q 485 595 485 587 L 485 516 Q 485 508 493 508 L 700 508" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="dataset" data-edge-to="runner" data-edge-label="input / label / strategy" data-edge-key="2" data-edge-id="dataset-runner-7" data-composition-points="270,595;485,595;485,508;700,508" data-composition-crossover="halo" data-composition-independent="true" d="M 270 595 L 477 595 Q 485 595 485 587 L 485 516 Q 485 508 493 508 L 700 508" class="a-emphasis" data-animate="edge" style="--step:2" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:3">
-          <path data-graph-role="automatic-crossover-underlay" d="M 624 116 L 624 248 Q 624 256 632 256 L 700 256" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="api" data-edge-to="runner" data-edge-label="Create Job / snapshot" data-edge-key="3" data-edge-id="api-runner-8" data-composition-points="624,116;624,256;700,256" data-composition-crossover="halo" data-composition-independent="true" d="M 624 116 L 624 248 Q 624 256 632 256 L 700 256" class="a-default" data-animate="edge" style="--step:3" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 624 346 L 624 478 Q 624 486 632 486 L 700 486" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="api" data-edge-to="runner" data-edge-label="Create Job / snapshot" data-edge-key="3" data-edge-id="api-runner-8" data-composition-points="624,346;624,486;700,486" data-composition-crossover="halo" data-composition-independent="true" d="M 624 346 L 624 478 Q 624 486 632 486 L 700 486" class="a-default" data-animate="edge" style="--step:3" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:4">
-          <path data-graph-role="automatic-crossover-underlay" d="M 920 300 L 1126 300 Q 1134 300 1134 308 L 1134 500" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="runner" data-edge-to="script" data-edge-label="Fetch SHA / JSON stdin" data-edge-key="4" data-edge-id="runner-script-11" data-composition-points="920,300;1134,300;1134,500" data-composition-crossover="halo" data-composition-independent="true" d="M 920 300 L 1126 300 Q 1134 300 1134 308 L 1134 500" class="a-emphasis" data-animate="edge" style="--step:4" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 920 530 L 1126 530 Q 1134 530 1134 538 L 1134 730" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="runner" data-edge-to="script" data-edge-label="Fetch SHA / JSON stdin" data-edge-key="4" data-edge-id="runner-script-11" data-composition-points="920,530;1134,530;1134,730" data-composition-crossover="halo" data-composition-independent="true" d="M 920 530 L 1126 530 Q 1134 530 1134 538 L 1134 730" class="a-emphasis" data-animate="edge" style="--step:4" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:5">
-          <path data-graph-role="automatic-crossover-underlay" d="M 1067 500 L 1067 348 Q 1067 340 1059 340 L 839 340 Q 831 340 831 332 L 831 316" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="script" data-edge-to="runner" data-edge-label="JSON classification" data-edge-key="5" data-edge-id="script-runner-12" data-composition-points="1067,500;1067,340;831,340;831,316" data-composition-crossover="halo" data-composition-independent="true" d="M 1067 500 L 1067 348 Q 1067 340 1059 340 L 839 340 Q 831 340 831 332 L 831 316" class="a-emphasis" data-animate="edge" style="--step:5" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 1067 730 L 1067 578 Q 1067 570 1059 570 L 839 570 Q 831 570 831 562 L 831 546" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="script" data-edge-to="runner" data-edge-label="JSON classification" data-edge-key="5" data-edge-id="script-runner-12" data-composition-points="1067,730;1067,570;831,570;831,546" data-composition-crossover="halo" data-composition-independent="true" d="M 1067 730 L 1067 578 Q 1067 570 1059 570 L 839 570 Q 831 570 831 562 L 831 546" class="a-emphasis" data-animate="edge" style="--step:5" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:6">
-          <path data-graph-role="automatic-crossover-underlay" d="M 819.1 516 L 819.1 700" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="guardrail-proxy" data-edge-to="guardrail" data-edge-label="HTTP POST /scans" data-edge-key="6" data-edge-id="runner-guardrail-13" data-composition-points="819.1,516;819.1,700" data-composition-crossover="halo" data-composition-independent="true" d="M 819.1 516 L 819.1 700" class="a-emphasis" data-animate="edge" style="--step:6" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 819.1 746 L 819.1 930" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="guardrail-proxy" data-edge-to="guardrail" data-edge-label="HTTP POST /scans" data-edge-key="6" data-edge-id="runner-guardrail-13" data-composition-points="819.1,746;819.1,930" data-composition-crossover="halo" data-composition-independent="true" d="M 819.1 746 L 819.1 930" class="a-emphasis" data-animate="edge" style="--step:6" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:7">
-          <path data-graph-role="automatic-crossover-underlay" d="M 803 700 L 803 516" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="guardrail" data-edge-to="guardrail-proxy" data-edge-label="output + request ID" data-edge-key="7" data-edge-id="guardrail-runner-14" data-composition-points="803,700;803,516" data-composition-crossover="halo" data-composition-independent="true" d="M 803 700 L 803 516" class="a-emphasis" data-animate="edge" style="--step:7" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 803 930 L 803 746" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="guardrail" data-edge-to="guardrail-proxy" data-edge-label="output + request ID" data-edge-key="7" data-edge-id="guardrail-runner-14" data-composition-points="803,930;803,746" data-composition-crossover="halo" data-composition-independent="true" d="M 803 930 L 803 746" class="a-emphasis" data-animate="edge" style="--step:7" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:8">
-          <path data-graph-role="automatic-crossover-underlay" d="M 700 300 L 632 300 Q 624 300 624 308 L 624 440" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="runner" data-edge-to="collector" data-edge-label="Scores / latency / OTLP" data-edge-key="8" data-edge-id="runner-collector-15" data-composition-points="700,300;624,300;624,440" data-composition-crossover="halo" data-composition-independent="true" d="M 700 300 L 632 300 Q 624 300 624 308 L 624 440" class="a-emphasis" data-animate="edge" style="--step:8" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 700 530 L 632 530 Q 624 530 624 538 L 624 670" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="runner" data-edge-to="collector" data-edge-label="Scores / latency / OTLP" data-edge-key="8" data-edge-id="runner-collector-15" data-composition-points="700,530;624,530;624,670" data-composition-crossover="halo" data-composition-independent="true" d="M 700 530 L 632 530 Q 624 530 624 538 L 624 670" class="a-emphasis" data-animate="edge" style="--step:8" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:9">
-          <path data-graph-role="automatic-crossover-underlay" d="M 420 500 L 262 500 Q 254 500 254 508 L 254 700" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="collector" data-edge-to="es" data-edge-label="Persist feedback / spans" data-edge-key="9" data-edge-id="collector-es-16" data-composition-points="420,500;254,500;254,700" data-composition-crossover="halo" data-composition-independent="true" d="M 420 500 L 262 500 Q 254 500 254 508 L 254 700" class="a-emphasis" data-animate="edge" style="--step:9" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 420 730 L 262 730 Q 254 730 254 738 L 254 930" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="collector" data-edge-to="es" data-edge-label="Persist feedback / spans" data-edge-key="9" data-edge-id="collector-es-16" data-composition-points="420,730;254,730;254,930" data-composition-crossover="halo" data-composition-independent="true" d="M 420 730 L 262 730 Q 254 730 254 738 L 254 930" class="a-emphasis" data-animate="edge" style="--step:9" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:10">
-          <path data-graph-role="automatic-crossover-underlay" d="M 530 116 L 530 429 Q 530 437 522 437 L 163 437 Q 155 437 155 445 L 155 700" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="api" data-edge-to="es" data-edge-label="Resources / reports" data-edge-key="10" data-edge-id="api-es-17" data-composition-points="530,116;530,437;155,437;155,700" data-composition-crossover="halo" data-composition-independent="true" d="M 530 116 L 530 429 Q 530 437 522 437 L 163 437 Q 155 437 155 445 L 155 700" class="a-default" data-animate="edge" style="--step:10" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 530 346 L 530 659 Q 530 667 522 667 L 163 667 Q 155 667 155 675 L 155 930" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="api" data-edge-to="es" data-edge-label="Resources / reports" data-edge-key="10" data-edge-id="api-es-17" data-composition-points="530,346;530,667;155,667;155,930" data-composition-crossover="halo" data-composition-independent="true" d="M 530 346 L 530 659 Q 530 667 522 667 L 163 667 Q 155 667 155 675 L 155 930" class="a-default" data-animate="edge" style="--step:10" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:11">
-          <path data-graph-role="automatic-crossover-underlay" d="M 530 516 L 530 930" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="collector" data-edge-to="langsmith" data-edge-label="Planned exporter" data-edge-key="11" data-edge-id="collector-langsmith-18" data-composition-points="530,516;530,930" data-composition-crossover="halo" data-composition-independent="true" d="M 530 516 L 530 930" class="a-dashed" data-animate="edge" style="--step:11" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 530 746 L 530 1160" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="collector" data-edge-to="langsmith" data-edge-label="Planned exporter" data-edge-key="11" data-edge-id="collector-langsmith-18" data-composition-points="530,746;530,1160" data-composition-crossover="halo" data-composition-independent="true" d="M 530 746 L 530 1160" class="a-dashed" data-animate="edge" style="--step:11" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:12">
-          <path data-graph-role="automatic-crossover-underlay" d="M 772.9 316 L 772.9 440" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="runner" data-edge-to="guardrail-proxy" data-edge-label="Dataset input" data-edge-key="12" data-edge-id="runner-proxy-input" data-composition-points="772.9,316;772.9,440" data-composition-crossover="halo" data-composition-independent="true" d="M 772.9 316 L 772.9 440" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 772.9 546 L 772.9 670" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="runner" data-edge-to="guardrail-proxy" data-edge-label="Dataset input" data-edge-key="12" data-edge-id="runner-proxy-input" data-composition-points="772.9,546;772.9,670" data-composition-crossover="halo" data-composition-independent="true" d="M 772.9 546 L 772.9 670" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:13">
-          <path data-graph-role="automatic-crossover-underlay" d="M 789 440 L 789 316" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="guardrail-proxy" data-edge-to="runner" data-edge-label="Scan output / latency" data-edge-key="13" data-edge-id="proxy-runner-output" data-composition-points="789,440;789,316" data-composition-crossover="halo" data-composition-independent="true" d="M 789 440 L 789 316" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 789 670 L 789 546" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="guardrail-proxy" data-edge-to="runner" data-edge-label="Scan output / latency" data-edge-key="13" data-edge-id="proxy-runner-output" data-composition-points="789,670;789,546" data-composition-crossover="halo" data-composition-independent="true" d="M 789 670 L 789 546" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:14">
+          <path data-graph-role="automatic-crossover-underlay" d="M 436 126 L 436 270" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="guardrail-management" data-edge-to="api" data-edge-label="Guardrail evaluation integration" data-edge-key="14" data-edge-id="platform-gm" data-composition-points="436,126;436,270" data-composition-crossover="halo" data-composition-independent="true" d="M 436 126 L 436 270" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:15">
+          <path data-graph-role="automatic-crossover-underlay" d="M 720 110 L 632 110 Q 624 110 624 118 L 624 270" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="ai-factory" data-edge-to="api" data-edge-label="Evaluation API integration" data-edge-key="15" data-edge-id="platform-factory" data-composition-points="720,110;624,110;624,270" data-composition-crossover="halo" data-composition-independent="true" d="M 720 110 L 632 110 Q 624 110 624 118 L 624 270" class="a-dashed" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
 
         <!-- Components -->
         <g id="node-ui" data-node-id="ui" data-node-label="AgentEval UI" tabindex="0" role="button" aria-label="Focus AgentEval UI, Publish / Configure / Trigger / Report, Architecture component" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Publish / Configure / Trigger / Report" data-node-context="Architecture component">
           <title>AgentEval UI · Publish / Configure / Trigger / Report · Architecture component</title>
-          <rect x="40" y="40" width="230" height="76" rx="8" class="c-mask"/>
-          <rect x="40" y="40" width="230" height="76" rx="8" class="c-frontend" data-animate="node" style="--step:0" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(46 46) scale(0.6875)">
+          <rect x="40" y="270" width="230" height="76" rx="8" class="c-mask"/>
+          <rect x="40" y="270" width="230" height="76" rx="8" class="c-frontend" data-animate="node" style="--step:0" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(46 276) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="155" y="76" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">AgentEval UI</text>
-        <text data-detail="context" x="155" y="92" class="t-muted" font-size="9" text-anchor="middle">Publish / Configure / Trigger / Report</text>
+          <text data-node-label="" data-detail-anchor="" x="155" y="306" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">AgentEval UI</text>
+        <text data-detail="context" x="155" y="322" class="t-muted" font-size="9" text-anchor="middle">Publish / Configure / Trigger / Report</text>
         </g>
 
         <g id="node-api" data-node-id="api" data-node-label="Evaluation API" tabindex="0" role="button" aria-label="Focus Evaluation API, Version pins / validation / snapshots, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Version pins / validation / snapshots" data-node-context="Architecture component">
           <title>Evaluation API · Version pins / validation / snapshots · Architecture component</title>
-          <rect x="420" y="40" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="420" y="40" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:1" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(426 46) scale(0.6875)">
+          <rect x="420" y="270" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="420" y="270" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:1" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(426 276) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="530" y="76" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Evaluation API</text>
-        <text data-detail="context" x="530" y="92" class="t-muted" font-size="9" text-anchor="middle">Version pins / validation / snapshots</text>
+          <text data-node-label="" data-detail-anchor="" x="530" y="306" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Evaluation API</text>
+        <text data-detail="context" x="530" y="322" class="t-muted" font-size="9" text-anchor="middle">Version pins / validation / snapshots</text>
         </g>
 
         <g id="node-dataset" data-node-id="dataset" data-node-label="Guardrail Dataset" tabindex="0" role="button" aria-label="Focus Guardrail Dataset, input / label / strategy / version, Architecture component" aria-pressed="false" data-node-kind="database" data-node-sublabel="input / label / strategy / version" data-node-context="Architecture component">
           <title>Guardrail Dataset · input / label / strategy / version · Architecture component</title>
-          <rect x="40" y="320" width="230" height="76" rx="8" class="c-mask"/>
-          <rect x="40" y="320" width="230" height="76" rx="8" class="c-database" data-animate="node" style="--step:2" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 326) scale(0.6875)">
+          <rect x="40" y="550" width="230" height="76" rx="8" class="c-mask"/>
+          <rect x="40" y="550" width="230" height="76" rx="8" class="c-database" data-animate="node" style="--step:2" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 556) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="155" y="356" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guardrail Dataset</text>
-        <text data-detail="context" x="155" y="372" class="t-muted" font-size="9" text-anchor="middle">input / label / strategy / version</text>
+          <text data-node-label="" data-detail-anchor="" x="155" y="586" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guardrail Dataset</text>
+        <text data-detail="context" x="155" y="602" class="t-muted" font-size="9" text-anchor="middle">input / label / strategy / version</text>
         </g>
 
         <g id="node-runner" data-node-id="runner" data-node-label="Evaluation Runner" tabindex="0" role="button" aria-label="Focus Evaluation Runner, Per-sample orchestration / Model=None, K8s Job - Evaluation Runner container" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Per-sample orchestration / Model=None" data-node-tag="Inside K8s Job" data-node-context="K8s Job - Evaluation Runner container">
           <title>Evaluation Runner · Per-sample orchestration / Model=None · K8s Job - Evaluation Runner container · Inside K8s Job</title>
-          <rect x="700" y="240" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="700" y="240" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:3" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(706 246) scale(0.6875)">
+          <rect x="700" y="470" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="700" y="470" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:3" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(706 476) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="810" y="276" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Evaluation Runner</text>
-        <text data-detail="context" x="810" y="292" class="t-muted" font-size="9" text-anchor="middle">Per-sample orchestration / Model=None</text>
-        <text data-detail="fine" x="810" y="308" class="t-backend" font-size="7" text-anchor="middle">Inside K8s Job</text>
+          <text data-node-label="" data-detail-anchor="" x="810" y="506" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Evaluation Runner</text>
+        <text data-detail="context" x="810" y="522" class="t-muted" font-size="9" text-anchor="middle">Per-sample orchestration / Model=None</text>
+        <text data-detail="fine" x="810" y="538" class="t-backend" font-size="7" text-anchor="middle">Inside K8s Job</text>
         </g>
 
         <g id="node-guardrail" data-node-id="guardrail" data-node-label="NeMo Guardrail / F5" tabindex="0" role="button" aria-label="Focus NeMo Guardrail / F5, External provider-selected instance, Architecture component" aria-pressed="false" data-node-kind="security" data-node-sublabel="External provider-selected instance" data-node-tag="Target instance / Mock supported" data-node-context="Architecture component">
           <title>NeMo Guardrail / F5 · External provider-selected instance · Architecture component · Target instance / Mock supported</title>
-          <rect x="700" y="700" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="700" y="700" width="220" height="76" rx="8" class="c-security" data-animate="node" style="--step:7" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(706 706) scale(0.6875)">
+          <rect x="700" y="930" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="700" y="930" width="220" height="76" rx="8" class="c-security" data-animate="node" style="--step:7" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(706 936) scale(0.6875)">
             <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
             <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="810" y="736" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">NeMo Guardrail / F5</text>
-        <text data-detail="context" x="810" y="752" class="t-muted" font-size="9" text-anchor="middle">External provider-selected instance</text>
-        <text data-detail="fine" x="810" y="768" class="t-security" font-size="7" text-anchor="middle">Target instance / Mock supported</text>
+          <text data-node-label="" data-detail-anchor="" x="810" y="966" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">NeMo Guardrail / F5</text>
+        <text data-detail="context" x="810" y="982" class="t-muted" font-size="9" text-anchor="middle">External provider-selected instance</text>
+        <text data-detail="fine" x="810" y="998" class="t-security" font-size="7" text-anchor="middle">Target instance / Mock supported</text>
         </g>
 
         <g id="node-script" data-node-id="script" data-node-label="Git Python Script" tabindex="0" role="button" aria-label="Focus Git Python Script, script.py / pinned commit, Git Repo - Scorer source" aria-pressed="false" data-node-kind="backend" data-node-sublabel="script.py / pinned commit" data-node-tag="Fetched and executed by Runner" data-node-context="Git Repo - Scorer source">
           <title>Git Python Script · script.py / pinned commit · Git Repo - Scorer source · Fetched and executed by Runner</title>
-          <rect x="970" y="500" width="180" height="90" rx="8" class="c-mask"/>
-          <rect x="970" y="500" width="180" height="90" rx="8" class="c-backend" data-animate="node" style="--step:5" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(976 506) scale(0.6875)">
+          <rect x="970" y="730" width="180" height="90" rx="8" class="c-mask"/>
+          <rect x="970" y="730" width="180" height="90" rx="8" class="c-backend" data-animate="node" style="--step:5" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(976 736) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="1060" y="543" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Git Python Script</text>
-        <text data-detail="context" x="1060" y="559" class="t-muted" font-size="9" text-anchor="middle">script.py / pinned commit</text>
-        <text data-detail="fine" x="1060" y="582" class="t-backend" font-size="7" text-anchor="middle">Fetched and executed by Runner</text>
+          <text data-node-label="" data-detail-anchor="" x="1060" y="773" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Git Python Script</text>
+        <text data-detail="context" x="1060" y="789" class="t-muted" font-size="9" text-anchor="middle">script.py / pinned commit</text>
+        <text data-detail="fine" x="1060" y="812" class="t-backend" font-size="7" text-anchor="middle">Fetched and executed by Runner</text>
         </g>
 
         <g id="node-es" data-node-id="es" data-node-label="Elasticsearch" tabindex="0" role="button" aria-label="Focus Elasticsearch, Resources / runs / scores / traces, Architecture component" aria-pressed="false" data-node-kind="database" data-node-sublabel="Resources / runs / scores / traces" data-node-context="Architecture component">
           <title>Elasticsearch · Resources / runs / scores / traces · Architecture component</title>
-          <rect x="40" y="700" width="230" height="76" rx="8" class="c-mask"/>
-          <rect x="40" y="700" width="230" height="76" rx="8" class="c-database" data-animate="node" style="--step:10" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 706) scale(0.6875)">
+          <rect x="40" y="930" width="230" height="76" rx="8" class="c-mask"/>
+          <rect x="40" y="930" width="230" height="76" rx="8" class="c-database" data-animate="node" style="--step:10" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 936) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="155" y="736" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Elasticsearch</text>
-        <text data-detail="context" x="155" y="752" class="t-muted" font-size="9" text-anchor="middle">Resources / runs / scores / traces</text>
+          <text data-node-label="" data-detail-anchor="" x="155" y="966" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Elasticsearch</text>
+        <text data-detail="context" x="155" y="982" class="t-muted" font-size="9" text-anchor="middle">Resources / runs / scores / traces</text>
         </g>
 
         <g id="node-collector" data-node-id="collector" data-node-label="Runner-local Collector" tabindex="0" role="button" aria-label="Focus Runner-local Collector, HTTP feedback + OTLP traces, K8s Job - Evaluation Runner container" aria-pressed="false" data-node-kind="backend" data-node-sublabel="HTTP feedback + OTLP traces" data-node-tag="Inside Runner container" data-node-context="K8s Job - Evaluation Runner container">
           <title>Runner-local Collector · HTTP feedback + OTLP traces · K8s Job - Evaluation Runner container · Inside Runner container</title>
-          <rect x="420" y="440" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="420" y="440" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:9" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(426 446) scale(0.6875)">
+          <rect x="420" y="670" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="420" y="670" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:9" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(426 676) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="530" y="476" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Runner-local Collector</text>
-        <text data-detail="context" x="530" y="492" class="t-muted" font-size="9" text-anchor="middle">HTTP feedback + OTLP traces</text>
-        <text data-detail="fine" x="530" y="508" class="t-backend" font-size="7" text-anchor="middle">Inside Runner container</text>
+          <text data-node-label="" data-detail-anchor="" x="530" y="706" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Runner-local Collector</text>
+        <text data-detail="context" x="530" y="722" class="t-muted" font-size="9" text-anchor="middle">HTTP feedback + OTLP traces</text>
+        <text data-detail="fine" x="530" y="738" class="t-backend" font-size="7" text-anchor="middle">Inside Runner container</text>
         </g>
 
         <g id="node-langsmith" data-node-id="langsmith" data-node-label="LangSmith" tabindex="0" role="button" aria-label="Focus LangSmith, Planned Collector exporter, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="Planned Collector exporter" data-node-tag="Not implemented" data-node-context="Architecture component">
           <title>LangSmith · Planned Collector exporter · Architecture component · Not implemented</title>
-          <rect x="350" y="930" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="350" y="930" width="220" height="76" rx="8" class="c-external" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(356 936) scale(0.6875)">
+          <rect x="350" y="1160" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="350" y="1160" width="220" height="76" rx="8" class="c-external" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(356 1166) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="460" y="966" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LangSmith</text>
-        <text data-detail="context" x="460" y="982" class="t-muted" font-size="9" text-anchor="middle">Planned Collector exporter</text>
-        <text data-detail="fine" x="460" y="998" class="t-external" font-size="7" text-anchor="middle">Not implemented</text>
+          <text data-node-label="" data-detail-anchor="" x="460" y="1196" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LangSmith</text>
+        <text data-detail="context" x="460" y="1212" class="t-muted" font-size="9" text-anchor="middle">Planned Collector exporter</text>
+        <text data-detail="fine" x="460" y="1228" class="t-external" font-size="7" text-anchor="middle">Not implemented</text>
         </g>
 
         <g id="node-guardrail-proxy" data-node-id="guardrail-proxy" data-node-label="Guardrail Proxy" tabindex="0" role="button" aria-label="Focus Guardrail Proxy, Resolve connection / forward Scan, K8s Job - Evaluation Runner container" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Resolve connection / forward Scan" data-node-tag="Runner-internal logic" data-node-context="K8s Job - Evaluation Runner container">
           <title>Guardrail Proxy · Resolve connection / forward Scan · K8s Job - Evaluation Runner container · Runner-internal logic</title>
-          <rect x="700" y="440" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="700" y="440" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:6" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(706 446) scale(0.6875)">
+          <rect x="700" y="670" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="700" y="670" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:6" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(706 676) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="810" y="476" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guardrail Proxy</text>
-        <text data-detail="context" x="810" y="492" class="t-muted" font-size="9" text-anchor="middle">Resolve connection / forward Scan</text>
-        <text data-detail="fine" x="810" y="508" class="t-backend" font-size="7" text-anchor="middle">Runner-internal logic</text>
+          <text data-node-label="" data-detail-anchor="" x="810" y="706" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guardrail Proxy</text>
+        <text data-detail="context" x="810" y="722" class="t-muted" font-size="9" text-anchor="middle">Resolve connection / forward Scan</text>
+        <text data-detail="fine" x="810" y="738" class="t-backend" font-size="7" text-anchor="middle">Runner-internal logic</text>
+        </g>
+
+        <g id="node-guardrail-management" data-node-id="guardrail-management" data-node-label="Guardrail Management" tabindex="0" role="button" aria-label="Focus Guardrail Management, Upstream Management Platforms - integration options" aria-pressed="false" data-node-kind="frontend" data-node-context="Upstream Management Platforms - integration options">
+          <title>Guardrail Management · Upstream Management Platforms - integration options</title>
+          <rect x="270" y="40" width="310" height="86" rx="8" class="c-mask"/>
+          <rect x="270" y="40" width="310" height="86" rx="8" class="c-frontend" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(276 46) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <text data-node-label="" x="425" y="87" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guardrail Management</text>
+        </g>
+
+        <g id="node-ai-factory" data-node-id="ai-factory" data-node-label="AI Factory / Other AI Platforms" tabindex="0" role="button" aria-label="Focus AI Factory / Other AI Platforms, Benchmarking / quality / safety / release gates, Upstream Management Platforms - integration options" aria-pressed="false" data-node-kind="external" data-node-sublabel="Benchmarking / quality / safety / release gates" data-node-tag="Not implemented" data-node-context="Upstream Management Platforms - integration options">
+          <title>AI Factory / Other AI Platforms · Benchmarking / quality / safety / release gates · Upstream Management Platforms - integration options · Not implemented</title>
+          <rect x="720" y="40" width="320" height="86" rx="8" class="c-mask"/>
+          <rect x="720" y="40" width="320" height="86" rx="8" class="c-external" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(726 46) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="880" y="81" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">AI Factory / Other AI Platforms</text>
+        <text data-detail="context" x="880" y="97" class="t-muted" font-size="9" text-anchor="middle">Benchmarking / quality / safety / release gates</text>
+        <text data-detail="fine" x="880" y="118" class="t-external" font-size="7" text-anchor="middle">Not implemented</text>
         </g>
 
         <!-- Connection labels -->
         <g data-detail="context" data-edge-from="ui" data-edge-to="api" data-edge-label="Configure / Trigger / Report" data-edge-key="0" data-edge-id="ui-api-0">
-          <rect x="272.8" y="49.95" width="144.4" height="14" rx="3" class="c-mask"/>
-          <text x="345" y="59.95" class="t-edge-emphasis" font-size="8" text-anchor="middle">Configure / Trigger / Report</text>
+          <rect x="272.8" y="279.95" width="144.4" height="14" rx="3" class="c-mask"/>
+          <text x="345" y="289.95" class="t-edge-emphasis" font-size="8" text-anchor="middle">Configure / Trigger / Report</text>
         </g>
         <g data-detail="context" data-edge-from="api" data-edge-to="dataset" data-edge-label="Versioned samples" data-edge-key="1" data-edge-id="api-dataset-6">
-          <rect x="307.2" y="316" width="91.6" height="14" rx="3" class="c-mask"/>
-          <text x="353" y="326" class="t-edge-default" font-size="8" text-anchor="middle">Versioned samples</text>
+          <rect x="307.2" y="546" width="91.6" height="14" rx="3" class="c-mask"/>
+          <text x="353" y="556" class="t-edge-default" font-size="8" text-anchor="middle">Versioned samples</text>
         </g>
         <g data-detail="context" data-edge-from="dataset" data-edge-to="runner" data-edge-label="input / label / strategy" data-edge-key="2" data-edge-id="dataset-runner-7">
-          <rect x="314.9" y="345" width="125.19999999999999" height="14" rx="3" class="c-mask"/>
-          <text x="377.5" y="355" class="t-edge-emphasis" font-size="8" text-anchor="middle">input / label / strategy</text>
+          <rect x="314.9" y="575" width="125.19999999999999" height="14" rx="3" class="c-mask"/>
+          <text x="377.5" y="585" class="t-edge-emphasis" font-size="8" text-anchor="middle">input / label / strategy</text>
         </g>
         <g data-detail="context" data-edge-from="api" data-edge-to="runner" data-edge-label="Create Job / snapshot" data-edge-key="3" data-edge-id="api-runner-8">
-          <rect x="630" y="179" width="110.8" height="14" rx="3" class="c-mask"/>
-          <text x="685.4" y="189" class="t-edge-default" font-size="8" text-anchor="middle">Create Job / snapshot</text>
+          <rect x="630" y="409" width="110.8" height="14" rx="3" class="c-mask"/>
+          <text x="685.4" y="419" class="t-edge-default" font-size="8" text-anchor="middle">Create Job / snapshot</text>
         </g>
         <g data-detail="context" data-edge-from="runner" data-edge-to="script" data-edge-label="Fetch SHA / JSON stdin" data-edge-key="4" data-edge-id="runner-script-11">
-          <rect x="1076.2" y="380" width="115.6" height="14" rx="3" class="c-mask"/>
-          <text x="1134" y="390" class="t-edge-emphasis" font-size="8" text-anchor="middle">Fetch SHA / JSON stdin</text>
+          <rect x="1076.2" y="610" width="115.6" height="14" rx="3" class="c-mask"/>
+          <text x="1134" y="620" class="t-edge-emphasis" font-size="8" text-anchor="middle">Fetch SHA / JSON stdin</text>
         </g>
         <g data-detail="context" data-edge-from="script" data-edge-to="runner" data-edge-label="JSON classification" data-edge-key="5" data-edge-id="script-runner-12">
-          <rect x="898.4" y="320" width="101.2" height="14" rx="3" class="c-mask"/>
-          <text x="949" y="330" class="t-edge-emphasis" font-size="8" text-anchor="middle">JSON classification</text>
+          <rect x="898.4" y="550" width="101.2" height="14" rx="3" class="c-mask"/>
+          <text x="949" y="560" class="t-edge-emphasis" font-size="8" text-anchor="middle">JSON classification</text>
         </g>
         <g data-detail="context" data-edge-from="guardrail-proxy" data-edge-to="guardrail" data-edge-label="HTTP POST /scans" data-edge-key="6" data-edge-id="runner-guardrail-13">
-          <rect x="825.1" y="601" width="86.8" height="14" rx="3" class="c-mask"/>
-          <text x="868.5" y="611" class="t-edge-emphasis" font-size="8" text-anchor="middle">HTTP POST /scans</text>
+          <rect x="825.1" y="831" width="86.8" height="14" rx="3" class="c-mask"/>
+          <text x="868.5" y="841" class="t-edge-emphasis" font-size="8" text-anchor="middle">HTTP POST /scans</text>
         </g>
         <g data-detail="context" data-edge-from="guardrail" data-edge-to="guardrail-proxy" data-edge-label="output + request ID" data-edge-key="7" data-edge-id="guardrail-runner-14">
-          <rect x="695.8" y="601" width="101.2" height="14" rx="3" class="c-mask"/>
-          <text x="746.4" y="611" class="t-edge-emphasis" font-size="8" text-anchor="middle">output + request ID</text>
+          <rect x="695.8" y="831" width="101.2" height="14" rx="3" class="c-mask"/>
+          <text x="746.4" y="841" class="t-edge-emphasis" font-size="8" text-anchor="middle">output + request ID</text>
         </g>
         <g data-detail="context" data-edge-from="runner" data-edge-to="collector" data-edge-label="Scores / latency / OTLP" data-edge-key="8" data-edge-id="runner-collector-15">
-          <rect x="563.8" y="350" width="120.39999999999999" height="14" rx="3" class="c-mask"/>
-          <text x="624" y="360" class="t-edge-emphasis" font-size="8" text-anchor="middle">Scores / latency / OTLP</text>
+          <rect x="563.8" y="580" width="120.39999999999999" height="14" rx="3" class="c-mask"/>
+          <text x="624" y="590" class="t-edge-emphasis" font-size="8" text-anchor="middle">Scores / latency / OTLP</text>
         </g>
         <g data-detail="context" data-edge-from="collector" data-edge-to="es" data-edge-label="Persist feedback / spans" data-edge-key="9" data-edge-id="collector-es-16">
-          <rect x="191.4" y="580" width="125.19999999999999" height="14" rx="3" class="c-mask"/>
-          <text x="254" y="590" class="t-edge-emphasis" font-size="8" text-anchor="middle">Persist feedback / spans</text>
+          <rect x="191.4" y="810" width="125.19999999999999" height="14" rx="3" class="c-mask"/>
+          <text x="254" y="820" class="t-edge-emphasis" font-size="8" text-anchor="middle">Persist feedback / spans</text>
         </g>
         <g data-detail="context" data-edge-from="api" data-edge-to="es" data-edge-label="Resources / reports" data-edge-key="10" data-edge-id="api-es-17">
-          <rect x="291.9" y="417" width="101.2" height="14" rx="3" class="c-mask"/>
-          <text x="342.5" y="427" class="t-edge-default" font-size="8" text-anchor="middle">Resources / reports</text>
+          <rect x="291.9" y="647" width="101.2" height="14" rx="3" class="c-mask"/>
+          <text x="342.5" y="657" class="t-edge-default" font-size="8" text-anchor="middle">Resources / reports</text>
         </g>
         <g data-detail="context" data-edge-from="collector" data-edge-to="langsmith" data-edge-label="Planned exporter" data-edge-key="11" data-edge-id="collector-langsmith-18">
-          <rect x="437.20000000000005" y="716" width="86.8" height="14" rx="3" class="c-mask"/>
-          <text x="480.6" y="726" class="t-edge-dashed" font-size="8" text-anchor="middle">Planned exporter</text>
+          <rect x="437.20000000000005" y="946" width="86.8" height="14" rx="3" class="c-mask"/>
+          <text x="480.6" y="956" class="t-edge-dashed" font-size="8" text-anchor="middle">Planned exporter</text>
         </g>
         <g data-detail="context" data-edge-from="runner" data-edge-to="guardrail-proxy" data-edge-label="Dataset input" data-edge-key="12" data-edge-id="runner-proxy-input">
-          <rect x="694.4999999999999" y="371" width="72.4" height="14" rx="3" class="c-mask"/>
-          <text x="730.6999999999999" y="381" class="t-edge-emphasis" font-size="8" text-anchor="middle">Dataset input</text>
+          <rect x="694.4999999999999" y="601" width="72.4" height="14" rx="3" class="c-mask"/>
+          <text x="730.6999999999999" y="611" class="t-edge-emphasis" font-size="8" text-anchor="middle">Dataset input</text>
         </g>
         <g data-detail="context" data-edge-from="guardrail-proxy" data-edge-to="runner" data-edge-label="Scan output / latency" data-edge-key="13" data-edge-id="proxy-runner-output">
-          <rect x="795" y="371" width="110.8" height="14" rx="3" class="c-mask"/>
-          <text x="850.4" y="381" class="t-edge-emphasis" font-size="8" text-anchor="middle">Scan output / latency</text>
+          <rect x="795" y="601" width="110.8" height="14" rx="3" class="c-mask"/>
+          <text x="850.4" y="611" class="t-edge-emphasis" font-size="8" text-anchor="middle">Scan output / latency</text>
+        </g>
+        <g data-detail="context" data-edge-from="guardrail-management" data-edge-to="api" data-edge-label="Guardrail evaluation integration" data-edge-key="14" data-edge-id="platform-gm">
+          <rect x="266.4" y="191" width="163.6" height="14" rx="3" class="c-mask"/>
+          <text x="348.2" y="201" class="t-edge-default" font-size="8" text-anchor="middle">Guardrail evaluation integration</text>
+        </g>
+        <g data-detail="context" data-edge-from="ai-factory" data-edge-to="api" data-edge-label="Evaluation API integration" data-edge-key="15" data-edge-id="platform-factory">
+          <rect x="556.6" y="170" width="134.8" height="14" rx="3" class="c-mask"/>
+          <text x="624" y="180" class="t-edge-dashed" font-size="8" text-anchor="middle">Evaluation API integration</text>
         </g>
 
         <!-- Boundary labels (foreground masks keep routes out of titles) -->
         <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="K8s Job - Evaluation Runner container">
-          <rect data-graph-role="structural-frame-label-mask" x="632" y="220" width="209.79999999999998" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="636" y="233" class="t-cloud" font-size="9" font-weight="600">K8s Job - Evaluation Runner container</text>
+          <rect data-graph-role="structural-frame-label-mask" x="632" y="450" width="209.79999999999998" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="636" y="463" class="t-cloud" font-size="9" font-weight="600">K8s Job - Evaluation Runner container</text>
         </g>
 
         <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="region" data-composition-frame-label="Git Repo - Scorer source">
-          <rect data-graph-role="structural-frame-label-mask" x="948" y="480" width="139.6" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="952" y="493" class="t-cloud" font-size="9" font-weight="600">Git Repo - Scorer source</text>
+          <rect data-graph-role="structural-frame-label-mask" x="948" y="710" width="139.6" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="952" y="723" class="t-cloud" font-size="9" font-weight="600">Git Repo - Scorer source</text>
+        </g>
+
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="2" data-composition-frame-kind="region" data-composition-frame-label="Upstream Management Platforms - integration options">
+          <rect data-graph-role="structural-frame-label-mask" x="254" y="20" width="285.4" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="258" y="33" class="t-cloud" font-size="9" font-weight="600">Upstream Management Platforms - integration options</text>
         </g>
 
         <!-- Legend -->
         <g data-legend="" data-legend-bridge="">
-          <text x="40" y="1038" class="t-primary" font-size="12" font-weight="650">Legend</text>
-          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="1058" data-legend-width="93">
-            <rect x="40" y="1049" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
-            <text x="62" y="1058" class="t-muted" font-size="10" font-weight="500">Frontend</text>
+          <text x="40" y="1268" class="t-primary" font-size="12" font-weight="650">Legend</text>
+          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="1288" data-legend-width="93">
+            <rect x="40" y="1279" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
+            <text x="62" y="1288" class="t-muted" font-size="10" font-weight="500">Frontend</text>
           </g>
-          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Backend" data-legend-x="155" data-legend-baseline="1058" data-legend-width="87">
-            <rect x="155" y="1049" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
-            <text x="177" y="1058" class="t-muted" font-size="10" font-weight="500">Backend</text>
+          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Backend" data-legend-x="155" data-legend-baseline="1288" data-legend-width="87">
+            <rect x="155" y="1279" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
+            <text x="177" y="1288" class="t-muted" font-size="10" font-weight="500">Backend</text>
           </g>
-          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Database" data-legend-x="264" data-legend-baseline="1058" data-legend-width="93">
-            <rect x="264" y="1049" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
-            <text x="286" y="1058" class="t-muted" font-size="10" font-weight="500">Database</text>
+          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Database" data-legend-x="264" data-legend-baseline="1288" data-legend-width="93">
+            <rect x="264" y="1279" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
+            <text x="286" y="1288" class="t-muted" font-size="10" font-weight="500">Database</text>
           </g>
-          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Security" data-legend-x="379" data-legend-baseline="1058" data-legend-width="93">
-            <rect x="379" y="1049" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
-            <text x="401" y="1058" class="t-muted" font-size="10" font-weight="500">Security</text>
+          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Security" data-legend-x="379" data-legend-baseline="1288" data-legend-width="93">
+            <rect x="379" y="1279" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
+            <text x="401" y="1288" class="t-muted" font-size="10" font-weight="500">Security</text>
           </g>
-          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="External" data-legend-x="494" data-legend-baseline="1058" data-legend-width="93">
-            <rect x="494" y="1049" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
-            <text x="516" y="1058" class="t-muted" font-size="10" font-weight="500">External</text>
+          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="External" data-legend-x="494" data-legend-baseline="1288" data-legend-width="93">
+            <rect x="494" y="1279" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
+            <text x="516" y="1288" class="t-muted" font-size="10" font-weight="500">External</text>
           </g>
         </g>
       </svg>
@@ -5740,7 +5789,19 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <li>Three ES index families store resources/runs, samples/scores and traces. UI queries through Evaluation API.</li>
           <li>When OTel is configured, Runner exports standard OTLP spans. Typed sample and score feedback uses the Collector HTTP API. Cost is currently mock.</li>
           <li>Guardrail credentials use a protected run-detail endpoint. Git SSH keys are mounted from Secrets. Script subprocesses do not inherit API, Guardrail or Collector credentials.</li>
-          <li>Based on a local working-tree evidence snapshot from 2026-11-04, not a published remote release commit.</li>
+          <li>Architecture overview based on the previously reviewed implementation. Upstream platform connections are proposed integration points; source snapshot links are unavailable in this copy.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>Upstream platform integration</h3>
+        </div>
+        <ul>
+          <li>Guardrail Management is an existing upstream management system. AI Factory and other AI platforms are not implemented.</li>
+          <li>Proposed flow: upstream platform submits or references an evaluation configuration, triggers a run and queries status, reports and request details through Evaluation API.</li>
+          <li>The solid Guardrail Management connection represents the current integration. The dashed AI Factory / Other AI Platforms connection represents a not-implemented extension.</li>
         </ul>
       </div>
     </div>
