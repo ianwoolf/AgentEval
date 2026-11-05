@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "receiptId": "60869b49-75de-42eb-9030-80ca3023f358",
+  "receiptId": "7ebc9e41-0d6f-4f91-bce6-93f50ebf9ae0",
   "status": "current",
   "command": "deliver",
   "type": "architecture",
   "input": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
   "output": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
   "specification": {
-    "sha256": "f546aa1ec38459316205a0b95dc4f6c80d9b4ceaa77340aee10490a990cc143f",
-    "bytes": 13720
+    "sha256": "2655ad5161a3054c13dfa7034f315176c3e51c93916e5b0b75bc039d4b6ea41f",
+    "bytes": 11611
   },
   "artifact": {
-    "sha256": "ff5a490dbed8ec90ea2606927f02606920d571d1a2a5285d402742c0f06c8dad",
-    "bytes": 868175
+    "sha256": "8f742de4c26c2d25be789bcbe1de16d7205d9b20db2e5a40bf87c73e80ba5fd0",
+    "bytes": 859825
   }
 }

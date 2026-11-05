@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark" data-preset="classic">
+<html lang="en" data-theme="dark" data-preset="classic">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 3.2.0">
   <meta name="archify-reader-contract" content="declared-wide-v1">
-  <title>AgentEval · Guardrail 测评架构与数据流</title>
+  <title>AgentEval - Guardrail Evaluation Architecture Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -5089,98 +5089,98 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   <!-- Toolbar: theme, live visual style, trace motion, presentation stage, and export.
        Motion appears only for trace-enabled artifacts and has no shortcut;
        Keyboard: T toggles theme, S cycles style, F toggles the stage, E opens export. -->
-  <div class="toolbar" role="toolbar" aria-label="图表操作">
+  <div class="toolbar" role="toolbar" aria-label="Diagram actions">
     <div class="toolbar-group">
     <button id="btn-theme" type="button"
-            title="切换主题（T）"
-            aria-label="切换颜色主题"
+            title="Toggle theme (T)"
+            aria-label="Toggle color theme"
             aria-pressed="false">
       <span id="theme-icon" class="toolbar-icon" aria-hidden="true"></span>
-      <span id="theme-label">深色</span>
+      <span id="theme-label">Dark</span>
     </button>
     <div class="preset-wrap">
       <button id="btn-preset" type="button"
-              title="选择视觉风格（S 循环切换）"
-              aria-label="选择视觉风格"
+              title="Choose visual style (S cycles)"
+              aria-label="Choose visual style"
               aria-haspopup="menu"
               aria-expanded="false"
               aria-controls="preset-menu"
               aria-keyshortcuts="S">
         <span class="preset-control-mark" aria-hidden="true"></span>
-        <span id="preset-label">风格</span>
+        <span id="preset-label">Style</span>
         <span class="toolbar-icon toolbar-chevron" aria-hidden="true"></span>
       </button>
-      <div class="preset-menu" id="preset-menu" role="menu" aria-label="视觉风格">
-        <div class="preset-menu-heading" role="presentation"><span>视觉表达</span><span class="preset-menu-shortcut"><kbd>S</kbd>循环切换</span></div>
+      <div class="preset-menu" id="preset-menu" role="menu" aria-label="Visual style">
+        <div class="preset-menu-heading" role="presentation"><span>Visual identity</span><span class="preset-menu-shortcut"><kbd>S</kbd>to cycle</span></div>
         <button class="preset-option" data-preset-value="classic" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
           <span class="preset-option-swatch classic" aria-hidden="true"></span>
-          <span class="preset-option-copy"><strong>经典</strong><small>稳定的技术默认风格</small></span>
+          <span class="preset-option-copy"><strong>Classic</strong><small>Stable technical default</small></span>
           <span class="preset-option-check" aria-hidden="true"></span>
         </button>
         <button class="preset-option" data-preset-value="signal-flow" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
           <span class="preset-option-swatch signal-flow" aria-hidden="true"></span>
-          <span class="preset-option-copy"><strong>信号流</strong><small>突出动态流向</small></span>
+          <span class="preset-option-copy"><strong>Signal Flow</strong><small>Motion-forward presentation</small></span>
           <span class="preset-option-check" aria-hidden="true"></span>
         </button>
         <button class="preset-option" data-preset-value="blueprint" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
           <span class="preset-option-swatch blueprint" aria-hidden="true"></span>
-          <span class="preset-option-copy"><strong>蓝图</strong><small>工程评审</small></span>
+          <span class="preset-option-copy"><strong>Blueprint</strong><small>Engineering review</small></span>
           <span class="preset-option-check" aria-hidden="true"></span>
         </button>
         <button class="preset-option" data-preset-value="editorial" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
           <span class="preset-option-swatch editorial" aria-hidden="true"></span>
-          <span class="preset-option-copy"><strong>编辑风格</strong><small>适合发布与上线说明</small></span>
+          <span class="preset-option-copy"><strong>Editorial</strong><small>Publication and launch notes</small></span>
           <span class="preset-option-check" aria-hidden="true"></span>
         </button>
       </div>
     </div>
     <button id="btn-motion" type="button" hidden
-            title="暂停动效"
-            aria-label="暂停动效"
+            title="Pause motion"
+            aria-label="Pause motion"
             aria-pressed="true">
       <span class="motion-control-dot" aria-hidden="true"></span>
-      <span id="motion-label">动态</span>
+      <span id="motion-label">Live</span>
     </button>
     <button id="btn-present" type="button"
-            title="演示模式（F）"
-            aria-label="进入演示模式"
+            title="Presentation stage (F)"
+            aria-label="Enter presentation stage"
             aria-pressed="false">
       <span id="present-icon" class="toolbar-icon" aria-hidden="true"></span>
-      <span id="present-label">演示</span>
+      <span id="present-label">Present</span>
     </button>
     </div>
     <div class="export-wrap">
       <button id="btn-export" type="button"
-              title="导出图表（E）"
-              aria-label="导出图表"
+              title="Export diagram (E)"
+              aria-label="Export diagram"
               aria-haspopup="menu"
               aria-expanded="false"
               aria-controls="export-menu">
-        导出 <span class="toolbar-icon toolbar-chevron" aria-hidden="true"></span>
+        Export <span class="toolbar-icon toolbar-chevron" aria-hidden="true"></span>
       </button>
-      <div class="export-menu" id="export-menu" role="menu" aria-label="导出">
+      <div class="export-menu" id="export-menu" role="menu" aria-label="Export">
         <div class="export-menu-header" role="presentation">
-          <div><strong>导出图表</strong><span>便携、整洁的输出</span></div>
+          <div><strong>Export diagram</strong><span>Portable, clean outputs</span></div>
           <kbd>E</kbd>
         </div>
-        <div class="export-menu-section" role="group" aria-label="分享">
-          <span class="export-menu-heading" aria-hidden="true">分享</span>
-          <button data-action="route-share-card" type="button" role="menuitem" tabindex="-1" hidden disabled><span class="export-item-copy"><strong>路径分享卡片</strong><small class="hint">1200&times;630 PNG</small></span></button>
-          <button data-action="reach-share-card" type="button" role="menuitem" tabindex="-1" hidden disabled><span class="export-item-copy"><strong>可达范围分享卡片</strong><small class="hint">1200&times;630 PNG</small></span></button>
-          <button data-action="copy" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>复制图表</strong><small class="hint">复制 PNG 到剪贴板</small></span></button>
+        <div class="export-menu-section" role="group" aria-label="Share">
+          <span class="export-menu-heading" aria-hidden="true">Share</span>
+          <button data-action="route-share-card" type="button" role="menuitem" tabindex="-1" hidden disabled><span class="export-item-copy"><strong>Route Share Card</strong><small class="hint">1200&times;630 PNG</small></span></button>
+          <button data-action="reach-share-card" type="button" role="menuitem" tabindex="-1" hidden disabled><span class="export-item-copy"><strong>Reach Share Card</strong><small class="hint">1200&times;630 PNG</small></span></button>
+          <button data-action="copy" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>Copy diagram</strong><small class="hint">PNG to clipboard</small></span></button>
         </div>
-        <div class="export-menu-section" role="group" aria-label="位图">
-          <span class="export-menu-heading" aria-hidden="true">图像</span>
-          <button data-format="png" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>PNG</strong><small class="hint">无损图像</small></span></button>
-          <button data-format="jpeg" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>JPEG</strong><small class="hint">紧凑图像</small></span></button>
-          <button data-format="webp" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>WebP</strong><small class="hint">现代图像格式</small></span></button>
+        <div class="export-menu-section" role="group" aria-label="Raster images">
+          <span class="export-menu-heading" aria-hidden="true">Image</span>
+          <button data-format="png" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>PNG</strong><small class="hint">Lossless image</small></span></button>
+          <button data-format="jpeg" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>JPEG</strong><small class="hint">Compact image</small></span></button>
+          <button data-format="webp" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>WebP</strong><small class="hint">Modern image</small></span></button>
         </div>
-        <div class="export-menu-section" role="group" aria-label="矢量与动效">
-          <span class="export-menu-heading" aria-hidden="true">矢量与动效</span>
-          <button data-format="svg" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>SVG · 自动</strong><small class="hint">匹配宿主主题</small></span></button>
-          <button data-format="svg-light" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>SVG · 浅色</strong><small class="hint">始终浅色</small></span></button>
-          <button data-format="svg-dark" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>SVG · 深色</strong><small class="hint">始终深色</small></span></button>
-          <button data-format="webm" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>WebM</strong><small class="hint">6 秒动效</small></span></button>
+        <div class="export-menu-section" role="group" aria-label="Vector and motion">
+          <span class="export-menu-heading" aria-hidden="true">Vector &amp; motion</span>
+          <button data-format="svg" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>SVG · Auto</strong><small class="hint">Matches host theme</small></span></button>
+          <button data-format="svg-light" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>SVG · Light</strong><small class="hint">Always light</small></span></button>
+          <button data-format="svg-dark" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>SVG · Dark</strong><small class="hint">Always dark</small></span></button>
+          <button data-format="webm" type="button" role="menuitem" tabindex="-1"><span class="export-item-copy"><strong>WebM</strong><small class="hint">6s motion</small></span></button>
         </div>
       </div>
     </div>
@@ -5190,22 +5190,22 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     <!-- Header -->
     <div class="header">
       <div class="header-row"
-           data-preset-badge-signal-flow="信号流"
-           data-preset-badge-blueprint="蓝图 / 修订 01"
-           data-preset-badge-editorial="编辑风格 / 现场笔记">
+           data-preset-badge-signal-flow="SIGNAL FLOW"
+           data-preset-badge-blueprint="BLUEPRINT / REV 01"
+           data-preset-badge-editorial="EDITORIAL / FIELD NOTE">
         <div class="pulse-dot"></div>
-        <h1>AgentEval · Guardrail 测评架构与数据流</h1>
+        <h1>AgentEval - Guardrail Evaluation Architecture</h1>
       </div>
     </div>
 
-    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"git@github.com:ianwoolf/AgentEval","revision":"4952ead4d97c558f3b5e8d78553d28a9a71dc23d","shortRevision":"4952ead","label":"ianwoolf/AgentEval","linkMode":"local-only"},"referenceCount":22,"nodes":{"ui":[{"path":"web/apps/control/src/features/evaluation-workbench/evaluation-configurator.tsx","line":1,"endLine":63},{"path":"web/apps/control/src/features/evaluation-workbench/reports-page.tsx","line":1,"endLine":687}],"api":[{"path":"evaluation-backend/src/evaluation_backend/target_configs.py","line":1,"endLine":149},{"path":"evaluation-backend/src/evaluation_backend/runs.py","line":1,"endLine":330}],"runtime":[{"path":"evaluation-backend/src/evaluation_backend/k8s_job.py","line":1,"endLine":101},{"path":"evaluation-backend/src/evaluation_backend/runs.py","line":1,"endLine":330}],"registry":[{"path":"evaluation-backend/src/evaluation_backend/guardrail_registry.py","line":1,"endLine":79},{"path":"evaluation-backend/src/evaluation_backend/guardrail_runs.py","line":1,"endLine":99}],"openshell":[{"path":"evaluation-backend/src/evaluation_backend/openshell_runner.py","line":1,"endLine":113}],"dataset":[{"path":"evaluation-backend/src/evaluation_backend/upload_api.py","line":1,"endLine":68},{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102}],"runner":[{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102},{"path":"evaluation-backend/src/evaluation_backend/proxy_entrypoint.py","line":1,"endLine":98}],"git":[{"path":"evaluation-backend/src/evaluation_backend/git_scorers.py","line":1,"endLine":118}],"guardrail":[{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102},{"path":"evaluation-backend/src/evaluation_backend/mock_guardrail.py","line":1,"endLine":93}],"script":[{"path":"evaluation-backend/src/evaluation_backend/git_scorers.py","line":1,"endLine":118},{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102}],"es":[{"path":"evaluation-backend/src/evaluation_backend/storage/elastic.py","line":1,"endLine":371}],"collector":[{"path":"evaluation-backend/src/evaluation_backend/collector.py","line":1,"endLine":111},{"path":"evaluation-backend/src/evaluation_backend/proxy_entrypoint.py","line":1,"endLine":98}],"langsmith":[{"path":"evaluation-backend/src/evaluation_backend/collector.py","line":1,"endLine":111}]}}</script>
-    <script id="archify-i18n-data" type="application/json">{"locale":"zh-CN","messages":{"viewer.kind.frontend":"前端","viewer.kind.backend":"后端","viewer.kind.database":"数据库","viewer.kind.cloud":"云服务","viewer.kind.security":"安全","viewer.kind.messagebus":"消息总线","viewer.kind.external":"外部系统","viewer.kind.neutral":"中性","viewer.kind.node":"节点","viewer.kind.start":"开始","viewer.kind.active":"活动","viewer.kind.waiting":"等待","viewer.kind.decision":"决策","viewer.kind.success":"成功","viewer.kind.failure":"失败","viewer.toolbar.actions":"图表操作","viewer.theme.toggle.title":"切换主题（T）","viewer.theme.toggle":"切换颜色主题","viewer.theme.dark":"深色","viewer.theme.light":"浅色","viewer.preset.choose.title":"选择视觉风格（S 循环切换）","viewer.preset.choose":"选择视觉风格","viewer.preset.style":"风格","viewer.preset.menu":"视觉风格","viewer.preset.identity":"视觉表达","viewer.preset.cycles":"循环切换","viewer.preset.classic":"经典","viewer.preset.classic.short":"经典","viewer.preset.classic.hint":"稳定的技术默认风格","viewer.preset.flow":"信号流","viewer.preset.flow.short":"流动","viewer.preset.flow.hint":"突出动态流向","viewer.preset.blueprint":"蓝图","viewer.preset.blueprint.hint":"工程评审","viewer.preset.editorial":"编辑风格","viewer.preset.editorial.hint":"适合发布与上线说明","viewer.preset.badge.signalFlow":"信号流","viewer.preset.badge.blueprint":"蓝图 / 修订 01","viewer.preset.badge.editorial":"编辑风格 / 现场笔记","viewer.preset.badge.editorialPlate":"ARCHIFY / 图版 04","viewer.preset.current":"当前视觉风格：{style}。选择视觉风格","viewer.motion.live":"动态","viewer.motion.still":"静态","viewer.motion.pause":"暂停动效","viewer.motion.resume":"恢复动效","viewer.motion.reduced":"已根据减少动态效果偏好暂停动效","viewer.motion.hidden":"页面不可见时已暂停动效","viewer.motion.yielding":"暂停动效；当前让位于{owner}","viewer.motion.yielding.title":"动态预览已启用 · 正在让位于{owner}","viewer.owner.route":"路径探测","viewer.owner.lens":"语义透镜","viewer.owner.relationship":"关系预览","viewer.owner.intent":"意图追踪","viewer.owner.focus":"语义聚焦","viewer.owner.legend":"图例预览","viewer.owner.reader":"读者交互","viewer.present.enter":"进入演示模式","viewer.present.enter.title":"演示模式（F）","viewer.present.exit":"退出演示模式","viewer.present.exit.title":"退出演示模式（F 或 Escape）","viewer.present.present":"演示","viewer.present.exit.label":"退出","viewer.export.button":"导出","viewer.export.button.title":"导出图表（E）","viewer.export.diagram":"导出图表","viewer.export.menu":"导出","viewer.export.subtitle":"便携、整洁的输出","viewer.export.share":"分享","viewer.export.shareCard":"分享卡片","viewer.export.routeShareCard":"路径分享卡片","viewer.export.reachShareCard":"可达范围分享卡片","viewer.export.copyDiagram":"复制图表","viewer.export.clipboardPng":"复制 PNG 到剪贴板","viewer.export.raster":"位图","viewer.export.image":"图像","viewer.export.lossless":"无损图像","viewer.export.compact":"紧凑图像","viewer.export.modern":"现代图像格式","viewer.export.vectorMotion":"矢量与动效","viewer.export.vectorMotion.heading":"矢量与动效","viewer.export.editable":"可编辑矢量图","viewer.export.svg.auto":"SVG · 自动","viewer.export.svg.auto.hint":"匹配宿主主题","viewer.export.svg.light":"SVG · 浅色","viewer.export.svg.light.hint":"始终浅色","viewer.export.svg.dark":"SVG · 深色","viewer.export.svg.dark.hint":"始终深色","viewer.export.motion6s":"6 秒动效","viewer.export.unsupported":"当前浏览器不支持","viewer.export.clipboardUnsupported":"当前浏览器不支持写入图片剪贴板","viewer.export.clipboardUnsupported.short":"此浏览器不支持写入图片剪贴板。","viewer.export.motionUnavailable":"当前浏览器无法录制动效","viewer.export.webmUnavailable":"当前浏览器不支持 WebM","viewer.export.failed":"导出失败：{message}","viewer.export.unknownVariant":"未知的分享卡片类型：{variant}","viewer.export.routeRequired":"请先追踪路径，再导出路径分享卡片","viewer.export.reachRequired":"请先追踪编写可达范围，再导出可达范围分享卡片","viewer.export.unknown":"未知错误","viewer.export.routeFailed":"路径分享卡片导出失败：{message}","viewer.export.reachFailed":"可达范围分享卡片导出失败：{message}","viewer.export.copyFailed":"复制失败：{message}","viewer.export.copiedPng":"已将 PNG 复制到剪贴板","viewer.export.downloadedRoute":"已下载路径分享卡片","viewer.export.downloadedReach":"已下载可达范围分享卡片","viewer.export.downloadedWebm":"已下载 WebM","viewer.export.recording":"正在录制 6 秒动效…","viewer.export.card.routeSummary.one":"路径：{source} → {target} · {count} 步","viewer.export.card.routeSummary.other":"路径：{source} → {target} · {count} 步","viewer.export.card.reachSummary":"从{origin}开始的编写{direction} · {nodes} · {links} · 最深 {hops}","viewer.export.card.node.one":"{count} 个节点","viewer.export.card.node.other":"{count} 个节点","viewer.export.card.link.one":"{count} 条连接","viewer.export.card.link.other":"{count} 条连接","viewer.export.card.hop.one":"{count} 跳","viewer.export.card.hop.other":"{count} 跳","viewer.export.card.routeBadge":"ARCHIFY · 路径 · {hops}","viewer.export.card.reachBadge":"ARCHIFY · {direction}可达范围","viewer.export.direction.upstream":"上游","viewer.export.direction.downstream":"下游","viewer.export.error.canvasUnavailable":"无法为{label}使用画布","viewer.export.error.contextUnavailable":"无法为{label}创建二维画布上下文","viewer.export.error.toBlobUnavailable":"{label}无法使用 canvas.toBlob","viewer.export.error.toBlobNull":"{label}的 canvas.toBlob 未返回数据","viewer.export.error.variantsCombined":"无法同时组合多种分享卡片类型","viewer.export.error.viewerState":"分享卡片导出无法移除临时 Viewer 状态","viewer.export.error.routeState":"路径卡片导出无法安全保留已解析路径","viewer.export.error.reachState":"可达范围卡片导出无法安全保留编写的可达范围","viewer.export.error.webmRequirements":"WebM 动效导出需要追踪动画及浏览器 MediaRecorder 支持","viewer.export.error.mediaRecorder":"MediaRecorder 录制失败","viewer.export.error.emptyWebm":"MediaRecorder 生成了空的 WebM","viewer.export.error.webmBackground":"无法为 WebM 导出加载 SVG 背景","viewer.guide.title":"探索此系统","viewer.focus.selectedNodes":"已选择 {count} 个节点","viewer.guide.eyebrow":"图表指南","viewer.guide.close":"关闭图表指南","viewer.guide.inspecting":"正在检查已编译语义","viewer.guide.actions":"图表探索操作","viewer.guide.find":"查找任意节点","viewer.guide.find.hint":"搜索标签、职责、类型和稳定 ID。","viewer.guide.route":"追踪路径","viewer.guide.route.aria":"追踪有向路径","viewer.guide.route.hint":"查看两个语义节点如何按编写方向连接。","viewer.guide.map":"查看完整系统","viewer.guide.map.hint":"打开带实时视口和稳定节点的语义雷达。","viewer.guide.lens":"比较语义类型","viewer.guide.lens.hint":"统计角色、显示流量并比较直接编写的连接。","viewer.guide.present":"进入演示模式","viewer.guide.present.hint":"让实时图表占满视口，同时不改变导出。","viewer.guide.shortcuts":"其他键盘快捷键","viewer.guide.shortcut.export":"导出","viewer.guide.shortcut.theme":"主题","viewer.guide.shortcut.style":"风格","viewer.guide.shortcut.reset":"重置","viewer.guide.shortcut.zoomIn":"放大","viewer.guide.shortcut.zoomOut":"缩小","viewer.guide.shortcut.close":"关闭","viewer.guide.credit":"觉得好用？在 GitHub 给 Archify 点个 Star","viewer.guide.star":"Star","viewer.guide.facts":"{nodes} · {relationships}","viewer.guide.fact.node.one":"{count} 个语义节点","viewer.guide.fact.node.other":"{count} 个语义节点","viewer.guide.fact.relationship.one":"{count} 条关系","viewer.guide.fact.relationship.other":"{count} 条关系","viewer.guide.open":"打开图表指南","viewer.finder.title":"查找节点","viewer.finder.close":"关闭节点查找器","viewer.finder.placeholder":"搜索标签或 ID","viewer.finder.search":"搜索图表节点","viewer.finder.results":"图表节点","viewer.finder.empty":"没有匹配的节点","viewer.finder.result.focus":"聚焦{label}","viewer.finder.result.routeStart":"选择{label}作为路径起点","viewer.finder.result.routeTarget":"选择{label}作为路径终点，{links}","viewer.finder.status.empty":"没有匹配的节点","viewer.finder.status.count.one":"{count} 个匹配节点","viewer.finder.status.count.other":"{count} 个匹配节点","viewer.finder.noun.nodes":"个节点","viewer.finder.link.one":"{count} 条连接","viewer.finder.link.other":"{count} 条连接","viewer.finder.result.focus.one":"聚焦{label}，{count} 条相关连接","viewer.finder.result.focus.other":"聚焦{label}，{count} 条相关连接","viewer.finder.status.filtered":"{visible}/{available} {noun}","viewer.finder.status.all":"{available} {noun}","viewer.passport.eyebrow":"语义护照","viewer.passport.metadata":"节点元数据","viewer.passport.evidence":"已验证的源代码证据","viewer.passport.verified":"已验证来源","viewer.passport.verificationScope":"已按固定修订版本验证本地 Git 证据，未检查远程访问权限。","viewer.passport.reach":"编写可达范围","viewer.passport.reach.trace":"追踪编写的可达性","viewer.passport.upstream":"上游","viewer.passport.downstream":"下游","viewer.passport.upstream.trace":"追踪上游编写可达性","viewer.passport.downstream.trace":"追踪下游编写可达性","viewer.passport.close":"关闭语义护照","viewer.passport.move":"移动语义护照。可拖动、使用方向键移动，或按 Home 恢复自动位置。","viewer.passport.copy":"复制链接","viewer.passport.copy.focus":"复制聚焦节点的链接","viewer.passport.relations":"关系","viewer.passport.relations.show":"显示关联关系","viewer.passport.relations.hide":"隐藏关联关系","viewer.passport.relations.list":"关联关系","viewer.passport.copyRelation":"复制关系","viewer.passport.copyNode":"复制节点","viewer.passport.copyPinned":"复制固定关系的链接","viewer.passport.copySource":"复制来源节点的链接","viewer.passport.copy.focused.success":"已复制聚焦节点链接","viewer.passport.copy.pinned.success":"已复制固定关系链接","viewer.passport.copy.focused.failed":"无法复制聚焦节点链接","viewer.passport.copy.pinned.failed":"无法复制固定关系链接","viewer.passport.relationship.none":"没有关联关系","viewer.passport.relationship.count.one":"{count} 条关系","viewer.passport.relationship.count.other":"{count} 条关系","viewer.passport.relationship.show.one":"显示 {count} 条关联关系","viewer.passport.relationship.show.other":"显示 {count} 条关联关系","viewer.passport.relationship.summary":"{out} 条出向 · {in} 条入向{loops}","viewer.passport.relationship.loops":" · {count} 条自环","viewer.passport.relationship.explorer":"直接关系浏览器","viewer.passport.relationship.help":"使用方向键浏览关系。按 Enter 或空格键固定详情；按 Escape 清除。","viewer.passport.relationship.loopsBack":"回环","viewer.passport.relationship.connectsTo":"连接到","viewer.passport.relationship.connectsFrom":"连接自","viewer.passport.relationship.pinned":"已固定关系 · {from} → {to} · {label}","viewer.passport.relationship.inspect":"检查第 {index}/{total} 条关系：{from} 到 {to}，{label}。按 Enter 查看详情。","viewer.passport.relationship.group.out":"出向","viewer.passport.relationship.group.in":"入向","viewer.passport.relationship.group.loop":"自环","viewer.passport.relationship.row":"{group}：{relationship}，{neighbor}","viewer.passport.relationship.direction.out":"出 →","viewer.passport.relationship.direction.in":"← 入","viewer.passport.relationship.direction.loop":"自环","viewer.passport.sourceCount.one":"{count} 个已验证来源引用","viewer.passport.sourceCount.other":"{count} 个已验证来源引用","viewer.passport.repository.open":"打开已验证的仓库修订版本 {revision}","viewer.passport.source.open":"打开修订版本 {revision} 中已验证的来源 {path}","viewer.passport.source.openLink":"打开 ↗","viewer.passport.reach.upstream.one":"追踪 {count} 个上游编写节点","viewer.passport.reach.upstream.other":"追踪 {count} 个上游编写节点","viewer.passport.reach.downstream.one":"追踪 {count} 个下游编写节点","viewer.passport.reach.downstream.other":"追踪 {count} 个下游编写节点","viewer.passport.reach.noUpstream":"没有上游编写节点","viewer.passport.reach.noDownstream":"没有下游编写节点","viewer.passport.reach.status":"{direction} · {nodes} 个节点 · {links} 条连接 · 最深 {hops} 跳","viewer.route.eyebrow":"路径","viewer.route.start":"点击路径的起点","viewer.route.start.find":"查找起点","viewer.route.start.find.aria":"查找路径起点","viewer.route.copy":"复制链接","viewer.route.copy.aria":"复制已追踪路径的链接","viewer.route.clear":"清除","viewer.route.clear.aria":"清除路径探测","viewer.route.traced":"路径","viewer.route.pickTwo":"在图上点两个节点","viewer.route.pickOne":"在图上点一个节点","viewer.route.controls":"路径旅程控制","viewer.route.previous":"上一个路径位置","viewer.route.play":"播放路径旅程","viewer.route.pause":"暂停路径旅程","viewer.route.replay":"重播路径旅程","viewer.route.next":"下一个路径位置","viewer.route.journey":"旅程","viewer.route.pause.label":"暂停","viewer.route.replay.label":"重播","viewer.route.overview":"总览","viewer.route.overview.aria":"显示完整路径总览","viewer.route.instructions":"先点起点，再点终点，沿箭头方向找路。","viewer.route.destination":"从{label}出发，走到哪里？","viewer.route.destination.find":"查找目标","viewer.route.destination.find.aria":"查找可达的路径目标","viewer.route.differentDestination":"选择其他目标","viewer.route.distinct":"请选两个不同的节点。","viewer.route.unreachable":"走不到{label}","viewer.route.unreachable.detail":"沿箭头方向，从{source}走不到{target}。请选一个高亮节点。","viewer.route.start.instructions":"接着选终点，能走到的节点会亮起。","viewer.route.copy.success":"已复制路径链接","viewer.route.copy.failed":"无法复制路径链接","viewer.route.position":"路径位置 {index}/{total}：{label}","viewer.route.step":"第 {index}/{total} 步 · {phase} · {label}","viewer.route.motionRequired":"自动旅程需要动态模式","viewer.route.trigger.clear":"清除已追踪路径","viewer.route.overview.status":"{nodes} · {hops} · 最短路径","viewer.route.overview.node.one":"{count} 个节点","viewer.route.overview.node.other":"{count} 个节点","viewer.route.overview.hop.one":"{count} 步","viewer.route.overview.hop.other":"{count} 步","viewer.route.phase.playing":"播放中","viewer.route.phase.complete":"已完成","viewer.route.phase.inspecting":"检查中","viewer.route.destination.count.one":"有 {count} 个能走到的节点已高亮，点一下。","viewer.route.destination.count.other":"有 {count} 个能走到的节点已高亮，点一个。","viewer.route.noOutgoing":"这个节点没有向外的箭头。清除后换一个起点。","viewer.route.result.title":"{source} 到 {target}","viewer.route.finder.source.title":"选择路径起点","viewer.route.finder.source.placeholder":"搜索路径来源","viewer.route.finder.source.empty":"没有匹配的路径来源","viewer.route.finder.source.results":"可作为路径起点的节点","viewer.route.finder.source.noun":"个路径来源","viewer.route.finder.source.badge":"起点","viewer.route.finder.target.title":"从{label}出发的目标","viewer.route.finder.target.placeholder":"搜索可达目标","viewer.route.finder.target.empty":"没有匹配的可达目标","viewer.route.finder.target.results":"可达路径目标","viewer.route.finder.target.noun":"个可达目标","viewer.route.hop.one":"{count} 跳","viewer.route.hop.other":"{count} 跳","viewer.lens.eyebrow":"语义透镜","viewer.lens.title":"比较系统角色","viewer.lens.close":"关闭语义透镜","viewer.lens.instruction":"最多选择两种语义类型。选择一种可显示其真实流量；选择两种只比较直接编写的关系。","viewer.lens.kinds":"语义类型","viewer.lens.choose":"选择一种类型以检查其节点和相连关系。","viewer.lens.copy":"复制语义透镜链接","viewer.lens.clear":"清除语义透镜","viewer.lens.open":"打开语义透镜","viewer.lens.openActive":"打开当前语义透镜","viewer.lens.legend":"语义图例","viewer.lens.legend.inspect.one":"检查{label}，{count} 个节点","viewer.lens.legend.inspect.other":"检查{label}，{count} 个节点","viewer.lens.kind.count.one":"{label}，{count} 个节点","viewer.lens.kind.count.other":"{label}，{count} 个节点","viewer.lens.compare.one":"{first} → {second}：{forward} · {second} → {first}：{reverse} · 共 {count} 条直接关系","viewer.lens.compare.other":"{first} → {second}：{forward} · {second} → {first}：{reverse} · 共 {count} 条直接关系","viewer.lens.single":"{nodes} · {relationships} · 已连接节点保持可见","viewer.lens.node.one":"{count} 个{label}节点","viewer.lens.node.other":"{count} 个{label}节点","viewer.lens.relationship.one":"{count} 条相连关系","viewer.lens.relationship.other":"{count} 条相连关系","viewer.radar.title":"语义雷达","viewer.radar.building":"正在构建总览","viewer.radar.openFull":"打开完整语义雷达","viewer.radar.open":"打开雷达","viewer.radar.close":"关闭语义雷达","viewer.radar.surface":"图表总览。点击节点进行聚焦，或使用方向键平移。","viewer.radar.click":"点击节点","viewer.radar.drag":"拖动平移","viewer.radar.space":"语义雷达需要更多地图可见空间。","viewer.radar.nodes":"语义图表雷达节点","viewer.radar.focus":"从语义雷达聚焦{label}","viewer.radar.status":"{count} 个节点 · {viewport}","viewer.radar.fullMap":"{count} 个节点 · 完整地图","viewer.radar.compacted":"已收紧雷达，避免遮挡语义护照或地图控件。","viewer.radar.cancelWaiting":"取消等待更多地图空间的语义雷达","viewer.radar.needsSpace":"语义雷达需要更多可见地图空间","viewer.radar.viewport.full":"完整地图","viewer.radar.viewport.width":"宽度 {percent}%","viewer.radar.viewport.scale":"视口 {percent}%","viewer.nav.controls":"图表视图控制","viewer.nav.route":"追踪有向路径","viewer.nav.route.title":"追踪路径（R）","viewer.nav.route.short":"路径","viewer.nav.radar":"打开语义雷达","viewer.nav.radar.title":"语义雷达（M）","viewer.nav.radar.short":"地图","viewer.nav.lens":"打开语义透镜","viewer.nav.lens.title":"语义透镜（L）","viewer.nav.lens.short":"透镜","viewer.nav.find":"查找节点","viewer.nav.find.title":"查找节点（/）","viewer.outline.title":"节点索引","viewer.rail.show":"要点与索引","viewer.rail.controls":"侧栏","viewer.rail.collapse":"收起侧栏","viewer.rail.bottom":"移到图下方","viewer.rail.right":"移到图右侧","viewer.nav.guide":"打开图表指南","viewer.nav.guide.title":"图表指南（?）","viewer.nav.zoomOut":"缩小","viewer.nav.zoomOut.title":"缩小（-）","viewer.nav.reset":"重置图表视图","viewer.nav.reset.title":"重置视图（0）","viewer.nav.read":"阅读","viewer.nav.zoomIn":"放大","viewer.nav.zoomIn.title":"放大（+）","viewer.nav.camera":"{hint}。重置图表视图","viewer.nav.camera.title":"{semantic}{hint} · 重置视图（0）","viewer.nav.camera.semantic":"语义相机已启用 · ","viewer.nav.level.map":"概览","viewer.nav.level.read":"阅读","viewer.nav.level.full":"完整","viewer.nav.level.auto":"自动","viewer.nav.detail.map":"放大以显示关系标签和节点上下文","viewer.nav.detail.read":"再次放大以显示标签和注释","viewer.nav.detail.full":"完整图表详情","viewer.intent.summary":"{label}。{out} 条出向，{in} 条入向{loops}。共 {total} 条连接。按 Enter 查看详情。","viewer.intent.loops":"，{count} 条自环","viewer.common.copied":"已复制","viewer.common.copyFailed":"复制失败","viewer.common.copyLink":"复制链接","viewer.common.clear":"清除","viewer.common.close":"关闭"}}</script>
+    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"git@github.com:ianwoolf/AgentEval","revision":"4952ead4d97c558f3b5e8d78553d28a9a71dc23d","shortRevision":"4952ead","label":"ianwoolf/AgentEval","linkMode":"local-only"},"referenceCount":18,"nodes":{"ui":[{"path":"web/apps/control/src/features/evaluation-workbench/evaluation-configurator.tsx","line":1,"endLine":63},{"path":"web/apps/control/src/features/evaluation-workbench/reports-page.tsx","line":1,"endLine":687}],"api":[{"path":"evaluation-backend/src/evaluation_backend/target_configs.py","line":1,"endLine":149},{"path":"evaluation-backend/src/evaluation_backend/runs.py","line":1,"endLine":330}],"dataset":[{"path":"evaluation-backend/src/evaluation_backend/upload_api.py","line":1,"endLine":68},{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102}],"runner":[{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102},{"path":"evaluation-backend/src/evaluation_backend/proxy_entrypoint.py","line":1,"endLine":98}],"guardrail":[{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102},{"path":"evaluation-backend/src/evaluation_backend/mock_guardrail.py","line":1,"endLine":93}],"script":[{"path":"evaluation-backend/src/evaluation_backend/git_scorers.py","line":1,"endLine":118},{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":1,"endLine":102}],"es":[{"path":"evaluation-backend/src/evaluation_backend/storage/elastic.py","line":1,"endLine":371}],"collector":[{"path":"evaluation-backend/src/evaluation_backend/collector.py","line":1,"endLine":111},{"path":"evaluation-backend/src/evaluation_backend/proxy_entrypoint.py","line":1,"endLine":98}],"langsmith":[{"path":"evaluation-backend/src/evaluation_backend/collector.py","line":1,"endLine":111}],"guardrail-proxy":[{"path":"evaluation-backend/src/evaluation_backend/guardrail_worker.py","line":13,"endLine":60},{"path":"evaluation-backend/src/evaluation_backend/guardrail_runs.py","line":83,"endLine":99}]}}</script>
+    <script id="archify-i18n-data" type="application/json">{"locale":"en","messages":{"viewer.kind.frontend":"Frontend","viewer.kind.backend":"Backend","viewer.kind.database":"Database","viewer.kind.cloud":"Cloud","viewer.kind.security":"Security","viewer.kind.messagebus":"Message bus","viewer.kind.external":"External","viewer.kind.neutral":"Neutral","viewer.kind.node":"Node","viewer.kind.start":"Start","viewer.kind.active":"Active","viewer.kind.waiting":"Waiting","viewer.kind.decision":"Decision","viewer.kind.success":"Success","viewer.kind.failure":"Failure","viewer.toolbar.actions":"Diagram actions","viewer.theme.toggle.title":"Toggle theme (T)","viewer.theme.toggle":"Toggle color theme","viewer.theme.dark":"Dark","viewer.theme.light":"Light","viewer.preset.choose.title":"Choose visual style (S cycles)","viewer.preset.choose":"Choose visual style","viewer.preset.style":"Style","viewer.preset.menu":"Visual style","viewer.preset.identity":"Visual identity","viewer.preset.cycles":"to cycle","viewer.preset.classic":"Classic","viewer.preset.classic.short":"Classic","viewer.preset.classic.hint":"Stable technical default","viewer.preset.flow":"Signal Flow","viewer.preset.flow.short":"Flow","viewer.preset.flow.hint":"Motion-forward presentation","viewer.preset.blueprint":"Blueprint","viewer.preset.blueprint.hint":"Engineering review","viewer.preset.editorial":"Editorial","viewer.preset.editorial.hint":"Publication and launch notes","viewer.preset.badge.signalFlow":"SIGNAL FLOW","viewer.preset.badge.blueprint":"BLUEPRINT / REV 01","viewer.preset.badge.editorial":"EDITORIAL / FIELD NOTE","viewer.preset.badge.editorialPlate":"ARCHIFY / PLATE 04","viewer.preset.current":"Visual style: {style}. Choose visual style","viewer.motion.live":"Live","viewer.motion.still":"Still","viewer.motion.pause":"Pause motion","viewer.motion.resume":"Resume motion","viewer.motion.reduced":"Motion paused by reduced-motion preference","viewer.motion.hidden":"Motion paused while this page is hidden","viewer.motion.yielding":"Pause motion; currently yielding to {owner}","viewer.motion.yielding.title":"Live preview enabled · yielding to {owner}","viewer.owner.route":"Route Probe","viewer.owner.lens":"Semantic Lens","viewer.owner.relationship":"Relationship Preview","viewer.owner.intent":"Intent Trace","viewer.owner.focus":"semantic focus","viewer.owner.legend":"legend preview","viewer.owner.reader":"reader interaction","viewer.present.enter":"Enter presentation stage","viewer.present.enter.title":"Presentation stage (F)","viewer.present.exit":"Exit presentation stage","viewer.present.exit.title":"Exit presentation stage (F or Escape)","viewer.present.present":"Present","viewer.present.exit.label":"Exit","viewer.export.button":"Export","viewer.export.button.title":"Export diagram (E)","viewer.export.diagram":"Export diagram","viewer.export.menu":"Export","viewer.export.subtitle":"Portable, clean outputs","viewer.export.share":"Share","viewer.export.shareCard":"Share Card","viewer.export.routeShareCard":"Route Share Card","viewer.export.reachShareCard":"Reach Share Card","viewer.export.copyDiagram":"Copy diagram","viewer.export.clipboardPng":"PNG to clipboard","viewer.export.raster":"Raster images","viewer.export.image":"Image","viewer.export.lossless":"Lossless image","viewer.export.compact":"Compact image","viewer.export.modern":"Modern image","viewer.export.vectorMotion":"Vector and motion","viewer.export.vectorMotion.heading":"Vector \u0026 motion","viewer.export.editable":"Editable vector","viewer.export.svg.auto":"SVG · Auto","viewer.export.svg.auto.hint":"Matches host theme","viewer.export.svg.light":"SVG · Light","viewer.export.svg.light.hint":"Always light","viewer.export.svg.dark":"SVG · Dark","viewer.export.svg.dark.hint":"Always dark","viewer.export.motion6s":"6s motion","viewer.export.unsupported":"Not supported by this browser","viewer.export.clipboardUnsupported":"Clipboard image write not supported by this browser","viewer.export.clipboardUnsupported.short":"Clipboard image write not supported in this browser.","viewer.export.motionUnavailable":"Motion capture unavailable in this browser","viewer.export.webmUnavailable":"WebM unavailable in this browser","viewer.export.failed":"Export failed: {message}","viewer.export.unknownVariant":"Unknown Share Card variant: {variant}","viewer.export.routeRequired":"Trace a route before exporting a Route Share Card","viewer.export.reachRequired":"Trace authored reach before exporting a Reach Share Card","viewer.export.unknown":"unknown","viewer.export.routeFailed":"Route Share Card export failed: {message}","viewer.export.reachFailed":"Reach Share Card export failed: {message}","viewer.export.copyFailed":"Copy failed: {message}","viewer.export.copiedPng":"Copied PNG to clipboard","viewer.export.downloadedRoute":"Downloaded Route Share Card","viewer.export.downloadedReach":"Downloaded Reach Share Card","viewer.export.downloadedWebm":"Downloaded WebM","viewer.export.recording":"Recording 6 seconds of motion…","viewer.export.card.routeSummary.one":"Path: {source} → {target} · {count} step","viewer.export.card.routeSummary.other":"Path: {source} → {target} · {count} steps","viewer.export.card.reachSummary":"Authored {direction} from {origin} · {nodes} · {links} · max {hops}","viewer.export.card.node.one":"{count} node","viewer.export.card.node.other":"{count} nodes","viewer.export.card.link.one":"{count} link","viewer.export.card.link.other":"{count} links","viewer.export.card.hop.one":"{count} hop","viewer.export.card.hop.other":"{count} hops","viewer.export.card.routeBadge":"ARCHIFY · ROUTE · {hops}","viewer.export.card.reachBadge":"ARCHIFY · {direction} REACH","viewer.export.direction.upstream":"Upstream","viewer.export.direction.downstream":"Downstream","viewer.export.error.canvasUnavailable":"Canvas unavailable for {label}","viewer.export.error.contextUnavailable":"2D canvas context unavailable for {label}","viewer.export.error.toBlobUnavailable":"canvas.toBlob unavailable for {label}","viewer.export.error.toBlobNull":"canvas.toBlob returned no data for {label}","viewer.export.error.variantsCombined":"Share Card variants cannot be combined","viewer.export.error.viewerState":"Share Card export could not remove temporary viewer state","viewer.export.error.routeState":"Route Card export could not preserve the resolved route safely","viewer.export.error.reachState":"Reach Card export could not preserve authored reach safely","viewer.export.error.webmRequirements":"WebM motion export requires a trace animation and browser MediaRecorder support","viewer.export.error.mediaRecorder":"MediaRecorder failed","viewer.export.error.emptyWebm":"MediaRecorder produced an empty WebM","viewer.export.error.webmBackground":"SVG background could not be loaded for WebM export","viewer.guide.title":"Explore this system","viewer.focus.selectedNodes":"{count} selected nodes","viewer.guide.eyebrow":"Diagram guide","viewer.guide.close":"Close diagram guide","viewer.guide.inspecting":"Inspecting compiled semantics","viewer.guide.actions":"Diagram exploration actions","viewer.guide.find":"Find any node","viewer.guide.find.hint":"Search labels, responsibilities, kinds, and stable IDs.","viewer.guide.route":"Trace a route","viewer.guide.route.aria":"Trace a directed route","viewer.guide.route.hint":"Ask how two semantic nodes connect in authored direction.","viewer.guide.map":"See the whole system","viewer.guide.map.hint":"Open Semantic Radar with a live viewport and stable nodes.","viewer.guide.lens":"Compare semantic kinds","viewer.guide.lens.hint":"Count roles, reveal their traffic, and compare direct authored links.","viewer.guide.present":"Enter Presentation Stage","viewer.guide.present.hint":"Give the live diagram the viewport without changing export.","viewer.guide.shortcuts":"Additional keyboard shortcuts","viewer.guide.shortcut.export":"Export","viewer.guide.shortcut.theme":"Theme","viewer.guide.shortcut.style":"Style","viewer.guide.shortcut.reset":"Reset","viewer.guide.shortcut.zoomIn":"Zoom in","viewer.guide.shortcut.zoomOut":"Zoom out","viewer.guide.shortcut.close":"Close","viewer.guide.credit":"Find Archify useful? A star on GitHub helps","viewer.guide.star":"Star","viewer.guide.facts":"{nodes} · {relationships}","viewer.guide.fact.node.one":"{count} semantic node","viewer.guide.fact.node.other":"{count} semantic nodes","viewer.guide.fact.relationship.one":"{count} relationship","viewer.guide.fact.relationship.other":"{count} relationships","viewer.guide.open":"Open diagram guide","viewer.finder.title":"Find a node","viewer.finder.close":"Close node finder","viewer.finder.placeholder":"Search labels or IDs","viewer.finder.search":"Search diagram nodes","viewer.finder.results":"Diagram nodes","viewer.finder.empty":"No matching nodes","viewer.finder.result.focus":"Focus {label}","viewer.finder.result.routeStart":"Choose {label} as route start","viewer.finder.result.routeTarget":"Choose {label} as route destination, {links}","viewer.finder.status.empty":"No matching nodes","viewer.finder.status.count.one":"{count} matching node","viewer.finder.status.count.other":"{count} matching nodes","viewer.finder.noun.nodes":"nodes","viewer.finder.link.one":"{count} link","viewer.finder.link.other":"{count} links","viewer.finder.result.focus.one":"Focus {label}, {count} related connection","viewer.finder.result.focus.other":"Focus {label}, {count} related connections","viewer.finder.status.filtered":"{visible} of {available} {noun}","viewer.finder.status.all":"{available} {noun}","viewer.passport.eyebrow":"Semantic passport","viewer.passport.metadata":"Node metadata","viewer.passport.evidence":"Verified source evidence","viewer.passport.verified":"Verified source","viewer.passport.verificationScope":"Verified against local Git at the pinned revision. Remote access has not been checked.","viewer.passport.reach":"Authored reach","viewer.passport.reach.trace":"Trace authored reachability","viewer.passport.upstream":"Upstream","viewer.passport.downstream":"Downstream","viewer.passport.upstream.trace":"Trace upstream authored reachability","viewer.passport.downstream.trace":"Trace downstream authored reachability","viewer.passport.close":"Close semantic passport","viewer.passport.move":"Move semantic passport. Drag, use arrow keys, or press Home to reset.","viewer.passport.copy":"Copy link","viewer.passport.copy.focus":"Copy link to focused node","viewer.passport.relations":"Relations","viewer.passport.relations.show":"Show connected relationships","viewer.passport.relations.hide":"Hide connected relationships","viewer.passport.relations.list":"Connected relationships","viewer.passport.copyRelation":"Copy relation","viewer.passport.copyNode":"Copy node","viewer.passport.copyPinned":"Copy link to pinned relationship","viewer.passport.copySource":"Copy link to source node","viewer.passport.copy.focused.success":"Focused node link copied","viewer.passport.copy.pinned.success":"Pinned relationship link copied","viewer.passport.copy.focused.failed":"Could not copy focused node link","viewer.passport.copy.pinned.failed":"Could not copy pinned relationship link","viewer.passport.relationship.none":"No connected relationships","viewer.passport.relationship.count.one":"{count} relation","viewer.passport.relationship.count.other":"{count} relations","viewer.passport.relationship.show.one":"Show {count} connected relationship","viewer.passport.relationship.show.other":"Show {count} connected relationships","viewer.passport.relationship.summary":"{out} outgoing · {in} incoming{loops}","viewer.passport.relationship.loops":" · {count} loop","viewer.passport.relationship.explorer":"Direct relationship explorer","viewer.passport.relationship.help":"Use arrow keys to explore relationships. Press Enter or Space to pin details; Escape clears.","viewer.passport.relationship.loopsBack":"loops back","viewer.passport.relationship.connectsTo":"connects to","viewer.passport.relationship.connectsFrom":"connects from","viewer.passport.relationship.pinned":"Pinned relationship · {from} → {to} · {label}","viewer.passport.relationship.inspect":"Inspect relationship {index} of {total}: {from} to {to}, {label}. Press Enter for details.","viewer.passport.relationship.group.out":"Outgoing","viewer.passport.relationship.group.in":"Incoming","viewer.passport.relationship.group.loop":"Self loops","viewer.passport.relationship.row":"{group}: {relationship}, {neighbor}","viewer.passport.relationship.direction.out":"OUT →","viewer.passport.relationship.direction.in":"← IN","viewer.passport.relationship.direction.loop":"LOOP","viewer.passport.sourceCount.one":"{count} verified source reference","viewer.passport.sourceCount.other":"{count} verified source references","viewer.passport.repository.open":"Open verified repository revision {revision}","viewer.passport.source.open":"Open verified source {path} at revision {revision}","viewer.passport.source.openLink":"Open ↗","viewer.passport.reach.upstream.one":"Trace {count} upstream authored node","viewer.passport.reach.upstream.other":"Trace {count} upstream authored nodes","viewer.passport.reach.downstream.one":"Trace {count} downstream authored node","viewer.passport.reach.downstream.other":"Trace {count} downstream authored nodes","viewer.passport.reach.noUpstream":"No upstream authored nodes","viewer.passport.reach.noDownstream":"No downstream authored nodes","viewer.passport.reach.status":"{direction} · {nodes} nodes · {links} links · max {hops} hops","viewer.route.eyebrow":"Path","viewer.route.start":"Click where the path starts","viewer.route.start.find":"Find start","viewer.route.start.find.aria":"Find a route start","viewer.route.copy":"Copy link","viewer.route.copy.aria":"Copy link to traced route","viewer.route.clear":"Clear","viewer.route.clear.aria":"Clear route probe","viewer.route.traced":"Path","viewer.route.pickTwo":"Click two nodes on the diagram","viewer.route.pickOne":"Click a node on the diagram","viewer.route.controls":"Route journey controls","viewer.route.previous":"Previous route position","viewer.route.play":"Play route journey","viewer.route.pause":"Pause route journey","viewer.route.replay":"Replay route journey","viewer.route.next":"Next route position","viewer.route.journey":"Journey","viewer.route.pause.label":"Pause","viewer.route.replay.label":"Replay","viewer.route.overview":"Overview","viewer.route.overview.aria":"Show complete route overview","viewer.route.instructions":"Click a start, then an end. Paths follow the arrows.","viewer.route.destination":"Where does the path from {label} end?","viewer.route.destination.find":"Find target","viewer.route.destination.find.aria":"Find a reachable route destination","viewer.route.differentDestination":"Choose a different destination","viewer.route.distinct":"Pick two different nodes.","viewer.route.unreachable":"Cannot reach {label} from here","viewer.route.unreachable.detail":"{target} cannot be reached from {source} along the arrows. Pick a highlighted node.","viewer.route.start.instructions":"Next, pick the end. Only nodes you can reach will light up.","viewer.route.copy.success":"Traced route link copied","viewer.route.copy.failed":"Could not copy traced route link","viewer.route.position":"Route position {index} of {total}: {label}","viewer.route.step":"Step {index} of {total} · {phase} · {label}","viewer.route.motionRequired":"Automatic journey requires Live motion","viewer.route.trigger.clear":"Clear traced route","viewer.route.overview.status":"{nodes} · {hops} · shortest path","viewer.route.overview.node.one":"{count} node","viewer.route.overview.node.other":"{count} nodes","viewer.route.overview.hop.one":"{count} step","viewer.route.overview.hop.other":"{count} steps","viewer.route.phase.playing":"Playing","viewer.route.phase.complete":"Complete","viewer.route.phase.inspecting":"Inspecting","viewer.route.destination.count.one":"{count} reachable node is highlighted. Click it.","viewer.route.destination.count.other":"{count} reachable nodes are highlighted. Click one.","viewer.route.noOutgoing":"No arrows lead out of this node. Clear it and pick another start.","viewer.route.result.title":"{source} to {target}","viewer.route.finder.source.title":"Choose route start","viewer.route.finder.source.placeholder":"Search route sources","viewer.route.finder.source.empty":"No matching route sources","viewer.route.finder.source.results":"Nodes that can start a route","viewer.route.finder.source.noun":"route sources","viewer.route.finder.source.badge":"start","viewer.route.finder.target.title":"Destination from {label}","viewer.route.finder.target.placeholder":"Search reachable destinations","viewer.route.finder.target.empty":"No matching reachable destinations","viewer.route.finder.target.results":"Reachable route destinations","viewer.route.finder.target.noun":"reachable destinations","viewer.route.hop.one":"{count} hop","viewer.route.hop.other":"{count} hops","viewer.lens.eyebrow":"Semantic lens","viewer.lens.title":"Compare system roles","viewer.lens.close":"Close semantic lens","viewer.lens.instruction":"Choose up to two semantic kinds. One reveals its real traffic; two compare only direct authored relationships.","viewer.lens.kinds":"Semantic kinds","viewer.lens.choose":"Choose a kind to inspect its nodes and touching relationships.","viewer.lens.copy":"Copy link to semantic lens","viewer.lens.clear":"Clear semantic lens","viewer.lens.open":"Open semantic lens","viewer.lens.openActive":"Open active semantic lens","viewer.lens.legend":"Semantic legend","viewer.lens.legend.inspect.one":"Inspect {label}, {count} node","viewer.lens.legend.inspect.other":"Inspect {label}, {count} nodes","viewer.lens.kind.count.one":"{label}, {count} node","viewer.lens.kind.count.other":"{label}, {count} nodes","viewer.lens.compare.one":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationship","viewer.lens.compare.other":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationships","viewer.lens.single":"{nodes} · {relationships} · connected peers remain visible","viewer.lens.node.one":"{count} {label} node","viewer.lens.node.other":"{count} {label} nodes","viewer.lens.relationship.one":"{count} touching relationship","viewer.lens.relationship.other":"{count} touching relationships","viewer.radar.title":"Semantic radar","viewer.radar.building":"Building overview","viewer.radar.openFull":"Open full semantic radar","viewer.radar.open":"Open radar","viewer.radar.close":"Close semantic radar","viewer.radar.surface":"Diagram overview. Click a node to focus it, or use arrow keys to pan.","viewer.radar.click":"Click node","viewer.radar.drag":"Drag to pan","viewer.radar.space":"Semantic radar needs more MAP space.","viewer.radar.nodes":"Semantic diagram radar nodes","viewer.radar.focus":"Focus {label} from Semantic Radar","viewer.radar.status":"{count} nodes · {viewport}","viewer.radar.fullMap":"{count} nodes · full map","viewer.radar.compacted":"Radar compacted to avoid covering the Semantic Passport or MAP controls.","viewer.radar.cancelWaiting":"Cancel semantic radar waiting for more MAP space","viewer.radar.needsSpace":"Semantic radar needs more visible MAP space","viewer.radar.viewport.full":"full map","viewer.radar.viewport.width":"{percent}% width","viewer.radar.viewport.scale":"{percent}% viewport","viewer.nav.controls":"Diagram view controls","viewer.nav.route":"Trace a directed route","viewer.nav.route.title":"Trace route (R)","viewer.nav.route.short":"ROUTE","viewer.nav.radar":"Open semantic radar","viewer.nav.radar.title":"Semantic radar (M)","viewer.nav.radar.short":"MAP","viewer.nav.lens":"Open semantic lens","viewer.nav.lens.title":"Semantic lens (L)","viewer.nav.lens.short":"LENS","viewer.nav.find":"Find a node","viewer.nav.find.title":"Find a node (/)","viewer.outline.title":"Node index","viewer.rail.show":"Notes \u0026 index","viewer.rail.controls":"Side panel","viewer.rail.collapse":"Collapse side panel","viewer.rail.bottom":"Move panel below the diagram","viewer.rail.right":"Move panel beside the diagram","viewer.nav.guide":"Open diagram guide","viewer.nav.guide.title":"Diagram guide (?)","viewer.nav.zoomOut":"Zoom out","viewer.nav.zoomOut.title":"Zoom out (-)","viewer.nav.reset":"Reset diagram view","viewer.nav.reset.title":"Reset view (0)","viewer.nav.read":"READ","viewer.nav.zoomIn":"Zoom in","viewer.nav.zoomIn.title":"Zoom in (+)","viewer.nav.camera":"{hint}. Reset diagram view","viewer.nav.camera.title":"{semantic}{hint} · reset view (0)","viewer.nav.camera.semantic":"Semantic camera active · ","viewer.nav.level.map":"MAP","viewer.nav.level.read":"READ","viewer.nav.level.full":"FULL","viewer.nav.level.auto":"AUTO","viewer.nav.detail.map":"Zoom in to reveal relationship labels and node context","viewer.nav.detail.read":"Zoom in again to reveal tags and annotations","viewer.nav.detail.full":"Full diagram detail","viewer.intent.summary":"{label}. {out} outgoing, {in} incoming{loops}. {total} connections. Press Enter for details.","viewer.intent.loops":", {count} self loop","viewer.common.copied":"Copied","viewer.common.copyFailed":"Copy failed","viewer.common.copyLink":"Copy link","viewer.common.clear":"Clear","viewer.common.close":"Close"}}</script>
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
-         data-preset-badge-editorial-plate="ARCHIFY / 图版 04">
-      <svg viewBox="0 0 1090 1014" role="img" lang="zh-CN" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase" data-node-ui="" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
-        <title id="archify-diagram-title">AgentEval · Guardrail 测评架构与数据流</title>
-        <desc id="archify-diagram-description">由 Archify 生成的架构图。</desc>
+         data-preset-badge-editorial-plate="ARCHIFY / PLATE 04">
+      <svg viewBox="0 0 1232 1074" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase" data-node-ui="" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
+        <title id="archify-diagram-title">AgentEval - Guardrail Evaluation Architecture</title>
+        <desc id="archify-diagram-description">An architecture diagram generated by Archify.</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -5250,89 +5250,71 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="K8s Job - Evaluation Runner container" x="394" y="214" width="552" height="322" rx="12" class="c-region" stroke-width="1"/>
 
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" data-composition-frame-label="Git Repo - Scorer source" x="944" y="474" width="232" height="136" rx="12" class="c-region" stroke-width="1"/>
 
         <!-- Connection paths (before components for correct z-order) -->
         <g data-graph-role="automatic-crossover" style="--step:0">
-          <path data-graph-role="automatic-crossover-underlay" d="M 270 78 L 420 78" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="ui" data-edge-to="api" data-edge-label="配置 / Trigger / Report" data-edge-key="0" data-edge-id="ui-api-0" data-composition-points="270,78;420,78" data-composition-crossover="halo" data-composition-independent="true" d="M 270 78 L 420 78" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 270 69.95 L 420 69.95" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="ui" data-edge-to="api" data-edge-label="Configure / Trigger / Report" data-edge-key="0" data-edge-id="ui-api-0" data-composition-points="270,69.95;420,69.95" data-composition-crossover="halo" data-composition-independent="true" d="M 270 69.95 L 420 69.95" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:1">
-          <path data-graph-role="automatic-crossover-underlay" d="M 640 68.9 L 830 68.9" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="api" data-edge-to="runtime" data-edge-label="创建异步任务" data-edge-key="1" data-edge-id="api-runtime-1" data-composition-points="640,68.9;830,68.9" data-composition-crossover="halo" data-composition-independent="true" d="M 640 68.9 L 830 68.9" class="a-emphasis" data-animate="edge" style="--step:1" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 436 116 L 436 328 Q 436 336 428 336 L 270 336" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="api" data-edge-to="dataset" data-edge-label="Versioned samples" data-edge-key="1" data-edge-id="api-dataset-6" data-composition-points="436,116;436,336;270,336" data-composition-crossover="halo" data-composition-independent="true" d="M 436 116 L 436 328 Q 436 336 428 336 L 270 336" class="a-default" data-animate="edge" style="--step:1" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:2">
-          <path data-graph-role="automatic-crossover-underlay" d="M 551 240 L 551 116" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="registry" data-edge-to="api" data-edge-label="实例目录" data-edge-key="2" data-edge-id="registry-api-2" data-composition-points="551,240;551,116" data-composition-crossover="halo" data-composition-independent="true" d="M 551 240 L 551 116" class="a-default" data-animate="edge" style="--step:2" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 270 365 L 477 365 Q 485 365 485 357 L 485 286 Q 485 278 493 278 L 700 278" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="dataset" data-edge-to="runner" data-edge-label="input / label / strategy" data-edge-key="2" data-edge-id="dataset-runner-7" data-composition-points="270,365;485,365;485,278;700,278" data-composition-crossover="halo" data-composition-independent="true" d="M 270 365 L 477 365 Q 485 365 485 357 L 485 286 Q 485 278 493 278 L 700 278" class="a-emphasis" data-animate="edge" style="--step:2" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:3">
-          <path data-graph-role="automatic-crossover-underlay" d="M 830 85 L 701.8 85 Q 693.8 85 693.8 93 L 693.8 400 Q 693.8 408 685.8 408 L 553.05 408 Q 545.05 408 545.05 416 L 545.05 440" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="runtime" data-edge-to="runner" data-edge-label="启动容器" data-edge-key="3" data-edge-id="runtime-runner-3" data-composition-points="830,85;693.8,85;693.8,408;545.05,408;545.05,440" data-composition-crossover="halo" data-composition-independent="true" d="M 830 85 L 701.8 85 Q 693.8 85 693.8 93 L 693.8 400 Q 693.8 408 685.8 408 L 553.05 408 Q 545.05 408 545.05 416 L 545.05 440" class="a-emphasis" data-animate="edge" style="--step:3" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 624 116 L 624 248 Q 624 256 632 256 L 700 256" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="api" data-edge-to="runner" data-edge-label="Create Job / snapshot" data-edge-key="3" data-edge-id="api-runner-8" data-composition-points="624,116;624,256;700,256" data-composition-crossover="halo" data-composition-independent="true" d="M 624 116 L 624 248 Q 624 256 632 256 L 700 256" class="a-default" data-animate="edge" style="--step:3" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:4">
-          <path data-graph-role="automatic-crossover-underlay" d="M 830 285 L 743 285 Q 735 285 735 293 L 735 463.05 Q 735 471.05 727 471.05 L 640 471.05" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="openshell" data-edge-to="runner" data-edge-label="可选 sandbox 执行" data-edge-key="4" data-edge-id="openshell-runner-4" data-composition-points="830,285;735,285;735,471.05;640,471.05" data-composition-crossover="halo" data-composition-independent="true" d="M 830 285 L 743 285 Q 735 285 735 293 L 735 463.05 Q 735 471.05 727 471.05 L 640 471.05" class="a-dashed" data-animate="edge" style="--step:4" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 920 300 L 1126 300 Q 1134 300 1134 308 L 1134 500" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="runner" data-edge-to="script" data-edge-label="Fetch SHA / JSON stdin" data-edge-key="4" data-edge-id="runner-script-11" data-composition-points="920,300;1134,300;1134,500" data-composition-crossover="halo" data-composition-independent="true" d="M 920 300 L 1126 300 Q 1134 300 1134 308 L 1134 500" class="a-emphasis" data-animate="edge" style="--step:4" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:5">
-          <path data-graph-role="automatic-crossover-underlay" d="M 640 85 L 656 85 Q 664 85 664 93 L 664 263 Q 664 271 672 271 L 830 271" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="api" data-edge-to="openshell" data-edge-label="可选 CLI 路径" data-edge-key="5" data-edge-id="api-openshell-5" data-composition-points="640,85;664,85;664,271;830,271" data-composition-crossover="halo" data-composition-independent="true" d="M 640 85 L 656 85 Q 664 85 664 93 L 664 263 Q 664 271 672 271 L 830 271" class="a-dashed" data-animate="edge" style="--step:5" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 1067 500 L 1067 348 Q 1067 340 1059 340 L 839 340 Q 831 340 831 332 L 831 316" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="script" data-edge-to="runner" data-edge-label="JSON classification" data-edge-key="5" data-edge-id="script-runner-12" data-composition-points="1067,500;1067,340;831,340;831,316" data-composition-crossover="halo" data-composition-independent="true" d="M 1067 500 L 1067 348 Q 1067 340 1059 340 L 839 340 Q 831 340 831 332 L 831 316" class="a-emphasis" data-animate="edge" style="--step:5" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:6">
-          <path data-graph-role="automatic-crossover-underlay" d="M 509 116 L 509 132 Q 509 140 501 140 L 163 140 Q 155 140 155 148 L 155 440" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="api" data-edge-to="dataset" data-edge-label="版本样本接口" data-edge-key="6" data-edge-id="api-dataset-6" data-composition-points="509,116;509,140;155,140;155,440" data-composition-crossover="halo" data-composition-independent="true" d="M 509 116 L 509 132 Q 509 140 501 140 L 163 140 Q 155 140 155 148 L 155 440" class="a-default" data-animate="edge" style="--step:6" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 819.1 516 L 819.1 700" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="guardrail-proxy" data-edge-to="guardrail" data-edge-label="HTTP POST /scans" data-edge-key="6" data-edge-id="runner-guardrail-13" data-composition-points="819.1,516;819.1,700" data-composition-crossover="halo" data-composition-independent="true" d="M 819.1 516 L 819.1 700" class="a-emphasis" data-animate="edge" style="--step:6" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:7">
-          <path data-graph-role="automatic-crossover-underlay" d="M 270 478 L 420 478" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="dataset" data-edge-to="runner" data-edge-label="input / label / strategy" data-edge-key="7" data-edge-id="dataset-runner-7" data-composition-points="270,478;420,478" data-composition-crossover="halo" data-composition-independent="true" d="M 270 478 L 420 478" class="a-emphasis" data-animate="edge" style="--step:7" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 803 700 L 803 516" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="guardrail" data-edge-to="guardrail-proxy" data-edge-label="output + request ID" data-edge-key="7" data-edge-id="guardrail-runner-14" data-composition-points="803,700;803,516" data-composition-crossover="halo" data-composition-independent="true" d="M 803 700 L 803 516" class="a-emphasis" data-animate="edge" style="--step:7" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:8">
-          <path data-graph-role="automatic-crossover-underlay" d="M 420 93.05 L 404 93.05 Q 396 93.05 396 101.05 L 396 408 Q 396 416 404 416 L 522 416 Q 530 416 530 424 L 530 440" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="api" data-edge-to="runner" data-edge-label="快照 + 受保护 detail" data-edge-key="8" data-edge-id="api-runner-8" data-composition-points="420,93.05;396,93.05;396,416;530,416;530,440" data-composition-crossover="halo" data-composition-independent="true" d="M 420 93.05 L 404 93.05 Q 396 93.05 396 101.05 L 396 408 Q 396 416 404 416 L 522 416 Q 530 416 530 424 L 530 440" class="a-default" data-animate="edge" style="--step:8" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 700 300 L 632 300 Q 624 300 624 308 L 624 440" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="runner" data-edge-to="collector" data-edge-label="Scores / latency / OTLP" data-edge-key="8" data-edge-id="runner-collector-15" data-composition-points="700,300;624,300;624,440" data-composition-crossover="halo" data-composition-independent="true" d="M 700 300 L 632 300 Q 624 300 624 308 L 624 440" class="a-emphasis" data-animate="edge" style="--step:8" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:9">
-          <path data-graph-role="automatic-crossover-underlay" d="M 561.15 516 L 561.15 532 Q 561.15 540 569.15 540 L 798 540 Q 806 540 806 532 L 806 486 Q 806 478 814 478 L 830 478" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="runner" data-edge-to="git" data-edge-label="fetch 固定 SHA" data-edge-key="9" data-edge-id="runner-git-9" data-composition-points="561.15,516;561.15,540;806,540;806,478;830,478" data-composition-crossover="halo" data-composition-independent="true" d="M 561.15 516 L 561.15 532 Q 561.15 540 569.15 540 L 798 540 Q 806 540 806 532 L 806 486 Q 806 478 814 478 L 830 478" class="a-default" data-animate="edge" style="--step:9" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 420 500 L 262 500 Q 254 500 254 508 L 254 700" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="collector" data-edge-to="es" data-edge-label="Persist feedback / spans" data-edge-key="9" data-edge-id="collector-es-16" data-composition-points="420,500;254,500;254,700" data-composition-crossover="halo" data-composition-independent="true" d="M 420 500 L 262 500 Q 254 500 254 508 L 254 700" class="a-emphasis" data-animate="edge" style="--step:9" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:10">
-          <path data-graph-role="automatic-crossover-underlay" d="M 940 516 L 940 655" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="git" data-edge-to="script" data-edge-label="checkout script.py" data-edge-key="10" data-edge-id="git-script-10" data-composition-points="940,516;940,655" data-composition-crossover="halo" data-composition-independent="true" d="M 940 516 L 940 655" class="a-default" data-animate="edge" style="--step:10" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 530 116 L 530 429 Q 530 437 522 437 L 163 437 Q 155 437 155 445 L 155 700" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="api" data-edge-to="es" data-edge-label="Resources / reports" data-edge-key="10" data-edge-id="api-es-17" data-composition-points="530,116;530,437;155,437;155,700" data-composition-crossover="halo" data-composition-independent="true" d="M 530 116 L 530 429 Q 530 437 522 437 L 163 437 Q 155 437 155 445 L 155 700" class="a-default" data-animate="edge" style="--step:10" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:11">
-          <path data-graph-role="automatic-crossover-underlay" d="M 546.1 516 L 546.1 623 Q 546.1 631 554.1 631 L 916.95 631 Q 924.95 631 924.95 639 L 924.95 655" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="runner" data-edge-to="script" data-edge-label="input + label + output" data-edge-key="11" data-edge-id="runner-script-11" data-composition-points="546.1,516;546.1,631;924.95,631;924.95,655" data-composition-crossover="halo" data-composition-independent="true" d="M 546.1 516 L 546.1 623 Q 546.1 631 554.1 631 L 916.95 631 Q 924.95 631 924.95 639 L 924.95 655" class="a-emphasis" data-animate="edge" style="--step:11" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 530 516 L 530 930" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="collector" data-edge-to="langsmith" data-edge-label="Planned exporter" data-edge-key="11" data-edge-id="collector-langsmith-18" data-composition-points="530,516;530,930" data-composition-crossover="halo" data-composition-independent="true" d="M 530 516 L 530 930" class="a-dashed" data-animate="edge" style="--step:11" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:12">
-          <path data-graph-role="automatic-crossover-underlay" d="M 830 700 L 743 700 Q 735 700 735 692 L 735 508 Q 735 500 727 500 L 640 500" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="script" data-edge-to="runner" data-edge-label="JSON 四象限" data-edge-key="12" data-edge-id="script-runner-12" data-composition-points="830,700;735,700;735,500;640,500" data-composition-crossover="halo" data-composition-independent="true" d="M 830 700 L 743 700 Q 735 700 735 692 L 735 508 Q 735 500 727 500 L 640 500" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 772.9 316 L 772.9 440" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="runner" data-edge-to="guardrail-proxy" data-edge-label="Dataset input" data-edge-key="12" data-edge-id="runner-proxy-input" data-composition-points="772.9,316;772.9,440" data-composition-crossover="halo" data-composition-independent="true" d="M 772.9 316 L 772.9 440" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:13">
-          <path data-graph-role="automatic-crossover-underlay" d="M 420 494.1 L 404 494.1 Q 396 494.1 396 502.1 L 396 685 Q 396 693 404 693 L 420 693" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="runner" data-edge-to="guardrail" data-edge-label="HTTP POST /scans" data-edge-key="13" data-edge-id="runner-guardrail-13" data-composition-points="420,494.1;396,494.1;396,693;420,693" data-composition-crossover="halo" data-composition-independent="true" d="M 420 494.1 L 404 494.1 Q 396 494.1 396 502.1 L 396 685 Q 396 693 404 693 L 420 693" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:14">
-          <path data-graph-role="automatic-crossover-underlay" d="M 513.9 655 L 513.9 516" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="guardrail" data-edge-to="runner" data-edge-label="output + request ID" data-edge-key="14" data-edge-id="guardrail-runner-14" data-composition-points="513.9,655;513.9,516" data-composition-crossover="halo" data-composition-independent="true" d="M 513.9 655 L 513.9 516" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:15">
-          <path data-graph-role="automatic-crossover-underlay" d="M 530 516 L 530 565.5 Q 530 573.5 522 573.5 L 418.2 573.5 Q 410.2 573.5 410.2 581.5 L 410.2 838 Q 410.2 846 418.2 846 L 522 846 Q 530 846 530 854 L 530 870" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="runner" data-edge-to="collector" data-edge-label="分数 / 耗时 / OTLP" data-edge-key="15" data-edge-id="runner-collector-15" data-composition-points="530,516;530,573.5;410.2,573.5;410.2,846;530,846;530,870" data-composition-crossover="halo" data-composition-independent="true" d="M 530 516 L 530 565.5 Q 530 573.5 522 573.5 L 418.2 573.5 Q 410.2 573.5 410.2 581.5 L 410.2 838 Q 410.2 846 418.2 846 L 522 846 Q 530 846 530 854 L 530 870" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:16">
-          <path data-graph-role="automatic-crossover-underlay" d="M 420 908 L 270 908" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="collector" data-edge-to="es" data-edge-label="写入反馈与 spans" data-edge-key="16" data-edge-id="collector-es-16" data-composition-points="420,908;270,908" data-composition-crossover="halo" data-composition-independent="true" d="M 420 908 L 270 908" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:17">
-          <path data-graph-role="automatic-crossover-underlay" d="M 523 116 L 523 156.5 Q 523 164.5 515 164.5 L 45 164.5 Q 37 164.5 37 172.5 L 37 838 Q 37 846 45 846 L 147 846 Q 155 846 155 854 L 155 870" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="api" data-edge-to="es" data-edge-label="读写资源 / 查询报告" data-edge-key="17" data-edge-id="api-es-17" data-composition-points="523,116;523,164.5;37,164.5;37,846;155,846;155,870" data-composition-crossover="halo" data-composition-independent="true" d="M 523 116 L 523 156.5 Q 523 164.5 515 164.5 L 45 164.5 Q 37 164.5 37 172.5 L 37 838 Q 37 846 45 846 L 147 846 Q 155 846 155 854 L 155 870" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:18">
-          <path data-graph-role="automatic-crossover-underlay" d="M 640 908 L 830 908" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="collector" data-edge-to="langsmith" data-edge-label="未来 exporter" data-edge-key="18" data-edge-id="collector-langsmith-18" data-composition-points="640,908;830,908" data-composition-crossover="halo" data-composition-independent="true" d="M 640 908 L 830 908" class="a-dashed" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 789 440 L 789 316" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="guardrail-proxy" data-edge-to="runner" data-edge-label="Scan output / latency" data-edge-key="13" data-edge-id="proxy-runner-output" data-composition-points="789,440;789,316" data-composition-crossover="halo" data-composition-independent="true" d="M 789 440 L 789 316" class="a-emphasis" data-animate="edge" style="--step:12" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
 
         <!-- Components -->
-        <g id="node-ui" data-node-id="ui" data-node-label="AgentEval UI" tabindex="0" role="button" aria-label="聚焦AgentEval UI，发布数据 · 配置 · Trigger · Report, 架构组件" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="发布数据 · 配置 · Trigger · Report" data-node-context="架构组件">
-          <title>AgentEval UI · 发布数据 · 配置 · Trigger · Report · 架构组件</title>
+        <g id="node-ui" data-node-id="ui" data-node-label="AgentEval UI" tabindex="0" role="button" aria-label="Focus AgentEval UI, Publish / Configure / Trigger / Report, Architecture component" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Publish / Configure / Trigger / Report" data-node-context="Architecture component">
+          <title>AgentEval UI · Publish / Configure / Trigger / Report · Architecture component</title>
           <rect x="40" y="40" width="230" height="76" rx="8" class="c-mask"/>
           <rect x="40" y="40" width="230" height="76" rx="8" class="c-frontend" data-animate="node" style="--step:0" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(46 46) scale(0.6875)">
@@ -5342,259 +5324,209 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="155" y="76" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">AgentEval UI</text>
-        <text data-detail="context" x="155" y="92" class="t-muted" font-size="9" text-anchor="middle">发布数据 · 配置 · Trigger · Report</text>
+        <text data-detail="context" x="155" y="92" class="t-muted" font-size="9" text-anchor="middle">Publish / Configure / Trigger / Report</text>
         </g>
 
-        <g id="node-api" data-node-id="api" data-node-label="Evaluation API" tabindex="0" role="button" aria-label="聚焦Evaluation API，固定版本 · 子集校验 · 运行快照, 架构组件" aria-pressed="false" data-node-kind="backend" data-node-sublabel="固定版本 · 子集校验 · 运行快照" data-node-context="架构组件">
-          <title>Evaluation API · 固定版本 · 子集校验 · 运行快照 · 架构组件</title>
+        <g id="node-api" data-node-id="api" data-node-label="Evaluation API" tabindex="0" role="button" aria-label="Focus Evaluation API, Version pins / validation / snapshots, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Version pins / validation / snapshots" data-node-context="Architecture component">
+          <title>Evaluation API · Version pins / validation / snapshots · Architecture component</title>
           <rect x="420" y="40" width="220" height="76" rx="8" class="c-mask"/>
           <rect x="420" y="40" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:1" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(426 46) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="530" y="76" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Evaluation API</text>
-        <text data-detail="context" x="530" y="92" class="t-muted" font-size="9" text-anchor="middle">固定版本 · 子集校验 · 运行快照</text>
+        <text data-detail="context" x="530" y="92" class="t-muted" font-size="9" text-anchor="middle">Version pins / validation / snapshots</text>
         </g>
 
-        <g id="node-runtime" data-node-id="runtime" data-node-label="K8s Job / Docker" tabindex="0" role="button" aria-label="聚焦K8s Job / Docker，当前部署：Kubernetes Job, 架构组件" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="当前部署：Kubernetes Job" data-node-tag="当前启用" data-node-context="架构组件">
-          <title>K8s Job / Docker · 当前部署：Kubernetes Job · 架构组件 · 当前启用</title>
-          <rect x="830" y="40" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="830" y="40" width="220" height="76" rx="8" class="c-cloud" data-animate="node" style="--step:2" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(836 46) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="940" y="76" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">K8s Job / Docker</text>
-        <text data-detail="context" x="940" y="92" class="t-muted" font-size="9" text-anchor="middle">当前部署：Kubernetes Job</text>
-        <text data-detail="fine" x="940" y="108" class="t-cloud" font-size="7" text-anchor="middle">当前启用</text>
-        </g>
-
-        <g id="node-registry" data-node-id="registry" data-node-label="实例配置 + Secret" tabindex="0" role="button" aria-label="聚焦实例配置 + Secret，Provider / ID / endpoint / token 引用, 架构组件" aria-pressed="false" data-node-kind="security" data-node-sublabel="Provider / ID / endpoint / token 引用" data-node-context="架构组件">
-          <title>实例配置 + Secret · Provider / ID / endpoint / token 引用 · 架构组件</title>
-          <rect x="420" y="240" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="420" y="240" width="220" height="76" rx="8" class="c-security" data-animate="node" style="--step:2" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(426 246) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="530" y="276" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">实例配置 + Secret</text>
-        <text data-detail="context" x="530" y="292" class="t-muted" font-size="9" text-anchor="middle">Provider / ID / endpoint / token 引用</text>
-        </g>
-
-        <g id="node-openshell" data-node-id="openshell" data-node-label="OpenShell" tabindex="0" role="button" aria-label="聚焦OpenShell，已有 gateway / policy 执行入口, 架构组件" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="已有 gateway / policy 执行入口" data-node-tag="可选入口 · 当前未启用" data-node-context="架构组件">
-          <title>OpenShell · 已有 gateway / policy 执行入口 · 架构组件 · 可选入口 · 当前未启用</title>
-          <rect x="830" y="240" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="830" y="240" width="220" height="76" rx="8" class="c-cloud" data-animate="node" style="--step:4" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(836 246) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="940" y="276" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">OpenShell</text>
-        <text data-detail="context" x="940" y="292" class="t-muted" font-size="9" text-anchor="middle">已有 gateway / policy 执行入口</text>
-        <text data-detail="fine" x="940" y="308" class="t-cloud" font-size="7" text-anchor="middle">可选入口 · 当前未启用</text>
-        </g>
-
-        <g id="node-dataset" data-node-id="dataset" data-node-label="Guardrail Dataset" tabindex="0" role="button" aria-label="聚焦Guardrail Dataset，input · label · strategy / 固定版本, 架构组件" aria-pressed="false" data-node-kind="database" data-node-sublabel="input · label · strategy / 固定版本" data-node-context="架构组件">
-          <title>Guardrail Dataset · input · label · strategy / 固定版本 · 架构组件</title>
-          <rect x="40" y="440" width="230" height="76" rx="8" class="c-mask"/>
-          <rect x="40" y="440" width="230" height="76" rx="8" class="c-database" data-animate="node" style="--step:7" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 446) scale(0.6875)">
+        <g id="node-dataset" data-node-id="dataset" data-node-label="Guardrail Dataset" tabindex="0" role="button" aria-label="Focus Guardrail Dataset, input / label / strategy / version, Architecture component" aria-pressed="false" data-node-kind="database" data-node-sublabel="input / label / strategy / version" data-node-context="Architecture component">
+          <title>Guardrail Dataset · input / label / strategy / version · Architecture component</title>
+          <rect x="40" y="320" width="230" height="76" rx="8" class="c-mask"/>
+          <rect x="40" y="320" width="230" height="76" rx="8" class="c-database" data-animate="node" style="--step:2" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 326) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="155" y="476" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guardrail Dataset</text>
-        <text data-detail="context" x="155" y="492" class="t-muted" font-size="9" text-anchor="middle">input · label · strategy / 固定版本</text>
+          <text data-node-label="" data-detail-anchor="" x="155" y="356" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guardrail Dataset</text>
+        <text data-detail="context" x="155" y="372" class="t-muted" font-size="9" text-anchor="middle">input / label / strategy / version</text>
         </g>
 
-        <g id="node-runner" data-node-id="runner" data-node-label="Evaluation Runner" tabindex="0" role="button" aria-label="聚焦Evaluation Runner，直连 Guardrail · Model=None, 架构组件" aria-pressed="false" data-node-kind="backend" data-node-sublabel="直连 Guardrail · Model=None" data-node-context="架构组件">
-          <title>Evaluation Runner · 直连 Guardrail · Model=None · 架构组件</title>
+        <g id="node-runner" data-node-id="runner" data-node-label="Evaluation Runner" tabindex="0" role="button" aria-label="Focus Evaluation Runner, Per-sample orchestration / Model=None, K8s Job - Evaluation Runner container" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Per-sample orchestration / Model=None" data-node-tag="Inside K8s Job" data-node-context="K8s Job - Evaluation Runner container">
+          <title>Evaluation Runner · Per-sample orchestration / Model=None · K8s Job - Evaluation Runner container · Inside K8s Job</title>
+          <rect x="700" y="240" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="700" y="240" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:3" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(706 246) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="810" y="276" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Evaluation Runner</text>
+        <text data-detail="context" x="810" y="292" class="t-muted" font-size="9" text-anchor="middle">Per-sample orchestration / Model=None</text>
+        <text data-detail="fine" x="810" y="308" class="t-backend" font-size="7" text-anchor="middle">Inside K8s Job</text>
+        </g>
+
+        <g id="node-guardrail" data-node-id="guardrail" data-node-label="NeMo Guardrail / F5" tabindex="0" role="button" aria-label="Focus NeMo Guardrail / F5, External provider-selected instance, Architecture component" aria-pressed="false" data-node-kind="security" data-node-sublabel="External provider-selected instance" data-node-tag="Target instance / Mock supported" data-node-context="Architecture component">
+          <title>NeMo Guardrail / F5 · External provider-selected instance · Architecture component · Target instance / Mock supported</title>
+          <rect x="700" y="700" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="700" y="700" width="220" height="76" rx="8" class="c-security" data-animate="node" style="--step:7" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(706 706) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="810" y="736" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">NeMo Guardrail / F5</text>
+        <text data-detail="context" x="810" y="752" class="t-muted" font-size="9" text-anchor="middle">External provider-selected instance</text>
+        <text data-detail="fine" x="810" y="768" class="t-security" font-size="7" text-anchor="middle">Target instance / Mock supported</text>
+        </g>
+
+        <g id="node-script" data-node-id="script" data-node-label="Git Python Script" tabindex="0" role="button" aria-label="Focus Git Python Script, script.py / pinned commit, Git Repo - Scorer source" aria-pressed="false" data-node-kind="backend" data-node-sublabel="script.py / pinned commit" data-node-tag="Fetched and executed by Runner" data-node-context="Git Repo - Scorer source">
+          <title>Git Python Script · script.py / pinned commit · Git Repo - Scorer source · Fetched and executed by Runner</title>
+          <rect x="970" y="500" width="180" height="90" rx="8" class="c-mask"/>
+          <rect x="970" y="500" width="180" height="90" rx="8" class="c-backend" data-animate="node" style="--step:5" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(976 506) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1060" y="543" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Git Python Script</text>
+        <text data-detail="context" x="1060" y="559" class="t-muted" font-size="9" text-anchor="middle">script.py / pinned commit</text>
+        <text data-detail="fine" x="1060" y="582" class="t-backend" font-size="7" text-anchor="middle">Fetched and executed by Runner</text>
+        </g>
+
+        <g id="node-es" data-node-id="es" data-node-label="Elasticsearch" tabindex="0" role="button" aria-label="Focus Elasticsearch, Resources / runs / scores / traces, Architecture component" aria-pressed="false" data-node-kind="database" data-node-sublabel="Resources / runs / scores / traces" data-node-context="Architecture component">
+          <title>Elasticsearch · Resources / runs / scores / traces · Architecture component</title>
+          <rect x="40" y="700" width="230" height="76" rx="8" class="c-mask"/>
+          <rect x="40" y="700" width="230" height="76" rx="8" class="c-database" data-animate="node" style="--step:10" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 706) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="155" y="736" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Elasticsearch</text>
+        <text data-detail="context" x="155" y="752" class="t-muted" font-size="9" text-anchor="middle">Resources / runs / scores / traces</text>
+        </g>
+
+        <g id="node-collector" data-node-id="collector" data-node-label="Runner-local Collector" tabindex="0" role="button" aria-label="Focus Runner-local Collector, HTTP feedback + OTLP traces, K8s Job - Evaluation Runner container" aria-pressed="false" data-node-kind="backend" data-node-sublabel="HTTP feedback + OTLP traces" data-node-tag="Inside Runner container" data-node-context="K8s Job - Evaluation Runner container">
+          <title>Runner-local Collector · HTTP feedback + OTLP traces · K8s Job - Evaluation Runner container · Inside Runner container</title>
           <rect x="420" y="440" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="420" y="440" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:4" stroke-width="1.5"/>
+          <rect x="420" y="440" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:9" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(426 446) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="530" y="476" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Evaluation Runner</text>
-        <text data-detail="context" x="530" y="492" class="t-muted" font-size="9" text-anchor="middle">直连 Guardrail · Model=None</text>
+          <text data-node-label="" data-detail-anchor="" x="530" y="476" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Runner-local Collector</text>
+        <text data-detail="context" x="530" y="492" class="t-muted" font-size="9" text-anchor="middle">HTTP feedback + OTLP traces</text>
+        <text data-detail="fine" x="530" y="508" class="t-backend" font-size="7" text-anchor="middle">Inside Runner container</text>
         </g>
 
-        <g id="node-git" data-node-id="git" data-node-label="Git Scorer Repository" tabindex="0" role="button" aria-label="聚焦Git Scorer Repository，SSH 拉取 · 固定 commit SHA, 架构组件" aria-pressed="false" data-node-kind="external" data-node-sublabel="SSH 拉取 · 固定 commit SHA" data-node-context="架构组件">
-          <title>Git Scorer Repository · SSH 拉取 · 固定 commit SHA · 架构组件</title>
-          <rect x="830" y="440" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="830" y="440" width="220" height="76" rx="8" class="c-external" data-animate="node" style="--step:10" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(836 446) scale(0.6875)">
+        <g id="node-langsmith" data-node-id="langsmith" data-node-label="LangSmith" tabindex="0" role="button" aria-label="Focus LangSmith, Planned Collector exporter, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="Planned Collector exporter" data-node-tag="Not implemented" data-node-context="Architecture component">
+          <title>LangSmith · Planned Collector exporter · Architecture component · Not implemented</title>
+          <rect x="350" y="930" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="350" y="930" width="220" height="76" rx="8" class="c-external" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(356 936) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="940" y="476" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Git Scorer Repository</text>
-        <text data-detail="context" x="940" y="492" class="t-muted" font-size="9" text-anchor="middle">SSH 拉取 · 固定 commit SHA</text>
+          <text data-node-label="" data-detail-anchor="" x="460" y="966" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LangSmith</text>
+        <text data-detail="context" x="460" y="982" class="t-muted" font-size="9" text-anchor="middle">Planned Collector exporter</text>
+        <text data-detail="fine" x="460" y="998" class="t-external" font-size="7" text-anchor="middle">Not implemented</text>
         </g>
 
-        <g id="node-guardrail" data-node-id="guardrail" data-node-label="Guardrail" tabindex="0" role="button" aria-label="聚焦Guardrail，配置实例 / Mock Scan Server, 架构组件" aria-pressed="false" data-node-kind="security" data-node-sublabel="配置实例 / Mock Scan Server" data-node-tag="被测对象" data-node-context="架构组件">
-          <title>Guardrail · 配置实例 / Mock Scan Server · 架构组件 · 被测对象</title>
-          <rect x="420" y="655" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="420" y="655" width="220" height="76" rx="8" class="c-security" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(426 661) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="530" y="691" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guardrail</text>
-        <text data-detail="context" x="530" y="707" class="t-muted" font-size="9" text-anchor="middle">配置实例 / Mock Scan Server</text>
-        <text data-detail="fine" x="530" y="723" class="t-security" font-size="7" text-anchor="middle">被测对象</text>
-        </g>
-
-        <g id="node-script" data-node-id="script" data-node-label="Git Python Script" tabindex="0" role="button" aria-label="聚焦Git Python Script，stdin JSON → TP / FP / TN / FN, 架构组件" aria-pressed="false" data-node-kind="backend" data-node-sublabel="stdin JSON → TP / FP / TN / FN" data-node-tag="Runner 内执行" data-node-context="架构组件">
-          <title>Git Python Script · stdin JSON → TP / FP / TN / FN · 架构组件 · Runner 内执行</title>
-          <rect x="830" y="655" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="830" y="655" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:11" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(836 661) scale(0.6875)">
+        <g id="node-guardrail-proxy" data-node-id="guardrail-proxy" data-node-label="Guardrail Proxy" tabindex="0" role="button" aria-label="Focus Guardrail Proxy, Resolve connection / forward Scan, K8s Job - Evaluation Runner container" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Resolve connection / forward Scan" data-node-tag="Runner-internal logic" data-node-context="K8s Job - Evaluation Runner container">
+          <title>Guardrail Proxy · Resolve connection / forward Scan · K8s Job - Evaluation Runner container · Runner-internal logic</title>
+          <rect x="700" y="440" width="220" height="76" rx="8" class="c-mask"/>
+          <rect x="700" y="440" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:6" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(706 446) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="940" y="691" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Git Python Script</text>
-        <text data-detail="context" x="940" y="707" class="t-muted" font-size="9" text-anchor="middle">stdin JSON → TP / FP / TN / FN</text>
-        <text data-detail="fine" x="940" y="723" class="t-backend" font-size="7" text-anchor="middle">Runner 内执行</text>
-        </g>
-
-        <g id="node-es" data-node-id="es" data-node-label="Elasticsearch" tabindex="0" role="button" aria-label="聚焦Elasticsearch，配置 / 数据集 / 样本分数 / traces, 架构组件" aria-pressed="false" data-node-kind="database" data-node-sublabel="配置 / 数据集 / 样本分数 / traces" data-node-context="架构组件">
-          <title>Elasticsearch · 配置 / 数据集 / 样本分数 / traces · 架构组件</title>
-          <rect x="40" y="870" width="230" height="76" rx="8" class="c-mask"/>
-          <rect x="40" y="870" width="230" height="76" rx="8" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 876) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="155" y="906" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Elasticsearch</text>
-        <text data-detail="context" x="155" y="922" class="t-muted" font-size="9" text-anchor="middle">配置 / 数据集 / 样本分数 / traces</text>
-        </g>
-
-        <g id="node-collector" data-node-id="collector" data-node-label="Runner-local Collector" tabindex="0" role="button" aria-label="聚焦Runner-local Collector，HTTP 样本反馈 + OTLP traces, 架构组件" aria-pressed="false" data-node-kind="backend" data-node-sublabel="HTTP 样本反馈 + OTLP traces" data-node-context="架构组件">
-          <title>Runner-local Collector · HTTP 样本反馈 + OTLP traces · 架构组件</title>
-          <rect x="420" y="870" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="420" y="870" width="220" height="76" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(426 876) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="530" y="906" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Runner-local Collector</text>
-        <text data-detail="context" x="530" y="922" class="t-muted" font-size="9" text-anchor="middle">HTTP 样本反馈 + OTLP traces</text>
-        </g>
-
-        <g id="node-langsmith" data-node-id="langsmith" data-node-label="LangSmith" tabindex="0" role="button" aria-label="聚焦LangSmith，Collector exporter 预留位置, 架构组件" aria-pressed="false" data-node-kind="external" data-node-sublabel="Collector exporter 预留位置" data-node-tag="尚未实现" data-node-context="架构组件">
-          <title>LangSmith · Collector exporter 预留位置 · 架构组件 · 尚未实现</title>
-          <rect x="830" y="870" width="220" height="76" rx="8" class="c-mask"/>
-          <rect x="830" y="870" width="220" height="76" rx="8" class="c-external" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(836 876) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="940" y="906" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LangSmith</text>
-        <text data-detail="context" x="940" y="922" class="t-muted" font-size="9" text-anchor="middle">Collector exporter 预留位置</text>
-        <text data-detail="fine" x="940" y="938" class="t-external" font-size="7" text-anchor="middle">尚未实现</text>
+          <text data-node-label="" data-detail-anchor="" x="810" y="476" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guardrail Proxy</text>
+        <text data-detail="context" x="810" y="492" class="t-muted" font-size="9" text-anchor="middle">Resolve connection / forward Scan</text>
+        <text data-detail="fine" x="810" y="508" class="t-backend" font-size="7" text-anchor="middle">Runner-internal logic</text>
         </g>
 
         <!-- Connection labels -->
-        <g data-detail="context" data-edge-from="ui" data-edge-to="api" data-edge-label="配置 / Trigger / Report" data-edge-key="0" data-edge-id="ui-api-0">
-          <rect x="284.8" y="58" width="120.39999999999999" height="14" rx="3" class="c-mask"/>
-          <text x="345" y="68" class="t-edge-emphasis" font-size="8" text-anchor="middle">配置 / Trigger / Report</text>
+        <g data-detail="context" data-edge-from="ui" data-edge-to="api" data-edge-label="Configure / Trigger / Report" data-edge-key="0" data-edge-id="ui-api-0">
+          <rect x="272.8" y="49.95" width="144.4" height="14" rx="3" class="c-mask"/>
+          <text x="345" y="59.95" class="t-edge-emphasis" font-size="8" text-anchor="middle">Configure / Trigger / Report</text>
         </g>
-        <g data-detail="context" data-edge-from="api" data-edge-to="runtime" data-edge-label="创建异步任务" data-edge-key="1" data-edge-id="api-runtime-1">
-          <rect x="701.2" y="48.900000000000006" width="67.6" height="14" rx="3" class="c-mask"/>
-          <text x="735" y="58.900000000000006" class="t-edge-emphasis" font-size="8" text-anchor="middle">创建异步任务</text>
+        <g data-detail="context" data-edge-from="api" data-edge-to="dataset" data-edge-label="Versioned samples" data-edge-key="1" data-edge-id="api-dataset-6">
+          <rect x="307.2" y="316" width="91.6" height="14" rx="3" class="c-mask"/>
+          <text x="353" y="326" class="t-edge-default" font-size="8" text-anchor="middle">Versioned samples</text>
         </g>
-        <g data-detail="context" data-edge-from="registry" data-edge-to="api" data-edge-label="实例目录" data-edge-key="2" data-edge-id="registry-api-2">
-          <rect x="526.8" y="220" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="551" y="230" class="t-edge-default" font-size="8" text-anchor="middle">实例目录</text>
+        <g data-detail="context" data-edge-from="dataset" data-edge-to="runner" data-edge-label="input / label / strategy" data-edge-key="2" data-edge-id="dataset-runner-7">
+          <rect x="314.9" y="345" width="125.19999999999999" height="14" rx="3" class="c-mask"/>
+          <text x="377.5" y="355" class="t-edge-emphasis" font-size="8" text-anchor="middle">input / label / strategy</text>
         </g>
-        <g data-detail="context" data-edge-from="runtime" data-edge-to="runner" data-edge-label="启动容器" data-edge-key="3" data-edge-id="runtime-runner-3">
-          <rect x="669.5999999999999" y="226.5" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="693.8" y="236.5" class="t-edge-emphasis" font-size="8" text-anchor="middle">启动容器</text>
+        <g data-detail="context" data-edge-from="api" data-edge-to="runner" data-edge-label="Create Job / snapshot" data-edge-key="3" data-edge-id="api-runner-8">
+          <rect x="630" y="179" width="110.8" height="14" rx="3" class="c-mask"/>
+          <text x="685.4" y="189" class="t-edge-default" font-size="8" text-anchor="middle">Create Job / snapshot</text>
         </g>
-        <g data-detail="context" data-edge-from="openshell" data-edge-to="runner" data-edge-label="可选 sandbox 执行" data-edge-key="4" data-edge-id="openshell-runner-4">
-          <rect x="741" y="371.025" width="91.6" height="14" rx="3" class="c-mask"/>
-          <text x="786.8" y="381.025" class="t-edge-dashed" font-size="8" text-anchor="middle">可选 sandbox 执行</text>
+        <g data-detail="context" data-edge-from="runner" data-edge-to="script" data-edge-label="Fetch SHA / JSON stdin" data-edge-key="4" data-edge-id="runner-script-11">
+          <rect x="1076.2" y="380" width="115.6" height="14" rx="3" class="c-mask"/>
+          <text x="1134" y="390" class="t-edge-emphasis" font-size="8" text-anchor="middle">Fetch SHA / JSON stdin</text>
         </g>
-        <g data-detail="context" data-edge-from="api" data-edge-to="openshell" data-edge-label="可选 CLI 路径" data-edge-key="5" data-edge-id="api-openshell-5">
-          <rect x="585.5999999999999" y="171" width="72.4" height="14" rx="3" class="c-mask"/>
-          <text x="621.8" y="181" class="t-edge-dashed" font-size="8" text-anchor="middle">可选 CLI 路径</text>
+        <g data-detail="context" data-edge-from="script" data-edge-to="runner" data-edge-label="JSON classification" data-edge-key="5" data-edge-id="script-runner-12">
+          <rect x="898.4" y="320" width="101.2" height="14" rx="3" class="c-mask"/>
+          <text x="949" y="330" class="t-edge-emphasis" font-size="8" text-anchor="middle">JSON classification</text>
         </g>
-        <g data-detail="context" data-edge-from="api" data-edge-to="dataset" data-edge-label="版本样本接口" data-edge-key="6" data-edge-id="api-dataset-6">
-          <rect x="298.2" y="120" width="67.6" height="14" rx="3" class="c-mask"/>
-          <text x="332" y="130" class="t-edge-default" font-size="8" text-anchor="middle">版本样本接口</text>
+        <g data-detail="context" data-edge-from="guardrail-proxy" data-edge-to="guardrail" data-edge-label="HTTP POST /scans" data-edge-key="6" data-edge-id="runner-guardrail-13">
+          <rect x="825.1" y="601" width="86.8" height="14" rx="3" class="c-mask"/>
+          <text x="868.5" y="611" class="t-edge-emphasis" font-size="8" text-anchor="middle">HTTP POST /scans</text>
         </g>
-        <g data-detail="context" data-edge-from="dataset" data-edge-to="runner" data-edge-label="input / label / strategy" data-edge-key="7" data-edge-id="dataset-runner-7">
-          <rect x="282.4" y="458" width="125.19999999999999" height="14" rx="3" class="c-mask"/>
-          <text x="345" y="468" class="t-edge-emphasis" font-size="8" text-anchor="middle">input / label / strategy</text>
+        <g data-detail="context" data-edge-from="guardrail" data-edge-to="guardrail-proxy" data-edge-label="output + request ID" data-edge-key="7" data-edge-id="guardrail-runner-14">
+          <rect x="695.8" y="601" width="101.2" height="14" rx="3" class="c-mask"/>
+          <text x="746.4" y="611" class="t-edge-emphasis" font-size="8" text-anchor="middle">output + request ID</text>
         </g>
-        <g data-detail="context" data-edge-from="api" data-edge-to="runner" data-edge-label="快照 + 受保护 detail" data-edge-key="8" data-edge-id="api-runner-8">
-          <rect x="284" y="247.52499999999998" width="106" height="14" rx="3" class="c-mask"/>
-          <text x="337" y="257.525" class="t-edge-default" font-size="8" text-anchor="middle">快照 + 受保护 detail</text>
+        <g data-detail="context" data-edge-from="runner" data-edge-to="collector" data-edge-label="Scores / latency / OTLP" data-edge-key="8" data-edge-id="runner-collector-15">
+          <rect x="563.8" y="350" width="120.39999999999999" height="14" rx="3" class="c-mask"/>
+          <text x="624" y="360" class="t-edge-emphasis" font-size="8" text-anchor="middle">Scores / latency / OTLP</text>
         </g>
-        <g data-detail="context" data-edge-from="runner" data-edge-to="git" data-edge-label="fetch 固定 SHA" data-edge-key="9" data-edge-id="runner-git-9">
-          <rect x="644.975" y="520" width="77.2" height="14" rx="3" class="c-mask"/>
-          <text x="683.575" y="530" class="t-edge-default" font-size="8" text-anchor="middle">fetch 固定 SHA</text>
+        <g data-detail="context" data-edge-from="collector" data-edge-to="es" data-edge-label="Persist feedback / spans" data-edge-key="9" data-edge-id="collector-es-16">
+          <rect x="191.4" y="580" width="125.19999999999999" height="14" rx="3" class="c-mask"/>
+          <text x="254" y="590" class="t-edge-emphasis" font-size="8" text-anchor="middle">Persist feedback / spans</text>
         </g>
-        <g data-detail="context" data-edge-from="git" data-edge-to="script" data-edge-label="checkout script.py" data-edge-key="10" data-edge-id="git-script-10">
-          <rect x="837.5999999999999" y="578.5" width="96.39999999999999" height="14" rx="3" class="c-mask"/>
-          <text x="885.8" y="588.5" class="t-edge-default" font-size="8" text-anchor="middle">checkout script.py</text>
+        <g data-detail="context" data-edge-from="api" data-edge-to="es" data-edge-label="Resources / reports" data-edge-key="10" data-edge-id="api-es-17">
+          <rect x="291.9" y="417" width="101.2" height="14" rx="3" class="c-mask"/>
+          <text x="342.5" y="427" class="t-edge-default" font-size="8" text-anchor="middle">Resources / reports</text>
         </g>
-        <g data-detail="context" data-edge-from="runner" data-edge-to="script" data-edge-label="input + label + output" data-edge-key="11" data-edge-id="runner-script-11">
-          <rect x="552.1" y="566.5" width="115.6" height="14" rx="3" class="c-mask"/>
-          <text x="609.9" y="576.5" class="t-edge-emphasis" font-size="8" text-anchor="middle">input + label + output</text>
+        <g data-detail="context" data-edge-from="collector" data-edge-to="langsmith" data-edge-label="Planned exporter" data-edge-key="11" data-edge-id="collector-langsmith-18">
+          <rect x="437.20000000000005" y="716" width="86.8" height="14" rx="3" class="c-mask"/>
+          <text x="480.6" y="726" class="t-edge-dashed" font-size="8" text-anchor="middle">Planned exporter</text>
         </g>
-        <g data-detail="context" data-edge-from="script" data-edge-to="runner" data-edge-label="JSON 四象限" data-edge-key="12" data-edge-id="script-runner-12">
-          <rect x="703.6" y="580" width="62.8" height="14" rx="3" class="c-mask"/>
-          <text x="735" y="590" class="t-edge-emphasis" font-size="8" text-anchor="middle">JSON 四象限</text>
+        <g data-detail="context" data-edge-from="runner" data-edge-to="guardrail-proxy" data-edge-label="Dataset input" data-edge-key="12" data-edge-id="runner-proxy-input">
+          <rect x="694.4999999999999" y="371" width="72.4" height="14" rx="3" class="c-mask"/>
+          <text x="730.6999999999999" y="381" class="t-edge-emphasis" font-size="8" text-anchor="middle">Dataset input</text>
         </g>
-        <g data-detail="context" data-edge-from="runner" data-edge-to="guardrail" data-edge-label="HTTP POST /scans" data-edge-key="13" data-edge-id="runner-guardrail-13">
-          <rect x="303.20000000000005" y="586.55" width="86.8" height="14" rx="3" class="c-mask"/>
-          <text x="346.6" y="596.55" class="t-edge-emphasis" font-size="8" text-anchor="middle">HTTP POST /scans</text>
-        </g>
-        <g data-detail="context" data-edge-from="guardrail" data-edge-to="runner" data-edge-label="output + request ID" data-edge-key="14" data-edge-id="guardrail-runner-14">
-          <rect x="463.29999999999995" y="635" width="101.2" height="14" rx="3" class="c-mask"/>
-          <text x="513.9" y="645" class="t-edge-emphasis" font-size="8" text-anchor="middle">output + request ID</text>
-        </g>
-        <g data-detail="context" data-edge-from="runner" data-edge-to="collector" data-edge-label="分数 / 耗时 / OTLP" data-edge-key="15" data-edge-id="runner-collector-15">
-          <rect x="307.8" y="702.75" width="96.39999999999999" height="14" rx="3" class="c-mask"/>
-          <text x="356" y="712.75" class="t-edge-emphasis" font-size="8" text-anchor="middle">分数 / 耗时 / OTLP</text>
-        </g>
-        <g data-detail="context" data-edge-from="collector" data-edge-to="es" data-edge-label="写入反馈与 spans" data-edge-key="16" data-edge-id="collector-es-16">
-          <rect x="301.6" y="888" width="86.8" height="14" rx="3" class="c-mask"/>
-          <text x="345" y="898" class="t-edge-emphasis" font-size="8" text-anchor="middle">写入反馈与 spans</text>
-        </g>
-        <g data-detail="context" data-edge-from="api" data-edge-to="es" data-edge-label="读写资源 / 查询报告" data-edge-key="17" data-edge-id="api-es-17">
-          <rect x="229.4" y="144.5" width="101.2" height="14" rx="3" class="c-mask"/>
-          <text x="280" y="154.5" class="t-edge-default" font-size="8" text-anchor="middle">读写资源 / 查询报告</text>
-        </g>
-        <g data-detail="context" data-edge-from="collector" data-edge-to="langsmith" data-edge-label="未来 exporter" data-edge-key="18" data-edge-id="collector-langsmith-18">
-          <rect x="698.8" y="888" width="72.4" height="14" rx="3" class="c-mask"/>
-          <text x="735" y="898" class="t-edge-dashed" font-size="8" text-anchor="middle">未来 exporter</text>
+        <g data-detail="context" data-edge-from="guardrail-proxy" data-edge-to="runner" data-edge-label="Scan output / latency" data-edge-key="13" data-edge-id="proxy-runner-output">
+          <rect x="795" y="371" width="110.8" height="14" rx="3" class="c-mask"/>
+          <text x="850.4" y="381" class="t-edge-emphasis" font-size="8" text-anchor="middle">Scan output / latency</text>
         </g>
 
         <!-- Boundary labels (foreground masks keep routes out of titles) -->
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="K8s Job - Evaluation Runner container">
+          <rect data-graph-role="structural-frame-label-mask" x="632" y="220" width="209.79999999999998" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="636" y="233" class="t-cloud" font-size="9" font-weight="600">K8s Job - Evaluation Runner container</text>
+        </g>
 
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="region" data-composition-frame-label="Git Repo - Scorer source">
+          <rect data-graph-role="structural-frame-label-mask" x="948" y="480" width="139.6" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="952" y="493" class="t-cloud" font-size="9" font-weight="600">Git Repo - Scorer source</text>
+        </g>
 
         <!-- Legend -->
         <g data-legend="" data-legend-bridge="">
-          <text x="40" y="978" class="t-primary" font-size="12" font-weight="650">图例</text>
-          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="前端" data-legend-x="40" data-legend-baseline="998" data-legend-width="68">
-            <rect x="40" y="989" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
-            <text x="62" y="998" class="t-muted" font-size="10" font-weight="500">前端</text>
+          <text x="40" y="1038" class="t-primary" font-size="12" font-weight="650">Legend</text>
+          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="1058" data-legend-width="93">
+            <rect x="40" y="1049" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
+            <text x="62" y="1058" class="t-muted" font-size="10" font-weight="500">Frontend</text>
           </g>
-          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="后端" data-legend-x="130" data-legend-baseline="998" data-legend-width="68">
-            <rect x="130" y="989" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
-            <text x="152" y="998" class="t-muted" font-size="10" font-weight="500">后端</text>
+          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Backend" data-legend-x="155" data-legend-baseline="1058" data-legend-width="87">
+            <rect x="155" y="1049" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
+            <text x="177" y="1058" class="t-muted" font-size="10" font-weight="500">Backend</text>
           </g>
-          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="数据库" data-legend-x="220" data-legend-baseline="998" data-legend-width="81">
-            <rect x="220" y="989" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
-            <text x="242" y="998" class="t-muted" font-size="10" font-weight="500">数据库</text>
+          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Database" data-legend-x="264" data-legend-baseline="1058" data-legend-width="93">
+            <rect x="264" y="1049" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
+            <text x="286" y="1058" class="t-muted" font-size="10" font-weight="500">Database</text>
           </g>
-          <g data-legend-semantic-kind="cloud" data-legend-kind="cloud" data-legend-label="云服务" data-legend-x="323" data-legend-baseline="998" data-legend-width="81">
-            <rect x="323" y="989" width="16" height="10" rx="2.5" class="c-cloud" stroke-width="1"/>
-            <text x="345" y="998" class="t-muted" font-size="10" font-weight="500">云服务</text>
+          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Security" data-legend-x="379" data-legend-baseline="1058" data-legend-width="93">
+            <rect x="379" y="1049" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
+            <text x="401" y="1058" class="t-muted" font-size="10" font-weight="500">Security</text>
           </g>
-          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="安全" data-legend-x="426" data-legend-baseline="998" data-legend-width="68">
-            <rect x="426" y="989" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
-            <text x="448" y="998" class="t-muted" font-size="10" font-weight="500">安全</text>
-          </g>
-          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="外部系统" data-legend-x="516" data-legend-baseline="998" data-legend-width="93">
-            <rect x="516" y="989" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
-            <text x="538" y="998" class="t-muted" font-size="10" font-weight="500">外部系统</text>
+          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="External" data-legend-x="494" data-legend-baseline="1058" data-legend-width="93">
+            <rect x="494" y="1049" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
+            <text x="516" y="1058" class="t-muted" font-size="10" font-weight="500">External</text>
           </g>
         </g>
       </svg>
@@ -5602,217 +5534,219 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       <div class="diagram-guide no-print" id="diagram-guide" hidden role="dialog" aria-modal="false" aria-labelledby="diagram-guide-title">
         <div class="diagram-guide-head">
           <span>
-            <span class="diagram-guide-eyebrow">图表指南</span>
-            <strong class="diagram-guide-title" id="diagram-guide-title">探索此系统</strong>
+            <span class="diagram-guide-eyebrow">Diagram guide</span>
+            <strong class="diagram-guide-title" id="diagram-guide-title">Explore this system</strong>
           </span>
-          <button class="diagram-guide-close" id="diagram-guide-close" type="button" aria-label="关闭图表指南">&#215;</button>
+          <button class="diagram-guide-close" id="diagram-guide-close" type="button" aria-label="Close diagram guide">&#215;</button>
         </div>
-        <p class="diagram-guide-stats" id="diagram-guide-stats">正在检查已编译语义</p>
-        <div class="diagram-guide-actions" id="diagram-guide-actions" role="group" aria-label="图表探索操作">
-          <button class="diagram-guide-action" type="button" data-guide-action="find" aria-label="查找任意节点">
+        <p class="diagram-guide-stats" id="diagram-guide-stats">Inspecting compiled semantics</p>
+        <div class="diagram-guide-actions" id="diagram-guide-actions" role="group" aria-label="Diagram exploration actions">
+          <button class="diagram-guide-action" type="button" data-guide-action="find" aria-label="Find any node">
             <span class="diagram-guide-index" aria-hidden="true">01</span>
-            <span class="diagram-guide-action-copy"><strong>查找任意节点</strong><small>搜索标签、职责、类型和稳定 ID。</small></span>
+            <span class="diagram-guide-action-copy"><strong>Find any node</strong><small>Search labels, responsibilities, kinds, and stable IDs.</small></span>
             <kbd aria-hidden="true">/</kbd>
           </button>
-          <button class="diagram-guide-action" type="button" data-guide-action="route" aria-label="追踪有向路径">
+          <button class="diagram-guide-action" type="button" data-guide-action="route" aria-label="Trace a directed route">
             <span class="diagram-guide-index" aria-hidden="true">02</span>
-            <span class="diagram-guide-action-copy"><strong>追踪路径</strong><small>查看两个语义节点如何按编写方向连接。</small></span>
+            <span class="diagram-guide-action-copy"><strong>Trace a route</strong><small>Ask how two semantic nodes connect in authored direction.</small></span>
             <kbd aria-hidden="true">R</kbd>
           </button>
-          <button class="diagram-guide-action" type="button" data-guide-action="map" aria-label="查看完整系统">
+          <button class="diagram-guide-action" type="button" data-guide-action="map" aria-label="See the whole system">
             <span class="diagram-guide-index" aria-hidden="true">03</span>
-            <span class="diagram-guide-action-copy"><strong>查看完整系统</strong><small>打开带实时视口和稳定节点的语义雷达。</small></span>
+            <span class="diagram-guide-action-copy"><strong>See the whole system</strong><small>Open Semantic Radar with a live viewport and stable nodes.</small></span>
             <kbd aria-hidden="true">M</kbd>
           </button>
-          <button class="diagram-guide-action" type="button" data-guide-action="lens" aria-label="比较语义类型">
+          <button class="diagram-guide-action" type="button" data-guide-action="lens" aria-label="Compare semantic kinds">
             <span class="diagram-guide-index" aria-hidden="true">04</span>
-            <span class="diagram-guide-action-copy"><strong>比较语义类型</strong><small>统计角色、显示流量并比较直接编写的连接。</small></span>
+            <span class="diagram-guide-action-copy"><strong>Compare semantic kinds</strong><small>Count roles, reveal their traffic, and compare direct authored links.</small></span>
             <kbd aria-hidden="true">L</kbd>
           </button>
-          <button class="diagram-guide-action" type="button" data-guide-action="present" aria-label="进入演示模式">
+          <button class="diagram-guide-action" type="button" data-guide-action="present" aria-label="Enter presentation stage">
             <span class="diagram-guide-index" aria-hidden="true">05</span>
-            <span class="diagram-guide-action-copy"><strong>进入演示模式</strong><small>让实时图表占满视口，同时不改变导出。</small></span>
+            <span class="diagram-guide-action-copy"><strong>Enter Presentation Stage</strong><small>Give the live diagram the viewport without changing export.</small></span>
             <kbd aria-hidden="true">F</kbd>
           </button>
         </div>
-        <div class="diagram-guide-shortcuts" aria-label="其他键盘快捷键">
-          <span><kbd>E</kbd> 导出</span><span><kbd>T</kbd> 主题</span><span><kbd>S</kbd> 风格</span><span><kbd>0</kbd> 重置</span><span><kbd>+</kbd> 放大</span><span><kbd>-</kbd> 缩小</span><span><kbd>Esc</kbd> 关闭</span>
+        <div class="diagram-guide-shortcuts" aria-label="Additional keyboard shortcuts">
+          <span><kbd>E</kbd> Export</span><span><kbd>T</kbd> Theme</span><span><kbd>S</kbd> Style</span><span><kbd>0</kbd> Reset</span><span><kbd>+</kbd> Zoom in</span><span><kbd>-</kbd> Zoom out</span><span><kbd>Esc</kbd> Close</span>
         </div>
         <p class="diagram-guide-feedback" id="diagram-guide-feedback" aria-live="polite"></p>
-        <a class="diagram-guide-credit" href="https://github.com/tt-a1i/archify" target="_blank" rel="noopener noreferrer"><span>觉得好用？在 GitHub 给 Archify 点个 Star</span><span class="diagram-guide-credit-link"><span class="diagram-guide-star" aria-hidden="true"></span>Star <span aria-hidden="true">&#8599;</span></span></a>
+        <a class="diagram-guide-credit" href="https://github.com/tt-a1i/archify" target="_blank" rel="noopener noreferrer"><span>Find Archify useful? A star on GitHub helps</span><span class="diagram-guide-credit-link"><span class="diagram-guide-star" aria-hidden="true"></span>Star <span aria-hidden="true">&#8599;</span></span></a>
       </div>
       <div class="node-finder no-print" id="node-finder" hidden role="dialog" aria-modal="false" aria-labelledby="node-finder-title">
         <div class="node-finder-head">
-          <strong id="node-finder-title">查找节点</strong>
-          <button class="node-finder-close" id="node-finder-close" type="button" aria-label="关闭节点查找器">&#215;</button>
+          <strong id="node-finder-title">Find a node</strong>
+          <button class="node-finder-close" id="node-finder-close" type="button" aria-label="Close node finder">&#215;</button>
         </div>
         <div class="node-finder-search">
           <span aria-hidden="true">&#8981;</span>
-          <input class="node-finder-input" id="node-finder-input" type="search" autocomplete="off" spellcheck="false" placeholder="搜索标签或 ID" aria-label="搜索图表节点" aria-describedby="node-finder-status">
+          <input class="node-finder-input" id="node-finder-input" type="search" autocomplete="off" spellcheck="false" placeholder="Search labels or IDs" aria-label="Search diagram nodes" aria-describedby="node-finder-status">
           <kbd aria-hidden="true">/</kbd>
         </div>
-        <div class="node-finder-results" id="node-finder-results" role="group" aria-label="图表节点"></div>
-        <p class="node-finder-empty" id="node-finder-empty" hidden>没有匹配的节点</p>
+        <div class="node-finder-results" id="node-finder-results" role="group" aria-label="Diagram nodes"></div>
+        <p class="node-finder-empty" id="node-finder-empty" hidden>No matching nodes</p>
         <p class="node-finder-status" id="node-finder-status" aria-live="polite"></p>
       </div>
       <div class="focus-chip relationship-lens no-print" id="focus-chip" hidden role="region" aria-labelledby="relationship-lens-title">
         <div class="relationship-lens-head">
-          <button class="relationship-lens-drag-handle" id="btn-focus-move" type="button" data-focus-drag-handle aria-label="移动语义护照。可拖动、使用方向键移动，或按 Home 恢复自动位置。" title="移动语义护照。可拖动、使用方向键移动，或按 Home 恢复自动位置。"></button>
+          <button class="relationship-lens-drag-handle" id="btn-focus-move" type="button" data-focus-drag-handle aria-label="Move semantic passport. Drag, use arrow keys, or press Home to reset." title="Move semantic passport. Drag, use arrow keys, or press Home to reset."></button>
           <div class="relationship-lens-copy">
-            <span class="relationship-lens-eyebrow">语义护照</span>
+            <span class="relationship-lens-eyebrow">Semantic passport</span>
             <strong class="relationship-lens-title" id="relationship-lens-title"><span id="focus-label"></span></strong>
             <span class="semantic-passport-detail" id="focus-detail" hidden></span>
-            <div class="semantic-passport-meta" id="focus-passport-meta" aria-label="节点元数据">
+            <div class="semantic-passport-meta" id="focus-passport-meta" aria-label="Node metadata">
               <span id="focus-kind" data-passport="kind"></span>
               <span id="focus-context" data-passport="context" hidden></span>
               <span id="focus-tag" data-passport="tag" hidden></span>
               <span id="focus-brand" data-passport="brand" hidden></span>
               <code id="focus-id" data-passport="id"></code>
             </div>
-            <div class="semantic-passport-evidence" id="focus-evidence" hidden aria-label="已验证的源代码证据">
+            <div class="semantic-passport-evidence" id="focus-evidence" hidden aria-label="Verified source evidence">
               <div class="semantic-passport-evidence-head">
-                <span class="semantic-passport-evidence-status">已验证来源</span>
+                <span class="semantic-passport-evidence-status">Verified source</span>
                 <a class="semantic-passport-repository" id="focus-repository" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"></a>
               </div>
               <div class="semantic-passport-evidence-links" id="focus-evidence-links"></div>
             </div>
             <span class="relationship-lens-summary" id="focus-summary" aria-live="polite"></span>
             <div class="semantic-passport-reach" id="focus-reach" hidden>
-              <span class="semantic-passport-reach-label">编写可达范围</span>
-              <div class="semantic-passport-reach-actions" role="group" aria-label="追踪编写的可达性">
-                <button id="btn-reach-upstream" type="button" aria-label="追踪上游编写可达性" aria-pressed="false">
-                  <span>上游</span><strong id="focus-reach-upstream-count">0</strong>
+              <span class="semantic-passport-reach-label">Authored reach</span>
+              <div class="semantic-passport-reach-actions" role="group" aria-label="Trace authored reachability">
+                <button id="btn-reach-upstream" type="button" aria-label="Trace upstream authored reachability" aria-pressed="false">
+                  <span>Upstream</span><strong id="focus-reach-upstream-count">0</strong>
                 </button>
-                <button id="btn-reach-downstream" type="button" aria-label="追踪下游编写可达性" aria-pressed="false">
-                  <span>下游</span><strong id="focus-reach-downstream-count">0</strong>
+                <button id="btn-reach-downstream" type="button" aria-label="Trace downstream authored reachability" aria-pressed="false">
+                  <span>Downstream</span><strong id="focus-reach-downstream-count">0</strong>
                 </button>
               </div>
               <small class="semantic-passport-reach-status" id="focus-reach-status" hidden aria-live="polite"></small>
             </div>
           </div>
           <div class="relationship-lens-actions">
-            <button id="btn-focus-clear" type="button" aria-label="关闭语义护照" title="关闭">&#215;</button>
-            <button id="btn-focus-copy" type="button" aria-label="复制聚焦节点的链接">复制链接</button>
-            <button id="btn-focus-relations" type="button" aria-label="显示关联关系" aria-expanded="false" aria-controls="relationship-lens-list">关系</button>
+            <button id="btn-focus-clear" type="button" aria-label="Close semantic passport" title="Close">&#215;</button>
+            <button id="btn-focus-copy" type="button" aria-label="Copy link to focused node">Copy link</button>
+            <button id="btn-focus-relations" type="button" aria-label="Show connected relationships" aria-expanded="false" aria-controls="relationship-lens-list">Relations</button>
           </div>
         </div>
-        <div class="relationship-lens-list" id="relationship-lens-list" aria-label="关联关系"></div>
+        <div class="relationship-lens-list" id="relationship-lens-list" aria-label="Connected relationships"></div>
       </div>
       <div class="route-probe no-print" id="route-probe" hidden role="region" aria-labelledby="route-probe-title" data-state="idle">
         <div class="route-probe-head">
           <span class="route-probe-copy">
-            <span class="route-probe-eyebrow">路径</span>
-            <strong class="route-probe-title" id="route-probe-title">点击路径的起点</strong>
+            <span class="route-probe-eyebrow">Path</span>
+            <strong class="route-probe-title" id="route-probe-title">Click where the path starts</strong>
           </span>
           <span class="route-probe-actions">
-            <button class="route-probe-find" id="route-probe-find" type="button" aria-label="查找路径起点" data-node-finder-trigger>查找起点</button>
-            <button class="route-probe-copy-link" id="route-probe-copy" type="button" aria-label="复制已追踪路径的链接" hidden>复制链接</button>
-            <button id="route-probe-clear" type="button" aria-label="清除路径探测">清除</button>
+            <button class="route-probe-find" id="route-probe-find" type="button" aria-label="Find a route start" data-node-finder-trigger>Find start</button>
+            <button class="route-probe-copy-link" id="route-probe-copy" type="button" aria-label="Copy link to traced route" hidden>Copy link</button>
+            <button id="route-probe-clear" type="button" aria-label="Clear route probe">Clear</button>
           </span>
         </div>
-        <div class="route-probe-path" id="route-probe-path" aria-label="路径">
-          <span class="route-probe-placeholder">在图上点两个节点</span>
+        <div class="route-probe-path" id="route-probe-path" aria-label="Path">
+          <span class="route-probe-placeholder">Click two nodes on the diagram</span>
         </div>
-        <div class="route-journey-controls" id="route-journey-controls" hidden role="group" aria-label="路径旅程控制" data-playing="false">
-          <button id="route-journey-prev" type="button" aria-label="上一个路径位置" title="上一个路径位置">&#8592;</button>
-          <button class="route-journey-play" id="route-journey-play" type="button" aria-label="播放路径旅程" aria-pressed="false" title="播放路径旅程">
+        <div class="route-journey-controls" id="route-journey-controls" hidden role="group" aria-label="Route journey controls" data-playing="false">
+          <button id="route-journey-prev" type="button" aria-label="Previous route position" title="Previous route position">&#8592;</button>
+          <button class="route-journey-play" id="route-journey-play" type="button" aria-label="Play route journey" aria-pressed="false" title="Play route journey">
             <span id="route-journey-play-icon" aria-hidden="true">&#9654;</span>
-            <span id="route-journey-play-label">旅程</span>
+            <span id="route-journey-play-label">Journey</span>
           </button>
-          <button id="route-journey-next" type="button" aria-label="下一个路径位置" title="下一个路径位置">&#8594;</button>
-          <button class="route-journey-overview" id="route-journey-overview" type="button" aria-label="显示完整路径总览" title="显示完整路径总览">总览</button>
+          <button id="route-journey-next" type="button" aria-label="Next route position" title="Next route position">&#8594;</button>
+          <button class="route-journey-overview" id="route-journey-overview" type="button" aria-label="Show complete route overview" title="Show complete route overview">Overview</button>
         </div>
-        <small class="route-probe-status" id="route-probe-status" aria-live="polite">先点起点，再点终点，沿箭头方向找路。</small>
+        <small class="route-probe-status" id="route-probe-status" aria-live="polite">Click a start, then an end. Paths follow the arrows.</small>
       </div>
       <div class="semantic-lens no-print" id="semantic-lens" hidden role="dialog" aria-modal="false" aria-labelledby="semantic-lens-title">
         <div class="semantic-lens-head">
           <span>
-            <span class="semantic-lens-eyebrow">语义透镜</span>
-            <strong class="semantic-lens-title" id="semantic-lens-title">比较系统角色</strong>
+            <span class="semantic-lens-eyebrow">Semantic lens</span>
+            <strong class="semantic-lens-title" id="semantic-lens-title">Compare system roles</strong>
           </span>
-          <button class="semantic-lens-close" id="semantic-lens-close" type="button" aria-label="关闭语义透镜">&#215;</button>
+          <button class="semantic-lens-close" id="semantic-lens-close" type="button" aria-label="Close semantic lens">&#215;</button>
         </div>
-        <p class="semantic-lens-instruction">最多选择两种语义类型。选择一种可显示其真实流量；选择两种只比较直接编写的关系。</p>
-        <div class="semantic-lens-kinds" id="semantic-lens-kinds" role="group" aria-label="语义类型"></div>
-        <p class="semantic-lens-status" id="semantic-lens-status" aria-live="polite">选择一种类型以检查其节点和相连关系。</p>
+        <p class="semantic-lens-instruction">Choose up to two semantic kinds. One reveals its real traffic; two compare only direct authored relationships.</p>
+        <div class="semantic-lens-kinds" id="semantic-lens-kinds" role="group" aria-label="Semantic kinds"></div>
+        <p class="semantic-lens-status" id="semantic-lens-status" aria-live="polite">Choose a kind to inspect its nodes and touching relationships.</p>
         <div class="semantic-lens-actions">
-          <button id="semantic-lens-copy" type="button" aria-label="复制语义透镜链接" hidden>复制链接</button>
-          <button id="semantic-lens-clear" type="button" aria-label="清除语义透镜">清除</button>
+          <button id="semantic-lens-copy" type="button" aria-label="Copy link to semantic lens" hidden>Copy link</button>
+          <button id="semantic-lens-clear" type="button" aria-label="Clear semantic lens">Clear</button>
         </div>
       </div>
       <div class="overview-map no-print" id="overview-map" hidden role="region" aria-labelledby="overview-map-title">
         <div class="overview-map-head">
           <span class="overview-map-live" aria-hidden="true"></span>
           <span class="overview-map-copy">
-            <strong id="overview-map-title">语义雷达</strong>
-            <small id="overview-map-status" aria-live="polite">正在构建总览</small>
+            <strong id="overview-map-title">Semantic radar</strong>
+            <small id="overview-map-status" aria-live="polite">Building overview</small>
           </span>
-          <button class="overview-map-expand" id="overview-map-expand" type="button" aria-label="打开完整语义雷达">打开雷达</button>
-          <button class="overview-map-close" id="overview-map-close" type="button" aria-label="关闭语义雷达">&#215;</button>
+          <button class="overview-map-expand" id="overview-map-expand" type="button" aria-label="Open full semantic radar">Open radar</button>
+          <button class="overview-map-close" id="overview-map-close" type="button" aria-label="Close semantic radar">&#215;</button>
         </div>
-        <div class="overview-map-surface" id="overview-map-surface" tabindex="0" role="group" aria-label="图表总览。点击节点进行聚焦，或使用方向键平移。"></div>
-        <div class="overview-map-hint" aria-hidden="true"><span>点击节点</span><span>拖动平移</span></div>
+        <div class="overview-map-surface" id="overview-map-surface" tabindex="0" role="group" aria-label="Diagram overview. Click a node to focus it, or use arrow keys to pan."></div>
+        <div class="overview-map-hint" aria-hidden="true"><span>Click node</span><span>Drag to pan</span></div>
       </div>
-      <p class="overview-map-feedback no-print" id="overview-map-feedback" role="status" aria-live="polite" hidden>语义雷达需要更多地图可见空间。</p>
-      <button class="rail-reveal no-print" id="rail-reveal" type="button" hidden aria-controls="reader-rail" aria-expanded="false"><span class="rail-reveal-icon" aria-hidden="true"></span><span>要点与索引</span></button>
-      <div class="diagram-nav no-print" role="toolbar" aria-label="图表视图控制">
-        <button id="btn-route-probe" type="button" aria-label="追踪有向路径" aria-pressed="false" aria-controls="route-probe" title="追踪路径（R）">路径</button>
-        <button id="btn-overview-map" type="button" aria-label="打开语义雷达" aria-expanded="false" aria-controls="overview-map" title="语义雷达（M）">地图</button>
-        <button id="btn-semantic-lens" type="button" aria-label="打开语义透镜" aria-haspopup="dialog" aria-expanded="false" aria-pressed="false" aria-controls="semantic-lens" title="语义透镜（L）">透镜</button>
-        <button id="btn-node-finder" type="button" aria-label="查找节点" aria-haspopup="dialog" aria-expanded="false" aria-controls="node-finder" title="查找节点（/）" data-node-finder-trigger><span class="diagram-nav-icon find" aria-hidden="true"></span></button>
-        <button id="btn-diagram-guide" type="button" aria-label="打开图表指南" aria-haspopup="dialog" aria-expanded="false" aria-controls="diagram-guide" title="图表指南（?）"><span class="diagram-nav-icon guide" aria-hidden="true"></span></button>
-        <button data-view="out" type="button" aria-label="缩小" title="缩小（-）"><span class="diagram-nav-icon minus" aria-hidden="true"></span></button>
-        <button data-view="reset" type="button" aria-label="重置图表视图" title="重置视图（0）"><span class="diagram-nav-detail" data-view-detail hidden>阅读</span><span class="diagram-nav-percent" data-view-percent>100%</span></button>
-        <button data-view="in" type="button" aria-label="放大" title="放大（+）"><span class="diagram-nav-icon plus" aria-hidden="true"></span></button>
+      <p class="overview-map-feedback no-print" id="overview-map-feedback" role="status" aria-live="polite" hidden>Semantic radar needs more MAP space.</p>
+      <button class="rail-reveal no-print" id="rail-reveal" type="button" hidden aria-controls="reader-rail" aria-expanded="false"><span class="rail-reveal-icon" aria-hidden="true"></span><span>Notes &amp; index</span></button>
+      <div class="diagram-nav no-print" role="toolbar" aria-label="Diagram view controls">
+        <button id="btn-route-probe" type="button" aria-label="Trace a directed route" aria-pressed="false" aria-controls="route-probe" title="Trace route (R)">ROUTE</button>
+        <button id="btn-overview-map" type="button" aria-label="Open semantic radar" aria-expanded="false" aria-controls="overview-map" title="Semantic radar (M)">MAP</button>
+        <button id="btn-semantic-lens" type="button" aria-label="Open semantic lens" aria-haspopup="dialog" aria-expanded="false" aria-pressed="false" aria-controls="semantic-lens" title="Semantic lens (L)">LENS</button>
+        <button id="btn-node-finder" type="button" aria-label="Find a node" aria-haspopup="dialog" aria-expanded="false" aria-controls="node-finder" title="Find a node (/)" data-node-finder-trigger><span class="diagram-nav-icon find" aria-hidden="true"></span></button>
+        <button id="btn-diagram-guide" type="button" aria-label="Open diagram guide" aria-haspopup="dialog" aria-expanded="false" aria-controls="diagram-guide" title="Diagram guide (?)"><span class="diagram-nav-icon guide" aria-hidden="true"></span></button>
+        <button data-view="out" type="button" aria-label="Zoom out" title="Zoom out (-)"><span class="diagram-nav-icon minus" aria-hidden="true"></span></button>
+        <button data-view="reset" type="button" aria-label="Reset diagram view" title="Reset view (0)"><span class="diagram-nav-detail" data-view-detail hidden>READ</span><span class="diagram-nav-percent" data-view-percent>100%</span></button>
+        <button data-view="in" type="button" aria-label="Zoom in" title="Zoom in (+)"><span class="diagram-nav-icon plus" aria-hidden="true"></span></button>
       </div>
     </div>
 
     <aside class="reader-rail" id="reader-rail">
-    <div class="rail-controls no-print" role="toolbar" aria-label="侧栏">
-      <button class="rail-control" id="rail-placement" type="button" hidden aria-label="移到图下方" title="移到图下方" data-placement="right"><span class="rail-control-icon placement" aria-hidden="true"></span></button>
-      <button class="rail-control" id="rail-collapse" type="button" hidden aria-controls="reader-rail" aria-expanded="true" aria-label="收起侧栏" title="收起侧栏"><span class="rail-control-icon collapse" aria-hidden="true"></span></button>
+    <div class="rail-controls no-print" role="toolbar" aria-label="Side panel">
+      <button class="rail-control" id="rail-placement" type="button" hidden aria-label="Move panel below the diagram" title="Move panel below the diagram" data-placement="right"><span class="rail-control-icon placement" aria-hidden="true"></span></button>
+      <button class="rail-control" id="rail-collapse" type="button" hidden aria-controls="reader-rail" aria-expanded="true" aria-label="Collapse side panel" title="Collapse side panel"><span class="rail-control-icon collapse" aria-hidden="true"></span></button>
     </div>
     <!-- Info Cards -->
     <div class="cards">
       <div class="card">
         <div class="card-header">
           <div class="card-dot rose"></div>
-          <h3>Guardrail Dataset × Git Scorer = Aspect</h3>
+          <h3>Guardrail Dataset + Git Scorer = Aspect</h3>
         </div>
         <ul>
-          <li>Dataset 先独立发布：input、label、strategy。Evaluation 再绑定 dataset/scorer 固定版本、aspect 与 label_mapping。</li>
-          <li>Runner 发送 input，取得 Scan output；Git script 接收 input、label、strategy、output，返回 expected/predicted/outcome/reason。</li>
-          <li>unsafe 为正类：TP 正确拦截，FP 误拦截，TN 正确放行，FN 漏检。每组结果独立汇总。</li>
+          <li>Publish datasets independently: input, label and strategy. Evaluation pins dataset and scorer versions, aspect and label mapping.</li>
+          <li>Runner sends input to a Guardrail instance. Git script consumes input, normalized label, strategy and Scan output; it returns expected, predicted, outcome and reason.</li>
+          <li>Unsafe is the positive class: TP = correct detection, FP = false alarm, TN = correct clearance, FN = missed detection. Results are aggregated for each binding.</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot cyan"></div>
-          <h3>OpenShell / LangSmith 的真实状态</h3>
+          <h3>Runtime and source boundaries</h3>
         </div>
         <ul>
-          <li>当前部署由 API 创建 Kubernetes Job；OpenShell 是另一个显式 gateway/policy CLI 执行入口，不是当前 Job 的隐含安全边界。</li>
-          <li>Python runner-local Collector 已实现 Elasticsearch；选择 LangSmith exporter 当前会抛出 NotImplementedError。虚线表示可选或待实现路径。</li>
-          <li>图据 2026-11-04 本地工作树绘制；证据为独立源码快照，不冒充已发布远端 commit。</li>
+          <li>Evaluation API creates a Kubernetes Job. The Runner container contains orchestration, Guardrail Proxy and Runner-local Collector.</li>
+          <li>Git Repo groups the scorer source. The script is fetched at a pinned SHA and executed as a subprocess in Runner, not on the Git server.</li>
+          <li>Guardrail Proxy represents HTTP Scan forwarding logic currently implemented in guardrail_worker; it is not a separately deployed proxy server. External targets are NeMo Guardrail / F5 instances, including Mock.</li>
+          <li>LangSmith exporter is not implemented. Current scoring feedback and traces are stored in Elasticsearch.</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot emerald"></div>
-          <h3>持久化、Trace 与凭据</h3>
+          <h3>Telemetry, storage and credentials</h3>
         </div>
         <ul>
-          <li>ES 三类索引保存资源/运行、样本/分数、traces；UI 通过 API 查询，不直接访问 ES。</li>
-          <li>OTel 配置启用时发送标准 OTLP spans；样本和评分反馈另外通过 Collector HTTP 接口写入。cost 当前为 mock。</li>
-          <li>Guardrail token 通过受保护 detail 获取；Git SSH key 从 Secret 挂载；script 子进程不继承 API/Guardrail/Collector 凭据。</li>
+          <li>Three ES index families store resources/runs, samples/scores and traces. UI queries through Evaluation API.</li>
+          <li>When OTel is configured, Runner exports standard OTLP spans. Typed sample and score feedback uses the Collector HTTP API. Cost is currently mock.</li>
+          <li>Guardrail credentials use a protected run-detail endpoint. Git SSH keys are mounted from Secrets. Script subprocesses do not inherit API, Guardrail or Collector credentials.</li>
+          <li>Based on a local working-tree evidence snapshot from 2026-11-04, not a published remote release commit.</li>
         </ul>
       </div>
     </div>
     <nav class="node-outline no-print" id="node-outline" hidden aria-labelledby="node-outline-title">
       <div class="node-outline-head">
-        <strong id="node-outline-title">节点索引</strong>
+        <strong id="node-outline-title">Node index</strong>
         <span class="node-outline-count" id="node-outline-count"></span>
       </div>
       <ol class="node-outline-list" id="node-outline-list"></ol>
