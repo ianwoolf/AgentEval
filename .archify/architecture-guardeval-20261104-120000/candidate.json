@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "AgentEval - Platform Integration and Guardrail Evaluation",
+    "title": "AgentEval - Layered Architecture and H3 Runner Pod",
     "locale": "en",
     "output": ".archify/architecture-guardeval-20261104-120000/guardrail-evaluation.html",
     "quality_profile": "showcase",
@@ -35,10 +35,9 @@
           "es",
           "api",
           "ui",
-          "langsmith",
           "guardrail-proxy"
         ],
-        "note": "Collector writes to Elasticsearch today. LangSmith is a planned exporter."
+        "note": "Runner-local Collector persists feedback and traces in Elasticsearch; API serves reports to the UI."
       },
       {
         "id": "platform-integration",
@@ -49,7 +48,7 @@
           "api",
           "ui"
         ],
-        "note": "Guardrail Management already exists. AI Factory / Other AI Platforms is not implemented."
+        "note": "Guardrail Management already exists. Other AI Platform is not implemented."
       }
     ]
   },
@@ -60,8 +59,8 @@
       "label": "AgentEval UI",
       "sublabel": "Publish / Configure / Trigger / Report",
       "pos": [
-        40,
-        270
+        80,
+        265
       ],
       "size": [
         230,
@@ -74,8 +73,8 @@
       "label": "Evaluation API",
       "sublabel": "Version pins / validation / snapshots",
       "pos": [
-        420,
-        270
+        80,
+        450
       ],
       "size": [
         220,
@@ -88,8 +87,8 @@
       "label": "Guardrail Dataset",
       "sublabel": "input / label / strategy / version",
       "pos": [
-        40,
-        550
+        420,
+        265
       ],
       "size": [
         230,
@@ -99,17 +98,17 @@
     {
       "id": "runner",
       "type": "backend",
-      "label": "Evaluation Runner",
+      "label": "Evaluation Worker",
       "sublabel": "Per-sample orchestration / Model=None",
       "pos": [
-        700,
-        470
+        510,
+        450
       ],
       "size": [
         220,
         76
       ],
-      "tag": "Inside K8s Job"
+      "tag": "Process inside Runner Pod"
     },
     {
       "id": "guardrail",
@@ -117,8 +116,8 @@
       "label": "NeMo Guardrail / F5",
       "sublabel": "External provider-selected instance",
       "pos": [
-        700,
-        930
+        860,
+        880
       ],
       "size": [
         220,
@@ -130,16 +129,16 @@
       "id": "script",
       "type": "backend",
       "label": "Git Python Script",
-      "sublabel": "script.py / pinned commit",
+      "sublabel": "script.py / pinned Git commit",
       "pos": [
-        970,
-        730
+        525,
+        880
       ],
       "size": [
-        180,
+        190,
         90
       ],
-      "tag": "Fetched and executed by Runner"
+      "tag": "Executed inside Runner Pod"
     },
     {
       "id": "es",
@@ -147,12 +146,12 @@
       "label": "Elasticsearch",
       "sublabel": "Resources / runs / scores / traces",
       "pos": [
-        40,
-        930
+        100,
+        880
       ],
       "size": [
-        230,
-        76
+        190,
+        90
       ]
     },
     {
@@ -161,39 +160,24 @@
       "label": "Runner-local Collector",
       "sublabel": "HTTP feedback + OTLP traces",
       "pos": [
-        420,
-        670
+        365,
+        630
       ],
       "size": [
         220,
         76
       ],
-      "tag": "Inside Runner container"
-    },
-    {
-      "id": "langsmith",
-      "type": "external",
-      "label": "LangSmith",
-      "sublabel": "Planned Collector exporter",
-      "pos": [
-        350,
-        1160
-      ],
-      "size": [
-        220,
-        76
-      ],
-      "tag": "Not implemented"
+      "tag": "Inside Runner Pod"
     },
     {
       "id": "guardrail-proxy",
       "type": "backend",
       "label": "Guardrail Proxy",
       "sublabel": "Resolve connection / forward Scan",
-      "tag": "Runner-internal logic",
+      "tag": "Inside Runner Pod",
       "pos": [
-        700,
-        670
+        860,
+        450
       ],
       "size": [
         220,
@@ -206,7 +190,7 @@
       "label": "Guardrail Management",
       "pos": [
         270,
-        40
+        50
       ],
       "size": [
         310,
@@ -216,12 +200,12 @@
     {
       "id": "ai-factory",
       "type": "external",
-      "label": "AI Factory / Other AI Platforms",
+      "label": "Other AI Platform",
       "sublabel": "Benchmarking / quality / safety / release gates",
       "tag": "Not implemented",
       "pos": [
         720,
-        40
+        50
       ],
       "size": [
         320,
@@ -250,13 +234,6 @@
       "to": "runner",
       "label": "input / label / strategy",
       "variant": "emphasis"
-    },
-    {
-      "id": "api-runner-8",
-      "from": "api",
-      "to": "runner",
-      "label": "Create Job / snapshot",
-      "variant": "default"
     },
     {
       "id": "runner-script-11",
@@ -308,13 +285,6 @@
       "variant": "default"
     },
     {
-      "id": "collector-langsmith-18",
-      "from": "collector",
-      "to": "langsmith",
-      "label": "Planned exporter",
-      "variant": "dashed"
-    },
-    {
       "id": "runner-proxy-input",
       "from": "runner",
       "to": "guardrail-proxy",
@@ -341,6 +311,13 @@
       "to": "api",
       "label": "Evaluation API integration",
       "variant": "dashed"
+    },
+    {
+      "id": "api-create-runner-pod",
+      "from": "api",
+      "to": "runner",
+      "label": "Create Job / Runner Pod",
+      "variant": "default"
     }
   ],
   "cards": [
@@ -357,10 +334,10 @@
       "dot": "cyan",
       "title": "Runtime and source boundaries",
       "items": [
-        "Evaluation API creates a Kubernetes Job. The Runner container contains orchestration, Guardrail Proxy and Runner-local Collector.",
-        "Git Repo groups the scorer source. The script is fetched at a pinned SHA and executed as a subprocess in Runner, not on the Git server.",
-        "Guardrail Proxy represents HTTP Scan forwarding logic currently implemented in guardrail_worker; it is not a separately deployed proxy server. External targets are NeMo Guardrail / F5 instances, including Mock.",
-        "LangSmith exporter is not implemented. Current scoring feedback and traces are stored in Elasticsearch."
+        "The logical Evaluation Layer owns orchestration. Evaluation API creates a Kubernetes Job; the Job creates a Runner Pod in H3.",
+        "The Runner Pod contains the evaluation worker, Guardrail Proxy and Runner-local Collector. These are cooperating processes or responsibilities in the Runner workload, not three separate Pods.",
+        "Git Repository groups scorer source. Code is fetched at a pinned SHA and executed inside Runner Pod, not by the Git server.",
+        "Guardrail instances belong to the Core Capability Layer and remain outside Runner Pod."
       ]
     },
     {
@@ -377,39 +354,79 @@
       "dot": "violet",
       "title": "Upstream platform integration",
       "items": [
-        "Guardrail Management is an existing upstream management system. AI Factory and other AI platforms are not implemented.",
+        "Guardrail Management is an existing upstream management system. Other AI platforms are not implemented.",
         "Proposed flow: upstream platform submits or references an evaluation configuration, triggers a run and queries status, reports and request details through Evaluation API.",
-        "The solid Guardrail Management connection represents the current integration. The dashed AI Factory / Other AI Platforms connection represents a not-implemented extension."
+        "The solid Guardrail Management connection represents the current integration. The dashed Other AI Platform connection represents a not-implemented extension."
       ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "K8s Job - Evaluation Runner container",
+      "label": "1. AI Platform Layer",
+      "wraps": [
+        "guardrail-management",
+        "ai-factory"
+      ],
+      "pad": 24
+    },
+    {
+      "kind": "region",
+      "label": "2. Evaluation Layer",
+      "wraps": [
+        "ui",
+        "api",
+        "dataset",
+        "runner",
+        "guardrail-proxy",
+        "collector"
+      ],
+      "pad": 48
+    },
+    {
+      "kind": "region",
+      "label": "H3 - Kubernetes Cluster",
       "wraps": [
         "runner",
         "guardrail-proxy",
         "collector"
       ],
-      "pad": 26
+      "pad": 43
+    },
+    {
+      "kind": "security-group",
+      "label": "Runner Pod - Evaluation Job workload",
+      "wraps": [
+        "runner",
+        "guardrail-proxy",
+        "collector"
+      ],
+      "pad": 22
     },
     {
       "kind": "region",
-      "label": "Git Repo - Scorer source",
+      "label": "3. Core Capability Layer",
+      "wraps": [
+        "guardrail"
+      ],
+      "pad": 28
+    },
+    {
+      "kind": "region",
+      "label": "4. Infrastructure & Dependencies",
+      "wraps": [
+        "script",
+        "es"
+      ],
+      "pad": 35
+    },
+    {
+      "kind": "security-group",
+      "label": "Git Repository - Scorer source",
       "wraps": [
         "script"
       ],
-      "pad": 26
-    },
-    {
-      "kind": "region",
-      "label": "Upstream Management Platforms - integration options",
-      "wraps": [
-        "guardrail-management",
-        "ai-factory"
-      ],
-      "pad": 20
+      "pad": 22
     }
   ]
 }

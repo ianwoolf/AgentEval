@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+    "sha256": "dad7fffb5851859389783d82398902faa8c5fbf08577a5b640f812f52daba38e",
+    "bytes": 10794
+  },
+  "artifact": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+    "sha256": "77230cfa277d0eadf2c10e393f6dce238919b85bf430e66bdf599d9d2868c9b4",
+    "bytes": 865726
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-21\\guardrail-evaluation.finalize.json",
+    "summaryReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-21\\guardrail-evaluation.finalize-summary.json",
+    "browserCheckReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-21\\guardrail-evaluation.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-05T09:32:20.395Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 6492,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 2,
+      "routesOverSuggestedBends": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "api-dataset-6",
+            "from": "api",
+            "to": "dataset",
+            "label": "Versioned samples",
+            "collectionIndex": 1,
+            "artifactIndex": 2
+          },
+          "right": {
+            "id": "platform-factory",
+            "from": "ai-factory",
+            "to": "api",
+            "label": "Evaluation API integration",
+            "collectionIndex": 13,
+            "artifactIndex": 14
+          },
+          "point": [
+            360,
+            403.5
+          ],
+          "sharedNode": "api"
+        },
+        {
+          "left": {
+            "id": "dataset-runner-7",
+            "from": "dataset",
+            "to": "runner",
+            "label": "input / label / strategy",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "right": {
+            "id": "platform-factory",
+            "from": "ai-factory",
+            "to": "api",
+            "label": "Evaluation API integration",
+            "collectionIndex": 13,
+            "artifactIndex": 14
+          },
+          "point": [
+            634,
+            403.5
+          ]
+        }
+      ],
+      "detours": [
+        {
+          "relationship": {
+            "id": "script-runner-12",
+            "from": "script",
+            "to": "runner",
+            "label": "JSON classification",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "bends": 4,
+          "stretch": 1.14
+        }
+      ],
+      "truncated": false
+    },
+    "hints": [
+      "api → dataset and ai-factory → api cross next to api: move node dataset or ai-factory so the two reach api from different sides (for example one level with it, one directly above or below it).",
+      "dataset → runner crosses ai-factory → api: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "script → runner needs 4 bends: move node script or runner so they share a row or column with matching centers, or sit diagonally with a clear corner."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

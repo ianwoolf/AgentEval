@@ -1,0 +1,1524 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-11-05T09:37:33.406Z",
+  "specification": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+    "sha256": "a7a9ccfda8bf1fc75470d8cb29f0a4231e8f3d71a39eeb3ec20863bd78f6b347",
+    "bytes": 12386
+  },
+  "artifact": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+    "sha256": "56324a893aad3c0b1b05122ad475e9d02b2685d3f122e986493c94d3d202bb7b",
+    "bytes": 874486
+  },
+  "stages": {
+    "validate": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": null,
+      "execution": "embedded-in-deliver",
+      "command": [
+        "C:\\Users\\o_lyn\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "C:\\zzz\\code\\ai\\AgentEval\\data\\local-deploy\\archify-tool\\archify\\bin\\archify.mjs",
+        "deliver",
+        "architecture",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "--quality",
+        "showcase",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "validate",
+        "specification": {
+          "sha256": "a7a9ccfda8bf1fc75470d8cb29f0a4231e8f3d71a39eeb3ec20863bd78f6b347",
+          "bytes": 12386
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      }
+    },
+    "deliver": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 1661,
+      "command": [
+        "C:\\Users\\o_lyn\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "C:\\zzz\\code\\ai\\AgentEval\\data\\local-deploy\\archify-tool\\archify\\bin\\archify.mjs",
+        "deliver",
+        "architecture",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "--quality",
+        "showcase",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "receiptId": "9394a6cc-95a5-459f-9fbe-6ccb8bd98bd9",
+        "ok": true,
+        "command": "deliver",
+        "type": "architecture",
+        "input": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+        "output": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "specification": {
+          "sha256": "a7a9ccfda8bf1fc75470d8cb29f0a4231e8f3d71a39eeb3ec20863bd78f6b347",
+          "bytes": 12386
+        },
+        "artifact": {
+          "sha256": "56324a893aad3c0b1b05122ad475e9d02b2685d3f122e986493c94d3d202bb7b",
+          "bytes": 874486
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        },
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      }
+    },
+    "check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 342,
+      "command": [
+        "C:\\Users\\o_lyn\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "C:\\zzz\\code\\ai\\AgentEval\\data\\local-deploy\\archify-tool\\archify\\bin\\archify.mjs",
+        "check",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "--require-provenance"
+      ],
+      "receipt": {
+        "ok": true,
+        "file": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "artifact": {
+          "sha256": "56324a893aad3c0b1b05122ad475e9d02b2685d3f122e986493c94d3d202bb7b",
+          "bytes": 874486
+        },
+        "checks": [
+          {
+            "name": "single_svg",
+            "ok": true,
+            "details": [
+              "found 1 <svg> block(s)"
+            ]
+          },
+          {
+            "name": "finite_svg",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "orthogonal_arrows",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "label_route_clearance",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_crossings",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_corridors",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "container_border_runs",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "route_rhythm",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "legend_clearance",
+            "ok": true,
+            "details": []
+          }
+        ],
+        "composition": {
+          "schemaVersion": 1,
+          "profile": "showcase",
+          "status": "pass",
+          "summary": {
+            "errors": 0,
+            "warnings": 0
+          },
+          "metrics": {
+            "properCrossings": 0,
+            "resolvedCrossovers": 19,
+            "ambiguousCorridors": 0,
+            "arrowheadCollisions": 0,
+            "containerBorderRuns": 0,
+            "labelRouteClearanceIssues": 0,
+            "labelCanvasOverflowIssues": 0,
+            "minLabelRouteClearance": 4.4,
+            "desktopReadabilityIssues": 0,
+            "viewportHeightIssues": 0,
+            "minProjectedNodeTextPx": 6.1234567901234565,
+            "maxBends": 6,
+            "routesOverSuggestedBends": 7,
+            "maxStretch": 1.444,
+            "routesOverSuggestedStretch": 1,
+            "minSegmentPx": 16,
+            "minInteriorSegmentPx": 16,
+            "shortSegmentCount": 0,
+            "shortEndpointSegmentCount": 0,
+            "shortInteriorSegmentCount": 0,
+            "microSegmentCount": 0
+          },
+          "suggestedLimits": {
+            "bendsPerRelationship": 2,
+            "stretch": 1.35,
+            "segmentPx": 16,
+            "microSegmentPx": 8
+          },
+          "routeReview": {
+            "crossings": [
+              {
+                "left": {
+                  "id": "dataset-runner-7",
+                  "from": "dataset",
+                  "to": "runner",
+                  "label": "input / label / strategy",
+                  "collectionIndex": 2,
+                  "artifactIndex": 3
+                },
+                "right": {
+                  "id": "script-runner-12",
+                  "from": "script",
+                  "to": "runner",
+                  "label": "JSON classification",
+                  "collectionIndex": 4,
+                  "artifactIndex": 5
+                },
+                "point": [
+                  640.0000000000001,
+                  631
+                ],
+                "sharedNode": "runner"
+              },
+              {
+                "left": {
+                  "id": "dataset-runner-7",
+                  "from": "dataset",
+                  "to": "runner",
+                  "label": "input / label / strategy",
+                  "collectionIndex": 2,
+                  "artifactIndex": 3
+                },
+                "right": {
+                  "id": "runner-collector-15",
+                  "from": "runner",
+                  "to": "collector",
+                  "label": "Scores / latency / OTLP",
+                  "collectionIndex": 7,
+                  "artifactIndex": 8
+                },
+                "point": [
+                  670,
+                  630.8461538461537
+                ],
+                "sharedNode": "runner"
+              },
+              {
+                "left": {
+                  "id": "dataset-runner-7",
+                  "from": "dataset",
+                  "to": "runner",
+                  "label": "input / label / strategy",
+                  "collectionIndex": 2,
+                  "artifactIndex": 3
+                },
+                "right": {
+                  "id": "api-es-17",
+                  "from": "api",
+                  "to": "es",
+                  "label": "Resources / reports",
+                  "collectionIndex": 9,
+                  "artifactIndex": 10
+                },
+                "point": [
+                  396,
+                  631
+                ]
+              },
+              {
+                "left": {
+                  "id": "dataset-runner-7",
+                  "from": "dataset",
+                  "to": "runner",
+                  "label": "input / label / strategy",
+                  "collectionIndex": 2,
+                  "artifactIndex": 3
+                },
+                "right": {
+                  "id": "api-kubernetes",
+                  "from": "api",
+                  "to": "kubernetes",
+                  "label": "Create evaluation Job",
+                  "collectionIndex": 15,
+                  "artifactIndex": 16
+                },
+                "point": [
+                  406,
+                  631
+                ]
+              },
+              {
+                "left": {
+                  "id": "runner-script-11",
+                  "from": "runner",
+                  "to": "script",
+                  "label": "Fetch SHA / JSON stdin",
+                  "collectionIndex": 3,
+                  "artifactIndex": 4
+                },
+                "right": {
+                  "id": "script-runner-12",
+                  "from": "script",
+                  "to": "runner",
+                  "label": "JSON classification",
+                  "collectionIndex": 4,
+                  "artifactIndex": 5
+                },
+                "point": [
+                  172.3846153846154,
+                  670
+                ],
+                "sharedNode": "runner"
+              },
+              {
+                "left": {
+                  "id": "runner-script-11",
+                  "from": "runner",
+                  "to": "script",
+                  "label": "Fetch SHA / JSON stdin",
+                  "collectionIndex": 3,
+                  "artifactIndex": 4
+                },
+                "right": {
+                  "id": "runner-collector-15",
+                  "from": "runner",
+                  "to": "collector",
+                  "label": "Scores / latency / OTLP",
+                  "collectionIndex": 7,
+                  "artifactIndex": 8
+                },
+                "point": [
+                  670.0000000000001,
+                  670
+                ],
+                "sharedNode": "runner"
+              },
+              {
+                "left": {
+                  "id": "runner-script-11",
+                  "from": "runner",
+                  "to": "script",
+                  "label": "Fetch SHA / JSON stdin",
+                  "collectionIndex": 3,
+                  "artifactIndex": 4
+                },
+                "right": {
+                  "id": "api-es-17",
+                  "from": "api",
+                  "to": "es",
+                  "label": "Resources / reports",
+                  "collectionIndex": 9,
+                  "artifactIndex": 10
+                },
+                "point": [
+                  396,
+                  670
+                ]
+              },
+              {
+                "left": {
+                  "id": "runner-script-11",
+                  "from": "runner",
+                  "to": "script",
+                  "label": "Fetch SHA / JSON stdin",
+                  "collectionIndex": 3,
+                  "artifactIndex": 4
+                },
+                "right": {
+                  "id": "api-kubernetes",
+                  "from": "api",
+                  "to": "kubernetes",
+                  "label": "Create evaluation Job",
+                  "collectionIndex": 15,
+                  "artifactIndex": 16
+                },
+                "point": [
+                  406.00000000000006,
+                  670
+                ]
+              },
+              {
+                "left": {
+                  "id": "script-runner-12",
+                  "from": "script",
+                  "to": "runner",
+                  "label": "JSON classification",
+                  "collectionIndex": 4,
+                  "artifactIndex": 5
+                },
+                "right": {
+                  "id": "api-es-17",
+                  "from": "api",
+                  "to": "es",
+                  "label": "Resources / reports",
+                  "collectionIndex": 9,
+                  "artifactIndex": 10
+                },
+                "point": [
+                  396,
+                  665
+                ]
+              },
+              {
+                "left": {
+                  "id": "script-runner-12",
+                  "from": "script",
+                  "to": "runner",
+                  "label": "JSON classification",
+                  "collectionIndex": 4,
+                  "artifactIndex": 5
+                },
+                "right": {
+                  "id": "api-kubernetes",
+                  "from": "api",
+                  "to": "kubernetes",
+                  "label": "Create evaluation Job",
+                  "collectionIndex": 15,
+                  "artifactIndex": 16
+                },
+                "point": [
+                  406,
+                  665.0000000000001
+                ]
+              },
+              {
+                "left": {
+                  "id": "script-runner-12",
+                  "from": "script",
+                  "to": "runner",
+                  "label": "JSON classification",
+                  "collectionIndex": 4,
+                  "artifactIndex": 5
+                },
+                "right": {
+                  "id": "kubernetes-runner",
+                  "from": "kubernetes",
+                  "to": "runner",
+                  "label": "Job creates Runner Pod",
+                  "collectionIndex": 16,
+                  "artifactIndex": 17
+                },
+                "point": [
+                  825.0500000000003,
+                  535
+                ],
+                "sharedNode": "runner"
+              },
+              {
+                "left": {
+                  "id": "collector-es-16",
+                  "from": "collector",
+                  "to": "es",
+                  "label": "Persist feedback / spans",
+                  "collectionIndex": 8,
+                  "artifactIndex": 9
+                },
+                "right": {
+                  "id": "collector-langsmith-18",
+                  "from": "collector",
+                  "to": "langsmith",
+                  "label": "Planned exporter",
+                  "collectionIndex": 10,
+                  "artifactIndex": 11
+                },
+                "point": [
+                  676,
+                  1393
+                ],
+                "sharedNode": "collector"
+              },
+              {
+                "left": {
+                  "id": "collector-es-16",
+                  "from": "collector",
+                  "to": "es",
+                  "label": "Persist feedback / spans",
+                  "collectionIndex": 8,
+                  "artifactIndex": 9
+                },
+                "right": {
+                  "id": "kubernetes-runner",
+                  "from": "kubernetes",
+                  "to": "runner",
+                  "label": "Job creates Runner Pod",
+                  "collectionIndex": 16,
+                  "artifactIndex": 17
+                },
+                "point": [
+                  676,
+                  1179
+                ]
+              },
+              {
+                "left": {
+                  "id": "api-es-17",
+                  "from": "api",
+                  "to": "es",
+                  "label": "Resources / reports",
+                  "collectionIndex": 9,
+                  "artifactIndex": 10
+                },
+                "right": {
+                  "id": "collector-langsmith-18",
+                  "from": "collector",
+                  "to": "langsmith",
+                  "label": "Planned exporter",
+                  "collectionIndex": 10,
+                  "artifactIndex": 11
+                },
+                "point": [
+                  537,
+                  1368
+                ]
+              },
+              {
+                "left": {
+                  "id": "api-es-17",
+                  "from": "api",
+                  "to": "es",
+                  "label": "Resources / reports",
+                  "collectionIndex": 9,
+                  "artifactIndex": 10
+                },
+                "right": {
+                  "id": "api-kubernetes",
+                  "from": "api",
+                  "to": "kubernetes",
+                  "label": "Create evaluation Job",
+                  "collectionIndex": 15,
+                  "artifactIndex": 16
+                },
+                "point": [
+                  563,
+                  1368
+                ],
+                "sharedNode": "api"
+              },
+              {
+                "left": {
+                  "id": "api-es-17",
+                  "from": "api",
+                  "to": "es",
+                  "label": "Resources / reports",
+                  "collectionIndex": 9,
+                  "artifactIndex": 10
+                },
+                "right": {
+                  "id": "kubernetes-runner",
+                  "from": "kubernetes",
+                  "to": "runner",
+                  "label": "Job creates Runner Pod",
+                  "collectionIndex": 16,
+                  "artifactIndex": 17
+                },
+                "point": [
+                  462,
+                  1368
+                ]
+              },
+              {
+                "left": {
+                  "id": "collector-langsmith-18",
+                  "from": "collector",
+                  "to": "langsmith",
+                  "label": "Planned exporter",
+                  "collectionIndex": 10,
+                  "artifactIndex": 11
+                },
+                "right": {
+                  "id": "api-kubernetes",
+                  "from": "api",
+                  "to": "kubernetes",
+                  "label": "Create evaluation Job",
+                  "collectionIndex": 15,
+                  "artifactIndex": 16
+                },
+                "point": [
+                  537,
+                  1096
+                ]
+              },
+              {
+                "left": {
+                  "id": "collector-langsmith-18",
+                  "from": "collector",
+                  "to": "langsmith",
+                  "label": "Planned exporter",
+                  "collectionIndex": 10,
+                  "artifactIndex": 11
+                },
+                "right": {
+                  "id": "kubernetes-runner",
+                  "from": "kubernetes",
+                  "to": "runner",
+                  "label": "Job creates Runner Pod",
+                  "collectionIndex": 16,
+                  "artifactIndex": 17
+                },
+                "point": [
+                  537,
+                  1179
+                ]
+              },
+              {
+                "left": {
+                  "id": "api-kubernetes",
+                  "from": "api",
+                  "to": "kubernetes",
+                  "label": "Create evaluation Job",
+                  "collectionIndex": 15,
+                  "artifactIndex": 16
+                },
+                "right": {
+                  "id": "kubernetes-runner",
+                  "from": "kubernetes",
+                  "to": "runner",
+                  "label": "Job creates Runner Pod",
+                  "collectionIndex": 16,
+                  "artifactIndex": 17
+                },
+                "point": [
+                  563,
+                  1179
+                ],
+                "sharedNode": "kubernetes"
+              }
+            ],
+            "detours": [
+              {
+                "relationship": {
+                  "id": "ui-api-0",
+                  "from": "ui",
+                  "to": "api",
+                  "label": "Configure / Trigger / Report",
+                  "collectionIndex": 0,
+                  "artifactIndex": 1
+                },
+                "bends": 3,
+                "stretch": 1.198
+              },
+              {
+                "relationship": {
+                  "id": "dataset-runner-7",
+                  "from": "dataset",
+                  "to": "runner",
+                  "label": "input / label / strategy",
+                  "collectionIndex": 2,
+                  "artifactIndex": 3
+                },
+                "bends": 4,
+                "stretch": 1.079
+              },
+              {
+                "relationship": {
+                  "id": "runner-script-11",
+                  "from": "runner",
+                  "to": "script",
+                  "label": "Fetch SHA / JSON stdin",
+                  "collectionIndex": 3,
+                  "artifactIndex": 4
+                },
+                "bends": 3,
+                "stretch": 1.031
+              },
+              {
+                "relationship": {
+                  "id": "script-runner-12",
+                  "from": "script",
+                  "to": "runner",
+                  "label": "JSON classification",
+                  "collectionIndex": 4,
+                  "artifactIndex": 5
+                },
+                "bends": 4,
+                "stretch": 1.136
+              },
+              {
+                "relationship": {
+                  "id": "api-es-17",
+                  "from": "api",
+                  "to": "es",
+                  "label": "Resources / reports",
+                  "collectionIndex": 9,
+                  "artifactIndex": 10
+                },
+                "bends": 6,
+                "stretch": 1.291
+              },
+              {
+                "relationship": {
+                  "id": "api-kubernetes",
+                  "from": "api",
+                  "to": "kubernetes",
+                  "label": "Create evaluation Job",
+                  "collectionIndex": 15,
+                  "artifactIndex": 16
+                },
+                "bends": 6,
+                "stretch": 1.286
+              },
+              {
+                "relationship": {
+                  "id": "kubernetes-runner",
+                  "from": "kubernetes",
+                  "to": "runner",
+                  "label": "Job creates Runner Pod",
+                  "collectionIndex": 16,
+                  "artifactIndex": 17
+                },
+                "bends": 4,
+                "stretch": 1.444
+              }
+            ]
+          },
+          "leadingSpace": {
+            "measured": true,
+            "emptyTopPx": 26,
+            "emptyTopRatio": 0.016,
+            "occupiedTop": 26,
+            "viewBoxTop": 0,
+            "canvasHeight": 1608,
+            "typicalNodeHeight": 76,
+            "reviewSuggested": false
+          },
+          "desktopReadability": {
+            "budgetBasis": "legacy-930",
+            "readerContract": "declared-wide-v1",
+            "availableDiagramWidth": 930,
+            "actualBudgetPx": 930,
+            "limit": "legacy",
+            "requestedTargetPx": 7.5,
+            "requestedTargetMet": false,
+            "hardFloorPx": 6,
+            "hardFloorMet": true,
+            "minimumOwner": {
+              "kind": "edge",
+              "id": "ui-api-0",
+              "from": "ui",
+              "to": "api"
+            },
+            "minimumSourceTextPx": 8,
+            "minimumProjectedTextPx": 6.1234567901234565,
+            "semanticTextCount": 51
+          },
+          "issues": []
+        },
+        "provenance": "current",
+        "deliveryReceiptId": "9394a6cc-95a5-459f-9fbe-6ccb8bd98bd9"
+      }
+    },
+    "browser-check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 2240,
+      "command": [
+        "C:\\Users\\o_lyn\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "C:\\zzz\\code\\ai\\AgentEval\\data\\local-deploy\\archify-tool\\archify\\bin\\archify.mjs",
+        "browser-check",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "--json",
+        "--require-provenance",
+        "--out-dir",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-16"
+      ],
+      "execution": "in-process",
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "browser-check",
+        "evidenceKind": "automated-browser",
+        "status": "pass",
+        "visualReview": "not-requested",
+        "provenance": "current",
+        "deliveryReceiptId": "9394a6cc-95a5-459f-9fbe-6ccb8bd98bd9",
+        "artifact": {
+          "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+          "sha256": "56324a893aad3c0b1b05122ad475e9d02b2685d3f122e986493c94d3d202bb7b",
+          "bytes": 874486
+        },
+        "state": {
+          "detail": "read",
+          "motion": "still"
+        },
+        "chrome": {
+          "status": "available",
+          "executable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        },
+        "diagnostics": [],
+        "containment": {
+          "status": "pass",
+          "policy": "fit-or-reader-declared-readable-vertical-scroll",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 1513,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1054,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 68,
+                "diagramChromePx": 78,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1579,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1054,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 76,
+                "diagramChromePx": 84,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1579,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1054,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 76,
+                "diagramChromePx": 84,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1581,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1074,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "themeStates": {
+          "status": "pass",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1440,
+              "height": 900,
+              "requestedTheme": "dark",
+              "resolvedTheme": "dark",
+              "ok": true
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "requestedTheme": "dark",
+              "resolvedTheme": "dark",
+              "ok": true
+            }
+          ]
+        },
+        "readability": {
+          "status": "pass",
+          "minimumProjectedNodeTextPx": 6,
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 1513,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1054,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 68,
+                "diagramChromePx": 78,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1579,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1054,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 76,
+                "diagramChromePx": 84,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1579,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1054,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 76,
+                "diagramChromePx": 84,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1581,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1074,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "viewerChrome": {
+          "status": "pass",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 1513,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1054,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 68,
+                "diagramChromePx": 78,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1579,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1054,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 76,
+                "diagramChromePx": 84,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1579,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1054,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 76,
+                "diagramChromePx": 84,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1581,
+              "overflowX": false,
+              "overflowY": true,
+              "verticalScrollAccepted": true,
+              "overflowDisposition": "readable-vertical-scroll",
+              "readerLayout": "adaptive",
+              "readerOverflow": "authored",
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1074,
+              "diagramWidth": 1024,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1355,
+                "cardsPx": 0,
+                "viewBoxHeight": 1608
+              },
+              "viewBoxWidth": 1215,
+              "minimumProjectedNodeTextPx": 6.74238683127572,
+              "minimumProjectedNonEdgeTextPx": 7.500905349794238,
+              "minimumProjectedEdgeTextPx": 6.74238683127572,
+              "minimumProjectedNodeText": "Configure / Trigger / Report",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "captures": {
+          "status": "not-requested",
+          "screenshots": [],
+          "contactSheet": null
+        },
+        "sidecars": {
+          "directory": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-16",
+          "receipt": "guardrail-evaluation.browser-check.json",
+          "files": []
+        }
+      }
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "diagnostics": [],
+  "evidence": {
+    "receipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-16\\guardrail-evaluation.finalize.json",
+    "summaryReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-16\\guardrail-evaluation.finalize-summary.json",
+    "browserCheckReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-16\\guardrail-evaluation.browser-check.json"
+  },
+  "visualReview": "not-requested",
+  "finishedAt": "2026-11-05T09:37:38.475Z",
+  "durationMs": 5068,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-05T09:32:20.395Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

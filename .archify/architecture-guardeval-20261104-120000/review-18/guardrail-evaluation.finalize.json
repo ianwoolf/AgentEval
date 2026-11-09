@@ -1,0 +1,463 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-11-05T10:00:31.830Z",
+  "specification": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+    "sha256": "fa8027baeadf3b94ed8da3c0df001939a34c5a56cc8ae746ac053fe76dd746ad",
+    "bytes": 12385
+  },
+  "artifact": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+    "sha256": "56324a893aad3c0b1b05122ad475e9d02b2685d3f122e986493c94d3d202bb7b",
+    "bytes": 874486
+  },
+  "stages": {
+    "validate": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": null,
+      "command": [
+        "C:\\Users\\o_lyn\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "C:\\zzz\\code\\ai\\AgentEval\\data\\local-deploy\\archify-tool\\archify\\bin\\archify.mjs",
+        "deliver",
+        "architecture",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+        "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "--quality",
+        "showcase",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "deliver",
+        "receiptId": "70348fb2-6f1b-46cc-942d-81ddf1aae3a7",
+        "stage": "check",
+        "type": "architecture",
+        "input": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+        "output": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+        "error": "Final artifact check failed; the previous artifact was preserved.",
+        "diagnostics": [
+          {
+            "code": "composition/desktop-readability",
+            "severity": "error",
+            "message": "Final artifact failed composition/desktop-readability.",
+            "subject": {
+              "check": "composition"
+            },
+            "evidence": {
+              "owner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "viewportWidth": 1440,
+              "viewportHeight": 900,
+              "availableDiagramWidth": 930,
+              "budgetBasis": "legacy-930",
+              "readerContract": "declared-wide-v1",
+              "requestedTargetPx": 7.5,
+              "requestedTargetMet": false,
+              "budgetLimit": "legacy",
+              "viewBoxWidth": 1262,
+              "scale": 0.7369255150554676,
+              "text": "Configure / Trigger / Report",
+              "detail": "edge",
+              "sourceFontPx": 8,
+              "projectedFontPx": 5.89540412044374,
+              "minimumProjectedFontPx": 6
+            },
+            "supportedFixes": [
+              "Preserve the semantic text and any supplied coordinates, routes, sides, channels, and labels. Compactly reflow automatic spacing and empty corridors so the complete viewBox width is at most 1240px (current 1262px; 8px source text at 930px desktop budget). If supplied geometry fixes that width, use a renderer-supported semantic text-size setting or renderer-level fix instead. Position-only label controls cannot repair its projection."
+            ]
+          }
+        ],
+        "provenance": "failed",
+        "checker": {
+          "ok": false,
+          "file": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+          "artifact": {
+            "sha256": "47d7faa9e7dce19530263ba450da322eb0c604a5b9cea5d4fb3afa63c4586f89",
+            "bytes": 873472
+          },
+          "checks": [
+            {
+              "name": "single_svg",
+              "ok": true,
+              "details": [
+                "found 1 <svg> block(s)"
+              ]
+            },
+            {
+              "name": "finite_svg",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "orthogonal_arrows",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "label_route_clearance",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "relationship_crossings",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "relationship_corridors",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "container_border_runs",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "route_rhythm",
+              "ok": true,
+              "details": []
+            },
+            {
+              "name": "legend_clearance",
+              "ok": true,
+              "details": []
+            }
+          ],
+          "composition": {
+            "schemaVersion": 1,
+            "profile": "showcase",
+            "status": "fail",
+            "summary": {
+              "errors": 1,
+              "warnings": 0
+            },
+            "metrics": {
+              "properCrossings": 0,
+              "resolvedCrossovers": 6,
+              "ambiguousCorridors": 0,
+              "arrowheadCollisions": 0,
+              "containerBorderRuns": 0,
+              "labelRouteClearanceIssues": 0,
+              "labelCanvasOverflowIssues": 0,
+              "minLabelRouteClearance": 5,
+              "desktopReadabilityIssues": 1,
+              "viewportHeightIssues": 0,
+              "minProjectedNodeTextPx": 5.89540412044374,
+              "maxBends": 6,
+              "routesOverSuggestedBends": 1,
+              "maxStretch": 1.074,
+              "routesOverSuggestedStretch": 0,
+              "minSegmentPx": 24,
+              "minInteriorSegmentPx": 27.1,
+              "shortSegmentCount": 0,
+              "shortEndpointSegmentCount": 0,
+              "shortInteriorSegmentCount": 0,
+              "microSegmentCount": 0
+            },
+            "suggestedLimits": {
+              "bendsPerRelationship": 2,
+              "stretch": 1.35,
+              "segmentPx": 16,
+              "microSegmentPx": 8
+            },
+            "routeReview": {
+              "crossings": [
+                {
+                  "left": {
+                    "id": "api-dataset-6",
+                    "from": "api",
+                    "to": "dataset",
+                    "label": "Versioned samples",
+                    "collectionIndex": 1,
+                    "artifactIndex": 2
+                  },
+                  "right": {
+                    "id": "platform-factory",
+                    "from": "ai-factory",
+                    "to": "api",
+                    "label": "Evaluation API integration",
+                    "collectionIndex": 14,
+                    "artifactIndex": 15
+                  },
+                  "point": [
+                    436,
+                    495
+                  ],
+                  "sharedNode": "api"
+                },
+                {
+                  "left": {
+                    "id": "dataset-runner-7",
+                    "from": "dataset",
+                    "to": "runner",
+                    "label": "input / label / strategy",
+                    "collectionIndex": 2,
+                    "artifactIndex": 3
+                  },
+                  "right": {
+                    "id": "platform-factory",
+                    "from": "ai-factory",
+                    "to": "api",
+                    "label": "Evaluation API integration",
+                    "collectionIndex": 14,
+                    "artifactIndex": 15
+                  },
+                  "point": [
+                    634,
+                    495
+                  ]
+                },
+                {
+                  "left": {
+                    "id": "collector-es-16",
+                    "from": "collector",
+                    "to": "es",
+                    "label": "Persist feedback / spans",
+                    "collectionIndex": 8,
+                    "artifactIndex": 9
+                  },
+                  "right": {
+                    "id": "kubernetes-runner",
+                    "from": "kubernetes",
+                    "to": "runner",
+                    "label": "Job creates Runner Pod",
+                    "collectionIndex": 16,
+                    "artifactIndex": 17
+                  },
+                  "point": [
+                    523,
+                    1187.0000000000002
+                  ]
+                },
+                {
+                  "left": {
+                    "id": "api-es-17",
+                    "from": "api",
+                    "to": "es",
+                    "label": "Resources / reports",
+                    "collectionIndex": 9,
+                    "artifactIndex": 10
+                  },
+                  "right": {
+                    "id": "kubernetes-runner",
+                    "from": "kubernetes",
+                    "to": "runner",
+                    "label": "Job creates Runner Pod",
+                    "collectionIndex": 16,
+                    "artifactIndex": 17
+                  },
+                  "point": [
+                    350,
+                    1187
+                  ]
+                },
+                {
+                  "left": {
+                    "id": "collector-langsmith-18",
+                    "from": "collector",
+                    "to": "langsmith",
+                    "label": "Planned exporter",
+                    "collectionIndex": 10,
+                    "artifactIndex": 11
+                  },
+                  "right": {
+                    "id": "kubernetes-runner",
+                    "from": "kubernetes",
+                    "to": "runner",
+                    "label": "Job creates Runner Pod",
+                    "collectionIndex": 16,
+                    "artifactIndex": 17
+                  },
+                  "point": [
+                    624,
+                    809.1066666666728
+                  ]
+                },
+                {
+                  "left": {
+                    "id": "runner-proxy-input",
+                    "from": "runner",
+                    "to": "guardrail-proxy",
+                    "label": "Dataset input",
+                    "collectionIndex": 11,
+                    "artifactIndex": 12
+                  },
+                  "right": {
+                    "id": "kubernetes-runner",
+                    "from": "kubernetes",
+                    "to": "runner",
+                    "label": "Job creates Runner Pod",
+                    "collectionIndex": 16,
+                    "artifactIndex": 17
+                  },
+                  "point": [
+                    766.9499999999999,
+                    649
+                  ],
+                  "sharedNode": "runner"
+                }
+              ],
+              "detours": [
+                {
+                  "relationship": {
+                    "id": "kubernetes-runner",
+                    "from": "kubernetes",
+                    "to": "runner",
+                    "label": "Job creates Runner Pod",
+                    "collectionIndex": 16,
+                    "artifactIndex": 17
+                  },
+                  "bends": 6,
+                  "stretch": 1
+                }
+              ]
+            },
+            "leadingSpace": {
+              "measured": true,
+              "emptyTopPx": 26,
+              "emptyTopRatio": 0.016,
+              "occupiedTop": 26,
+              "viewBoxTop": 0,
+              "canvasHeight": 1608,
+              "typicalNodeHeight": 76,
+              "reviewSuggested": false
+            },
+            "desktopReadability": {
+              "budgetBasis": "legacy-930",
+              "readerContract": "declared-wide-v1",
+              "availableDiagramWidth": 930,
+              "actualBudgetPx": 930,
+              "limit": "legacy",
+              "requestedTargetPx": 7.5,
+              "requestedTargetMet": false,
+              "hardFloorPx": 6,
+              "hardFloorMet": false,
+              "minimumOwner": {
+                "kind": "edge",
+                "id": "ui-api-0",
+                "from": "ui",
+                "to": "api"
+              },
+              "minimumSourceTextPx": 8,
+              "minimumProjectedTextPx": 5.89540412044374,
+              "semanticTextCount": 51
+            },
+            "issues": [
+              {
+                "severity": "error",
+                "code": "composition/desktop-readability",
+                "owner": {
+                  "kind": "edge",
+                  "id": "ui-api-0",
+                  "from": "ui",
+                  "to": "api"
+                },
+                "viewportWidth": 1440,
+                "viewportHeight": 900,
+                "availableDiagramWidth": 930,
+                "budgetBasis": "legacy-930",
+                "readerContract": "declared-wide-v1",
+                "requestedTargetPx": 7.5,
+                "requestedTargetMet": false,
+                "budgetLimit": "legacy",
+                "viewBoxWidth": 1262,
+                "scale": 0.7369255150554676,
+                "text": "Configure / Trigger / Report",
+                "detail": "edge",
+                "sourceFontPx": 8,
+                "projectedFontPx": 5.89540412044374,
+                "minimumProjectedFontPx": 6
+              }
+            ]
+          }
+        },
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      },
+      "execution": "embedded-in-deliver"
+    },
+    "deliver": {
+      "status": "not-run",
+      "execution": "blocked-by-validate"
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "diagnostics": [
+    {
+      "code": "composition/desktop-readability",
+      "severity": "error",
+      "message": "Final artifact failed composition/desktop-readability.",
+      "subject": {
+        "check": "composition"
+      },
+      "evidence": {
+        "owner": {
+          "kind": "edge",
+          "id": "ui-api-0",
+          "from": "ui",
+          "to": "api"
+        },
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "availableDiagramWidth": 930,
+        "budgetBasis": "legacy-930",
+        "readerContract": "declared-wide-v1",
+        "requestedTargetPx": 7.5,
+        "requestedTargetMet": false,
+        "budgetLimit": "legacy",
+        "viewBoxWidth": 1262,
+        "scale": 0.7369255150554676,
+        "text": "Configure / Trigger / Report",
+        "detail": "edge",
+        "sourceFontPx": 8,
+        "projectedFontPx": 5.89540412044374,
+        "minimumProjectedFontPx": 6
+      },
+      "supportedFixes": [
+        "Preserve the semantic text and any supplied coordinates, routes, sides, channels, and labels. Compactly reflow automatic spacing and empty corridors so the complete viewBox width is at most 1240px (current 1262px; 8px source text at 930px desktop budget). If supplied geometry fixes that width, use a renderer-supported semantic text-size setting or renderer-level fix instead. Position-only label controls cannot repair its projection."
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-18\\guardrail-evaluation.finalize.json",
+    "summaryReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-18\\guardrail-evaluation.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "validate",
+  "finishedAt": "2026-11-05T10:00:34.021Z",
+  "durationMs": 2191,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-05T09:32:20.395Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

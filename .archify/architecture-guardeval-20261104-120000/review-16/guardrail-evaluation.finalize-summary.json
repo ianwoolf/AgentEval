@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+    "sha256": "a7a9ccfda8bf1fc75470d8cb29f0a4231e8f3d71a39eeb3ec20863bd78f6b347",
+    "bytes": 12386
+  },
+  "artifact": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+    "sha256": "56324a893aad3c0b1b05122ad475e9d02b2685d3f122e986493c94d3d202bb7b",
+    "bytes": 874486
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-16\\guardrail-evaluation.finalize.json",
+    "summaryReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-16\\guardrail-evaluation.finalize-summary.json",
+    "browserCheckReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-16\\guardrail-evaluation.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-05T09:32:20.395Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 5068,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 19,
+      "routesOverSuggestedBends": 7,
+      "routesOverSuggestedStretch": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "dataset-runner-7",
+            "from": "dataset",
+            "to": "runner",
+            "label": "input / label / strategy",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "right": {
+            "id": "script-runner-12",
+            "from": "script",
+            "to": "runner",
+            "label": "JSON classification",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "point": [
+            640.0000000000001,
+            631
+          ],
+          "sharedNode": "runner"
+        },
+        {
+          "left": {
+            "id": "dataset-runner-7",
+            "from": "dataset",
+            "to": "runner",
+            "label": "input / label / strategy",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "right": {
+            "id": "runner-collector-15",
+            "from": "runner",
+            "to": "collector",
+            "label": "Scores / latency / OTLP",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "point": [
+            670,
+            630.8461538461537
+          ],
+          "sharedNode": "runner"
+        },
+        {
+          "left": {
+            "id": "dataset-runner-7",
+            "from": "dataset",
+            "to": "runner",
+            "label": "input / label / strategy",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "right": {
+            "id": "api-es-17",
+            "from": "api",
+            "to": "es",
+            "label": "Resources / reports",
+            "collectionIndex": 9,
+            "artifactIndex": 10
+          },
+          "point": [
+            396,
+            631
+          ]
+        },
+        {
+          "left": {
+            "id": "dataset-runner-7",
+            "from": "dataset",
+            "to": "runner",
+            "label": "input / label / strategy",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "right": {
+            "id": "api-kubernetes",
+            "from": "api",
+            "to": "kubernetes",
+            "label": "Create evaluation Job",
+            "collectionIndex": 15,
+            "artifactIndex": 16
+          },
+          "point": [
+            406,
+            631
+          ]
+        },
+        {
+          "left": {
+            "id": "runner-script-11",
+            "from": "runner",
+            "to": "script",
+            "label": "Fetch SHA / JSON stdin",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "script-runner-12",
+            "from": "script",
+            "to": "runner",
+            "label": "JSON classification",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "point": [
+            172.3846153846154,
+            670
+          ],
+          "sharedNode": "runner"
+        },
+        {
+          "left": {
+            "id": "runner-script-11",
+            "from": "runner",
+            "to": "script",
+            "label": "Fetch SHA / JSON stdin",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "runner-collector-15",
+            "from": "runner",
+            "to": "collector",
+            "label": "Scores / latency / OTLP",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "point": [
+            670.0000000000001,
+            670
+          ],
+          "sharedNode": "runner"
+        },
+        {
+          "left": {
+            "id": "runner-script-11",
+            "from": "runner",
+            "to": "script",
+            "label": "Fetch SHA / JSON stdin",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "api-es-17",
+            "from": "api",
+            "to": "es",
+            "label": "Resources / reports",
+            "collectionIndex": 9,
+            "artifactIndex": 10
+          },
+          "point": [
+            396,
+            670
+          ]
+        },
+        {
+          "left": {
+            "id": "runner-script-11",
+            "from": "runner",
+            "to": "script",
+            "label": "Fetch SHA / JSON stdin",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "api-kubernetes",
+            "from": "api",
+            "to": "kubernetes",
+            "label": "Create evaluation Job",
+            "collectionIndex": 15,
+            "artifactIndex": 16
+          },
+          "point": [
+            406.00000000000006,
+            670
+          ]
+        }
+      ],
+      "detours": [
+        {
+          "relationship": {
+            "id": "ui-api-0",
+            "from": "ui",
+            "to": "api",
+            "label": "Configure / Trigger / Report",
+            "collectionIndex": 0,
+            "artifactIndex": 1
+          },
+          "bends": 3,
+          "stretch": 1.198
+        },
+        {
+          "relationship": {
+            "id": "dataset-runner-7",
+            "from": "dataset",
+            "to": "runner",
+            "label": "input / label / strategy",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "bends": 4,
+          "stretch": 1.079
+        },
+        {
+          "relationship": {
+            "id": "runner-script-11",
+            "from": "runner",
+            "to": "script",
+            "label": "Fetch SHA / JSON stdin",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "bends": 3,
+          "stretch": 1.031
+        },
+        {
+          "relationship": {
+            "id": "script-runner-12",
+            "from": "script",
+            "to": "runner",
+            "label": "JSON classification",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "bends": 4,
+          "stretch": 1.136
+        },
+        {
+          "relationship": {
+            "id": "api-es-17",
+            "from": "api",
+            "to": "es",
+            "label": "Resources / reports",
+            "collectionIndex": 9,
+            "artifactIndex": 10
+          },
+          "bends": 6,
+          "stretch": 1.291
+        },
+        {
+          "relationship": {
+            "id": "api-kubernetes",
+            "from": "api",
+            "to": "kubernetes",
+            "label": "Create evaluation Job",
+            "collectionIndex": 15,
+            "artifactIndex": 16
+          },
+          "bends": 6,
+          "stretch": 1.286
+        },
+        {
+          "relationship": {
+            "id": "kubernetes-runner",
+            "from": "kubernetes",
+            "to": "runner",
+            "label": "Job creates Runner Pod",
+            "collectionIndex": 16,
+            "artifactIndex": 17
+          },
+          "bends": 4,
+          "stretch": 1.444
+        }
+      ],
+      "truncated": true
+    },
+    "hints": [
+      "dataset → runner and script → runner cross next to runner: move node dataset or script so the two reach runner from different sides (for example one level with it, one directly above or below it).",
+      "dataset → runner and runner → collector cross next to runner: move node dataset or collector so the two reach runner from different sides (for example one level with it, one directly above or below it).",
+      "dataset → runner crosses api → es: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "dataset → runner crosses api → kubernetes: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "runner → script and script → runner cross next to runner: move node script or script so the two reach runner from different sides (for example one level with it, one directly above or below it).",
+      "runner → script and runner → collector cross next to runner: move node script or collector so the two reach runner from different sides (for example one level with it, one directly above or below it).",
+      "runner → script crosses api → es: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "runner → script crosses api → kubernetes: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

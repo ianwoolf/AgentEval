@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+    "sha256": "16cdfb9b286a789ed890d2bcd0f064077edea397079f9ce75fe3a804fe7d4969",
+    "bytes": 12386
+  },
+  "artifact": {
+    "path": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\guardrail-evaluation.html",
+    "sha256": "4988353bc9fc104dd53261150e110e37511f74a52a62feeb5d082b0ae59daf3b",
+    "bytes": 864421
+  },
+  "gates": {
+    "validate": "fail",
+    "deliver": "not-run",
+    "check": "not-run",
+    "browser-check": "not-run"
+  },
+  "failedStage": "validate",
+  "diagnostics": [
+    {
+      "code": "layout/constraint",
+      "severity": "error",
+      "message": "Boundary label \"2. Evaluation Layer\" extends outside the viewBox — move wrapped components away from the canvas edge, shorten the label, or increase the viewBox.",
+      "subject": {
+        "diagramType": "architecture"
+      }
+    },
+    {
+      "code": "layout/boundary-out-of-bounds",
+      "severity": "error",
+      "message": "Boundary \"2. Evaluation Layer\" extends outside the viewBox (left by 28px) — preserve wraps membership and repair the measured canvas side.",
+      "subject": {
+        "diagramType": "architecture",
+        "boundary": {
+          "kind": "region",
+          "label": "2. Evaluation Layer",
+          "wraps": [
+            "ui",
+            "api",
+            "dataset",
+            "runner",
+            "guardrail-proxy",
+            "collector"
+          ]
+        }
+      },
+      "evidence": {
+        "bounds": {
+          "x": -28,
+          "y": 262,
+          "width": 1016,
+          "height": 604
+        },
+        "viewBox": [
+          1265,
+          1612
+        ],
+        "overflow": {
+          "left": 28,
+          "top": 0,
+          "right": 0,
+          "bottom": 0
+        },
+        "members": [
+          {
+            "id": "ui",
+            "type": "frontend",
+            "label": "AgentEval UI",
+            "x": 40,
+            "y": 330,
+            "width": 230,
+            "height": 76,
+            "pos": [
+              40,
+              330
+            ]
+          },
+          {
+            "id": "api",
+            "type": "backend",
+            "label": "Evaluation API",
+            "x": 420,
+            "y": 330,
+            "width": 220,
+            "height": 76,
+            "pos": [
+              420,
+              330
+            ]
+          },
+          {
+            "id": "dataset",
+            "type": "database",
+            "label": "Guardrail Dataset",
+            "x": 40,
+            "y": 570,
+            "width": 230,
+            "height": 76,
+            "pos": [
+              40,
+              570
+            ]
+          },
+          {
+            "id": "runner",
+            "type": "backend",
+            "label": "Evaluation Worker",
+            "x": 700,
+            "y": 570,
+            "width": 220,
+            "height": 76,
+            "pos": [
+              700,
+              570
+            ]
+          },
+          {
+            "id": "guardrail-proxy",
+            "type": "backend",
+            "label": "Guardrail Proxy",
+            "x": 700,
+            "y": 770,
+            "width": 220,
+            "height": 76,
+            "pos": [
+              700,
+              770
+            ]
+          },
+          {
+            "id": "collector",
+            "type": "backend",
+            "label": "Runner-local Collector",
+            "x": 420,
+            "y": 770,
+            "width": 220,
+            "height": 76,
+            "pos": [
+              420,
+              770
+            ]
+          }
+        ]
+      },
+      "supportedFixes": [
+        "move the wrapped components right by at least 28px and down by at least 0px, then revalidate connected routes and the opposite canvas sides; enlarging meta.viewBox cannot fix left/top overflow"
+      ]
+    },
+    {
+      "code": "layout/boundary-out-of-bounds",
+      "severity": "error",
+      "message": "Boundary \"4. Infrastructure & Dependencies\" extends outside the viewBox (left by 25px) — preserve wraps membership and repair the measured canvas side.",
+      "subject": {
+        "diagramType": "architecture",
+        "boundary": {
+          "kind": "region",
+          "label": "4. Infrastructure & Dependencies",
+          "wraps": [
+            "script",
+            "kubernetes",
+            "es",
+            "langsmith"
+          ]
+        }
+      },
+      "evidence": {
+        "bounds": {
+          "x": -25,
+          "y": 1365,
+          "width": 1250,
+          "height": 175
+        },
+        "viewBox": [
+          1265,
+          1612
+        ],
+        "overflow": {
+          "left": 25,
+          "top": 0,
+          "right": 0,
+          "bottom": 0
+        },
+        "members": [
+          {
+            "id": "script",
+            "type": "backend",
+            "label": "Git Python Script",
+            "x": 40,
+            "y": 1430,
+            "width": 190,
+            "height": 90,
+            "pos": [
+              40,
+              1430
+            ]
+          },
+          {
+            "id": "kubernetes",
+            "type": "cloud",
+            "label": "Kubernetes / H3",
+            "x": 350,
+            "y": 1430,
+            "width": 210,
+            "height": 90,
+            "pos": [
+              350,
+              1430
+            ]
+          },
+          {
+            "id": "es",
+            "type": "database",
+            "label": "Elasticsearch",
+            "x": 660,
+            "y": 1430,
+            "width": 190,
+            "height": 90,
+            "pos": [
+              660,
+              1430
+            ]
+          },
+          {
+            "id": "langsmith",
+            "type": "external",
+            "label": "LangSmith",
+            "x": 970,
+            "y": 1430,
+            "width": 190,
+            "height": 90,
+            "pos": [
+              970,
+              1430
+            ]
+          }
+        ]
+      },
+      "supportedFixes": [
+        "move the wrapped components right by at least 25px and down by at least 0px, then revalidate connected routes and the opposite canvas sides; enlarging meta.viewBox cannot fix left/top overflow"
+      ]
+    },
+    {
+      "code": "layout/constraint",
+      "severity": "error",
+      "message": "Boundary label \"4. Infrastructure & Dependencies\" extends outside the viewBox — move wrapped components away from the canvas edge, shorten the label, or increase the viewBox.",
+      "subject": {
+        "diagramType": "architecture"
+      }
+    }
+  ],
+  "diagnosticSummary": {
+    "total": 4,
+    "shown": 4,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-15\\guardrail-evaluation.finalize.json",
+    "summaryReceipt": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\review-15\\guardrail-evaluation.finalize-summary.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-05T09:32:20.395Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 931,
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "nextAction": {
+    "action": "edit-in-place",
+    "candidate": "C:\\zzz\\code\\ai\\AgentEval\\.archify\\architecture-guardeval-20261104-120000\\candidate.json",
+    "constraint": "Preserve unaffected semantics and geometry; apply each diagnostic's supportedFixes, or the fix its message names, and do not replace the whole candidate.",
+    "then": "finalize-once"
+  }
+}
