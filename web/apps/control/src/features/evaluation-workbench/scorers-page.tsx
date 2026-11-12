@@ -24,6 +24,19 @@ import {
   Tabs,
   Textarea,
 } from "./ui";
+
+const pythonScriptSource = {
+  kind: "CODE" as const,
+  execution: defaultExecution("CODE"),
+  repoUrl: "",
+  scriptPath: "",
+};
+const scorerTypeLabels = {
+  CODE: "Python script (Git)",
+  LLM_JUDGE: "LLM judge",
+  RULE: "Rule",
+};
+
 export function ScorersPage() {
   const { state, saveScorer } = useWorkbench();
   const [pageError,setPageError]=useState("");
@@ -55,11 +68,8 @@ export function ScorersPage() {
               draft: {
                 name: "",
                 description: "",
-                kind: "RULE",
-                execution:defaultExecution("RULE"),
+                ...pythonScriptSource,
                 definition: "",
-                repoUrl: "",
-                scriptPath: "",
                 threshold: 0.8,
                 notes: "",
               },
@@ -222,11 +232,20 @@ function ScorerEditor({
       if (!d.name.trim()) throw new Error("Name is required.");
       if (!Number.isFinite(d.threshold) || d.threshold < 0 || d.threshold > 1)
         throw new Error("Threshold must be between 0 and 1.");
-      if(d.execution?.engine==='git')d.execution={...d.execution,repo_url:d.repoUrl??'',script_path:d.scriptPath??''};
-      if(publish && d.execution?.engine==='git')await executionApi(project,'scorers/actions/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-      if(publish && !d.execution) throw new Error("Configure an execution engine before publishing.");
-      if(!d.criteria)scorer.draft.criteria={aspect:'custom',subject:'Target output',expectation:'Configured check passes',requirements:'Use executable configuration',evidence:'Configured inputs'};
-      await onSave(publish ? publishScorer(scorer) : scorer);
+      const draft={...d};
+      if(draft.kind==="CODE"){
+        if(draft.execution?.engine==='git'&&draft.execution.commit){
+          draft.execution={...draft.execution,repo_url:draft.repoUrl??'',script_path:draft.scriptPath??''};
+        }else{
+          if(publish)throw new Error("Pin a Git commit in Execution before publishing.");
+          delete draft.execution;
+        }
+      }
+      if(publish && draft.execution?.engine==='git')await executionApi(project,'scorers/actions/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(draft)});
+      if(publish && !draft.execution) throw new Error("Configure an execution engine before publishing.");
+      if(!draft.criteria)draft.criteria={aspect:'custom',subject:'Target output',expectation:'Configured check passes',requirements:'Use executable configuration',evidence:'Configured inputs'};
+      const updated={...scorer,draft};
+      await onSave(publish ? publishScorer(updated) : updated);
     } catch (e) {
       setError((e as Error).message);
     } finally {setSaving(false);}
@@ -262,17 +281,7 @@ function ScorerEditor({
             />
           </Field>
           <Field label="Scorer type">
-            <Select
-              disabled={readonly}
-              value={d.kind}
-              onChange={(e) =>
-                patch({ kind: e.target.value as Scorer["draft"]["kind"], execution:defaultExecution(e.target.value as Scorer["draft"]["kind"]) })
-              }
-            >
-              <option value="LLM_JUDGE">LLM judge</option>
-              <option value="CODE">Python script (Git)</option>
-              <option value="RULE">Rule</option>
-            </Select>
+            <Input readOnly className="bg-muted/40" value={scorerTypeLabels[d.kind]} />
           </Field>
           <div className="sm:col-span-2">
             <Field label="Description">
@@ -423,7 +432,8 @@ function ScorerEditor({
         <Button variant="outline" onClick={onClose}>
           Close
         </Button>
-        {readonly && <Button onClick={()=>setScorer({...clone(scorer),id:uid("sc"),source:"CUSTOM",versions:[],draft:{...clone(d),name:d.name+" (custom)"}})}>Use this template</Button>}
+        {readonly && <Button onClick={()=>setScorer({...clone(scorer),id:uid("sc"),source:"CUSTOM",versions:[],
+          draft:{...clone(d),...(d.kind==="CODE"?{}:pythonScriptSource),name:d.name+" (custom)"}})}>Use this template</Button>}
         {!readonly && (
           <>
             <Button disabled={saving} variant="outline" onClick={() => void save(false)}>

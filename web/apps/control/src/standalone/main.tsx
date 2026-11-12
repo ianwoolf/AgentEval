@@ -7,6 +7,7 @@ import { EvalPage } from '@/features/evaluation-workbench/eval-page';
 import { DatasetsPage } from '@/features/evaluation-workbench/datasets-page';
 import { EnvironmentsPage } from '@/features/evaluation-workbench/environments-page';
 import { ScorersPage } from '@/features/evaluation-workbench/scorers-page';
+import { CleanupAdminPage } from '@/features/evaluation-workbench/cleanup-admin-page';
 import { ReportsPage } from '@/features/evaluation-workbench/reports-page';
 import { evaluationRuntime } from '@/features/evaluation-workbench/runtime';
 import '../styles.css';
@@ -33,7 +34,8 @@ const scorers = createRoute({getParentRoute:()=>root,path:'$projectId/evaluation
 const reports = createRoute({getParentRoute:()=>root,path:'$projectId/evaluation/reports',
   validateSearch:(search:Record<string,unknown>)=>({evaluationId:typeof search.evaluationId==='string'?search.evaluationId:''}),
   component:()=>{const {evaluationId}=reports.useSearch();return <ReportsPage evaluationId={evaluationId} onSelect={id=>router.history.push(`/${encodeURIComponent(evaluationRuntime().projectId)}/evaluation/reports?evaluationId=${encodeURIComponent(id)}`)}/>;}});
-const router = createRouter({routeTree:root.addChildren([home,catalog,datasets,environments,scorers,reports])});
+const cleanupAdmin = createRoute({getParentRoute:()=>root,path:'$projectId/evaluation/admin/cleanup',component:CleanupAdminPage});
+const router = createRouter({routeTree:root.addChildren([home,catalog,datasets,environments,scorers,reports,cleanupAdmin])});
 
 async function start() {
   const response = await fetch('/evaluation-config.json', {cache:'no-store'});

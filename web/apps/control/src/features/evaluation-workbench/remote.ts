@@ -2,6 +2,9 @@ import { getAuthToken } from "@/lib/auth-token";
 import type { Evaluation, EvaluationSnapshot } from "./contracts";
 import { evaluationRuntime } from './runtime';
 export interface RemoteRun {
+  concurrency?: number;
+  concurrency_group?: string | null;
+  serial_index?: number;
   execution_mode?: 'legacy' | 'guardrail';
   feature_modes?: {scoring_enabled:boolean;reflection_enabled:boolean;effective_reflection_mode:'real'|'mock'};
   datasets?: Array<{dataset_id:string;dataset_version:number;name:string;sample_count:number;objective?:string;scorer_ids?:string[]}>;
@@ -43,6 +46,7 @@ export async function executionPages<T>(project: string, path: string): Promise<
 }
 
 export interface TargetRunConfig {
+ concurrency?: number;
  version?:number;
  execution_mode?: 'legacy'|'guardrail';
  guardrail_bindings?: EvaluationBinding[];

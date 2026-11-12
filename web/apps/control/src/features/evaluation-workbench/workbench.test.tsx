@@ -21,6 +21,7 @@ beforeEach(() => {
   let targets = createFixtures().targets.filter(t=>t.kind==="GUARDRAIL");
   vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
     if (_url.includes("/scorers?")) return Response.json({items:[...createFixtures().scorers,...scorerTemplates()]});
+    if (_url.endsWith("/guardrail-instances")) return Response.json({providers:[]});
     if (_url.includes("/environments?")) return Response.json({items:environments,total:environments.length});
     if (_url.includes("/targets?")) return Response.json({items:targets,total:targets.length});
     if (_url.includes("/targets/") && _url.endsWith("/config")) return Response.json({id:"guardrail-privacy",revision:"1:1",dataset_id:"ds-guardrail",dataset_version:1,environment_id:"env-isolated",environment_version:1,data_source:"published",scoring_mode:"mock",scorer_ids:["mock-score"]});
@@ -38,7 +39,7 @@ beforeEach(() => {
       }
       if (_url.includes("/scorers/")) return Response.json({...body,revision:"1:1"});
       if (_url.includes("/datasets/")) return Response.json({...body, revision: "1:1"});
-      return Response.json({...body, scorer_ids:["mock-score"],scoring_mode:"mock",model_id:"glm-dev",snapshot:createFixtures().evaluations.find(e=>e.snapshot.target.kind==="GUARDRAIL")!.snapshot, id: "eval-live-test", created_at: new Date().toISOString(), status: "RUNNING", experiment_id: "exp-live-test", completed: 0, phase: "QUEUED"});
+      return Response.json({name:"Privacy & prompt injection · 2026-11-10 12:00:00", ...body, scorer_ids:["mock-score"],scoring_mode:"mock",model_id:"glm-dev",snapshot:createFixtures().evaluations.find(e=>e.snapshot.target.kind==="GUARDRAIL")!.snapshot, id: "eval-live-test", created_at: new Date().toISOString(), status: "RUNNING", experiment_id: "exp-live-test", completed: 0, phase: "QUEUED"});
     }
     return Response.json({items: []});
   }));
@@ -63,17 +64,18 @@ describe("interactive workbench", () => {
     expect(screen.getByRole("dialog")).toBeTruthy();
     expect(screen.queryByLabelText("Test target *")).toBeNull();
     expect(screen.queryByRole("region", { name: "Target details" })).toBeNull();
-    await waitFor(()=>expect((screen.getByRole("button",{name:"Run evaluation"}) as HTMLButtonElement).disabled).toBe(false));
-    await user.type(screen.getByLabelText("Evaluation name"), "Inline safety check");
+    await screen.findByLabelText("Case concurrency");
+    expect(screen.queryByLabelText("Evaluation name")).toBeNull();
     expect(screen.queryByLabelText("Scoring mode")).toBeNull();
-    expect(screen.queryByRole("button", { name: "Review evaluation" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Review datasets" }));
+    await waitFor(()=>expect(screen.getByRole("button",{name:"Run evaluation"})).toHaveProperty("disabled",false));
     await user.click(screen.getByRole("button", { name: "Run evaluation" }));
-    expect(await screen.findByRole("heading", { name: "Inline safety check" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Privacy & prompt injection · 2026-11-10 12:00:00" })).toBeTruthy();
     expect(screen.getByText("Evaluation in progress")).toBeTruthy();
     expect(screen.getByText(/Scores are development mocks/)).toBeTruthy();
     const call = vi.mocked(fetch).mock.calls.find(([, init]) => init?.method === "POST")!;
     const body = JSON.parse(call[1]!.body as string);
-    expect(body).toEqual({name:"Inline safety check",config_revision:"1:1",datasets:[{dataset_id:'ds-guardrail',dataset_version:1}]});
+    expect(body).toEqual({concurrency:1,config_revision:"1:1",datasets:[{dataset_id:'ds-guardrail',dataset_version:1}]});
   });
   it("saves dataset scorer choices and exposes reverse links without rewriting versions", async () => {
     const user = userEvent.setup();
@@ -111,29 +113,22 @@ describe("interactive workbench", () => {
     );
     await user.click(screen.getByRole("button", { name: "New dataset" }));
     await user.type(screen.getByLabelText("Name *"), "Imported dataset");
-    await user.type(
-      screen.getByLabelText(/Dataset objective/),
-      "Check accuracy",
-    );
-    await user.click(screen.getByRole("tab", { name: "Data (0)" }));
+    await user.click(screen.getByRole("tab", { name: "Data & fields" }));
     await user.click(screen.getByRole("button", { name: "Import data" }));
     const dialog = within(screen.getByRole("dialog"));
+    const source = dialog.getByLabelText("Source data");
+    await user.clear(source);
+    await user.click(source);
+    await user.paste("input,label,strategy\nHow can I reset my password?,safe,benign");
     await user.click(
       dialog.getByRole("button", { name: "Read source & map fields" }),
     );
-    await user.selectOptions(
-      dialog.getByRole("combobox", { name: /input/ }),
-      "question",
-    );
-    await user.selectOptions(
-      dialog.getByRole("combobox", { name: /expected/ }),
-      "answer",
-    );
-    await user.click(dialog.getByRole("button", { name: "Validate import" }));
+    expect(dialog.getByText(/1 valid records/)).toBeTruthy();
     await user.click(dialog.getByRole("button", { name: "Import 1 records" }));
     await user.click(screen.getByRole("button", { name: "Publish version" }));
     const dataset = readState().datasets.at(-1);
-    expect(dataset.draft.objective).toBe("Check accuracy");
+    expect(dataset.draft.objective).toBe("");
+    expect(dataset.draft.evaluation_type).toBe("guardrail");
     expect(dataset.versions[0].rows[0].input).toBe(
       "How can I reset my password?",
     );
@@ -150,10 +145,11 @@ describe("interactive workbench", () => {
     await user.click(
       await screen.findByRole("button", { name: "Edit configuration" }),
     );
-    await user.selectOptions(screen.getByRole("combobox", { name: "Model ID" }), "none");
-    expect(screen.getByRole("option", { name: "glm-dev" })).toBeTruthy();
-    expect(screen.getByText("1000m = 1 CPU core. Requests and limits use this value.")).toBeTruthy();
-    expect(screen.getByText("1024Mi = 1Gi. Requests and limits use this value.")).toBeTruthy();
+    expect(screen.queryByLabelText("Model ID")).toBeNull();
+    expect(screen.queryByLabelText("Writable paths")).toBeNull();
+    const concurrency=screen.getByLabelText("Default case concurrency");
+    await user.clear(concurrency);
+    await user.type(concurrency,"8");
     await user.clear(screen.getByLabelText("CPU (m)"));
     await user.type(screen.getByLabelText("CPU (m)"), "0");
     await user.click(screen.getByRole("button", { name: "Save v2" }));
@@ -162,7 +158,12 @@ describe("interactive workbench", () => {
     await user.type(screen.getByLabelText("CPU (m)"), "750");
     await user.click(screen.getByRole("button", { name: "Save v2" }));
     await waitFor(()=>expect(readState().environments[0].versions.map((v: {cpuMillicores:number})=>v.cpuMillicores)).toEqual([2000,750]));
-    expect(readState().environments[0].versions.at(-1).modelId).toBe("none");
+    expect(readState().environments[0].versions.at(-1)).toMatchObject({
+      modelId:"none",
+      readOnlyPaths:["/app","/datasets"],
+      writablePaths:["/workspace","/tmp"],
+      runner:{id:"openshell",concurrency:8},
+    });
     cleanup();
     render(<WorkbenchProvider><EnvironmentsPage /></WorkbenchProvider>);
     expect(await screen.findByText("750m")).toBeTruthy();
@@ -183,8 +184,11 @@ describe("interactive workbench", () => {
     );
     await user.clear(screen.getByLabelText("Pass threshold (0–1)"));
     await user.type(screen.getByLabelText("Pass threshold (0–1)"), "0.9");
-    await user.selectOptions(screen.getByLabelText("Scorer type"), "RULE");
+    expect(screen.getByLabelText("Scorer type")).toHaveProperty("readOnly",true);
+    await user.click(screen.getByRole("tab",{name:"Execution"}));
+    await user.type(screen.getByLabelText("Commit SHA (40 characters)"),"a".repeat(40));
     await user.click(screen.getByRole("button", { name: "Publish v2" }));
+    await waitFor(()=>expect(screen.queryByRole("dialog")).toBeNull());
     expect(
       readState().scorers[2].versions.map(
         (v: { threshold: number }) => v.threshold,
@@ -195,6 +199,7 @@ describe("interactive workbench", () => {
     const user = userEvent.setup();
     const close = vi.fn();
     vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+      if (_url.endsWith("/guardrail-instances")) return Response.json({providers:[]});
       if (_url.includes("/environments?")) return Response.json({items:createFixtures().environments,total:1});
     if (_url.includes("/targets?")) return Response.json({items:createFixtures().targets.filter(t=>t.kind==="GUARDRAIL"),total:1});
     if (_url.includes("/targets/") && _url.endsWith("/config")) return Response.json({id:"guardrail-privacy",revision:"1:1",dataset_id:"ds-guardrail",dataset_version:1,environment_id:"env-isolated",environment_version:1,data_source:"published",scoring_mode:"mock",scorer_ids:["mock-score"]});
@@ -203,7 +208,9 @@ describe("interactive workbench", () => {
       return Response.json({items: []});
     }));
     render(<WorkbenchProvider><TriggerTargetDialog targetId="guardrail-privacy" onClose={close} /><StateProbe /></WorkbenchProvider>);
-    await user.type(screen.getByLabelText("Evaluation name"), "Safety check");
+    await screen.findByLabelText("Case concurrency");
+    await user.click(screen.getByRole("button", {name: "Review datasets"}));
+    await waitFor(()=>expect(screen.getByRole("button",{name:"Run evaluation"})).toHaveProperty("disabled",false));
     await user.click(screen.getByRole("button", {name: "Run evaluation"}));
     expect((await screen.findByRole("alert")).textContent).toContain("Kubernetes is unavailable");
     expect(readState().evaluations.every((e: {id: string}) => e.id.startsWith("eval-demo"))).toBe(true);
@@ -221,6 +228,8 @@ describe("interactive workbench", () => {
       </WorkbenchProvider>,
     );
     await user.type(screen.getByLabelText("Evaluation ID"), "eval-demo-001");
+    expect(screen.queryByRole("columnheader", { name: "Pass rate" })).toBeNull();
+    expect(screen.getByRole("columnheader", { name: "Samples" })).toBeTruthy();
     expect(
       screen.queryByRole("button", { name: "Guardrail risk regression" }),
     ).toBeNull();
@@ -257,15 +266,32 @@ describe("interactive workbench", () => {
   });
 });
 
-it("creates an executable rule with typed evidence paths",async()=>{
+it("creates a Python script scorer with a fixed type",async()=>{
  const user=userEvent.setup();render(<WorkbenchProvider><ScorersPage/><StateProbe/></WorkbenchProvider>);
  await user.click(screen.getByRole('button',{name:'New scorer'}));
  await user.type(screen.getByLabelText('Name *'),'Risk exact match');
- await user.type(screen.getByLabelText('Version notes *'),'Executable rule');
- expect(screen.queryByLabelText('Judge prompt')).toBeNull();
+ const type=screen.getByLabelText('Scorer type');
+ expect(type).toHaveProperty('value','Python script (Git)');
+ expect(type).toHaveProperty('readOnly',true);
+ await user.type(screen.getByLabelText('Git repository *'),'https://github.com/example/scorers.git');
+ await user.type(screen.getByLabelText('Script path *'),'risk.py');
+ await user.type(screen.getByLabelText('Version notes *'),'Initial script');
+ await user.click(screen.getByRole('tab',{name:'Execution'}));
+ await user.type(screen.getByLabelText('Commit SHA (40 characters)'),'a'.repeat(40));
  await user.click(screen.getByRole('button',{name:'Publish v1'}));
  await waitFor(()=>expect(screen.queryByRole('dialog')).toBeNull());
- expect(readState().scorers.at(-1).versions[0].execution).toMatchObject({engine:'rule',operator:'equals',actual:'actual_output.has_issue',expected_path:'expected_output.has_issue'});
+ expect(readState().scorers.at(-1).versions[0]).toMatchObject({kind:'CODE',execution:{engine:'git',script_path:'risk.py',commit:'a'.repeat(40)}});
+});
+
+it("saves an unconfigured Python script draft",async()=>{
+ const user=userEvent.setup();render(<WorkbenchProvider><ScorersPage/><StateProbe/></WorkbenchProvider>);
+ await user.click(screen.getByRole('button',{name:'New scorer'}));
+ await user.type(screen.getByLabelText('Name *'),'Unconfigured Python scorer');
+ await user.click(screen.getByRole('button',{name:'Save draft'}));
+ await waitFor(()=>expect(screen.queryByRole('dialog')).toBeNull());
+ const scorer=readState().scorers.at(-1);
+ expect(scorer.draft.kind).toBe('CODE');
+ expect(scorer.draft).not.toHaveProperty('execution');
 });
 
 it("filters Guardrail targets by provider", async () => {
@@ -288,14 +314,6 @@ it("saves target Config without launching a job",async()=>{
  const writes=vi.mocked(fetch).mock.calls.filter(([,init])=>init?.method==="POST");
  expect(writes).toHaveLength(1);expect(writes[0]![0]).toContain("/targets/guardrail-privacy/config");
  expect(JSON.parse(writes[0]![1]!.body as string)).toMatchObject({dataset_id:"ds-guardrail",environment_version:1,data_source:"published"});
-});
-it("allows an empty trigger name and leaves naming to backend",async()=>{
- const user=userEvent.setup(),close=vi.fn();render(<WorkbenchProvider><TriggerTargetDialog targetId="guardrail-privacy" onClose={close}/></WorkbenchProvider>);
- const run=screen.getByRole("button",{name:"Run evaluation"});await waitFor(()=>expect((run as HTMLButtonElement).disabled).toBe(false));
- expect(screen.queryByLabelText("Dataset *")).toBeNull();await user.click(run);
- await waitFor(()=>expect(close).toHaveBeenCalled());
- const call=vi.mocked(fetch).mock.calls.find(([,init])=>init?.method==="POST")!;
- expect(JSON.parse(call[1]!.body as string)).toEqual({name:"",config_revision:"1:1",datasets:[{dataset_id:'ds-guardrail',dataset_version:1}]});
 });
 
 
@@ -338,44 +356,28 @@ it("keeps a duplicate target form open and preserves the list",async()=>{
  expect(vi.mocked(fetch).mock.calls.filter(([,init])=>init?.method==="POST")).toHaveLength(writes);
 });
 
-it('configures multiple datasets and only triggers a subset of configured versions', async()=>{
+it('runs all pinned dataset versions after review', async()=>{
  const original=fetch;
  const dataset=createFixtures().datasets.find(d=>d.id==='ds-guardrail')!;
- const second={...dataset,id:'ds-second',draft:{...dataset.draft,name:'Second safety dataset'},versions:[{...dataset.versions[0]!,version:1},{...dataset.versions[0]!,version:2}]};
+ const second={...dataset,id:'ds-second',draft:{...dataset.draft,name:'Second safety dataset'},versions:[{...dataset.versions[0]!,name:'Second safety dataset',version:1},{...dataset.versions[0]!,name:'Second safety dataset',version:2}]};
  const hidden={...dataset,id:'ds-hidden',draft:{...dataset.draft,name:'Unconfigured dataset'}};
- let config={id:'guardrail-privacy',revision:'1:1',dataset_id:dataset.id,dataset_version:1,datasets:[{dataset_id:dataset.id,dataset_version:1}],environment_id:'env-isolated',environment_version:1,data_source:'published',scoring_mode:'mock',scorer_ids:['mock-score']};
+ const config={id:'guardrail-privacy',revision:'1:1',dataset_id:dataset.id,dataset_version:1,datasets:[{dataset_id:dataset.id,dataset_version:1},{dataset_id:second.id,dataset_version:1}],environment_id:'env-isolated',environment_version:1,data_source:'published',scoring_mode:'mock',scorer_ids:['mock-score']};
  vi.stubGlobal('fetch',vi.fn(async(url:string,init?:RequestInit)=>{
   if(url.includes('/datasets?'))return Response.json({items:[dataset,second,hidden],total:3});
-  if(url.endsWith('/config')){
-   if(init?.method==='POST') config={...config,...JSON.parse(init.body as string),revision:'2:1'};
-   return Response.json(config);
-  }
+  if(url.endsWith('/config'))return Response.json(config);
   return original(url,init);
  }));
  const user=userEvent.setup();
- const view=render(<WorkbenchProvider><CreateEvalDialog targetId="guardrail-privacy" onClose={()=>{}}/></WorkbenchProvider>);
- await screen.findByRole('checkbox',{name:'Second safety dataset'});
- await waitFor(()=>expect((screen.getByRole('button',{name:'Continue to scorers'}) as HTMLButtonElement).disabled).toBe(false));
- await user.click(screen.getByRole('checkbox',{name:'Second safety dataset'}));
- await user.selectOptions(screen.getByLabelText('Second safety dataset version'),'1');
- await user.click(screen.getByRole('button',{name:'Continue to scorers'}));
- expect(screen.queryByRole('button',{name:'Save config'})).toBeNull();
- await user.click(screen.getByRole('button',{name:'Continue to environment'}));
- await user.click(screen.getByRole('button',{name:'Save config'}));
- await waitFor(()=>expect(config.datasets).toHaveLength(2));
- expect(config.datasets[1]).toEqual({dataset_id:'ds-second',dataset_version:1});
- view.unmount();
  render(<WorkbenchProvider><TriggerTargetDialog targetId="guardrail-privacy" onClose={()=>{}}/></WorkbenchProvider>);
- const first=await screen.findByRole('checkbox',{name:dataset.draft.name});
- expect(screen.queryByRole('checkbox',{name:'Unconfigured dataset'})).toBeNull();
+ await screen.findByLabelText('Case concurrency');
+ await user.click(screen.getByRole('button',{name:'Review datasets'}));
+ expect(screen.getByRole('group',{name:'Datasets · 2'}).textContent).toContain('Second safety dataset');
+ expect(screen.queryByText('Unconfigured dataset')).toBeNull();
  expect(screen.queryByLabelText('Second safety dataset version')).toBeNull();
- await user.click(first);
- await user.click(screen.getByRole('checkbox',{name:'Second safety dataset'}));
- expect((screen.getByRole('button',{name:'Run evaluation'}) as HTMLButtonElement).disabled).toBe(true);
- await user.click(screen.getByRole('checkbox',{name:'Second safety dataset'}));
+ await waitFor(()=>expect(screen.getByRole('button',{name:'Run evaluation'})).toHaveProperty('disabled',false));
  await user.click(screen.getByRole('button',{name:'Run evaluation'}));
  const call=vi.mocked(fetch).mock.calls.find(([url,init])=>url.toString().endsWith('/runs')&&init?.method==='POST')!;
- expect(JSON.parse(call[1]!.body as string).datasets).toEqual([{dataset_id:'ds-second',dataset_version:1}]);
+ expect(JSON.parse(call[1]!.body as string).datasets).toEqual(config.datasets);
 });
 
 it('shows a compact evaluation landing page', async()=>{
@@ -388,15 +390,16 @@ it('customizes a scorer template and saves its criteria to the server',async()=>
  render(<WorkbenchProvider><ScorersPage/></WorkbenchProvider>);
  await user.click(await screen.findByRole('button',{name:'Factual grounding'}));
  await user.click(screen.getByRole('button',{name:'Use this template'}));
+ expect(screen.getByLabelText('Scorer type')).toHaveProperty('value','Python script (Git)');
+ await user.type(screen.getByLabelText('Git repository *'),'https://github.com/example/scorers.git');
+ await user.type(screen.getByLabelText('Script path *'),'grounding.py');
  await user.click(screen.getByRole('tab',{name:'Execution'}));
- await user.click(screen.getByRole('button',{name:'Configure execution'}));
- const expectation=screen.getByLabelText('Judge prompt');
- await user.clear(expectation);await user.type(expectation,'Cite supplied policy only');
+ await user.type(screen.getByLabelText('Commit SHA (40 characters)'),'b'.repeat(40));
  await user.click(screen.getByRole('button',{name:'Publish v1'}));
- await waitFor(()=>expect(vi.mocked(fetch).mock.calls.some(([url,init])=>String(url).includes('/scorers/')&&init?.method==='POST')).toBe(true));
- const call=vi.mocked(fetch).mock.calls.find(([url,init])=>String(url).includes('/scorers/')&&init?.method==='POST')!;
+ await waitFor(()=>expect(screen.queryByRole('dialog')).toBeNull());
+ const call=vi.mocked(fetch).mock.calls.find(([url,init])=>String(url).includes('/scorers/sc-')&&init?.method==='POST')!;
  const body=JSON.parse(call[1]!.body as string);
- expect(body.versions[0].execution.prompt).toBe('Cite supplied policy only');
+ expect(body.versions[0]).toMatchObject({kind:'CODE',execution:{engine:'git',script_path:'grounding.py'}});
  expect(body.versions[0].criteria.aspect).toBe('grounding');
 });
 

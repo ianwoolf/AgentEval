@@ -15,8 +15,7 @@ export const uid = (prefix: string) =>
 const stamp = "2026-10-18T08:00:00.000Z";
 export function validateDataset(dataset: Dataset) {
   const d = dataset.draft;
-  if (!d.name.trim() || !d.objective.trim())
-    throw new Error("Name and objective are required.");
+  if (!d.name.trim()) throw new Error("Name is required.");
   validateFields(d.fields);
   if (!d.rows.length)
     throw new Error("Add at least one row before publishing.");

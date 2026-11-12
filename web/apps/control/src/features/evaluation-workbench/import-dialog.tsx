@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useCurrentProjectId } from "@/hooks/use-project";
+import { executionApi } from "./remote";
 import type { Field as DatasetField, Row } from "./contracts";
-import { mapImport, parseImport, type ImportFormat } from "./import-data";
+import { decodeCsv, mapImport, parseImport, type ImportFormat } from "./import-data";
 import {
   Button,
   ErrorText,
@@ -20,10 +22,11 @@ export function ImportDialog({
   onImport(rows: Row[]): void;
   onClose(): void;
 }) {
+  const projectId = useCurrentProjectId();
   const isGuardrail =
     fields.some((f) => f.name === "messages") &&
     fields.some((f) => f.name === "has_issue");
-  const [format, setFormat] = useState<ImportFormat>(
+  const [format, setFormat] = useState<ImportFormat | "xlsx">(
     isGuardrail ? "json" : "csv",
   );
   const [raw, setRaw] = useState(
@@ -55,54 +58,91 @@ export function ImportDialog({
     setError("");
   };
   const columns = [...new Set(rows?.flatMap((row) => Object.keys(row)) ?? [])];
+  function validateRows(parsed: Record<string, unknown>[], fieldMapping: Record<string, string>) {
+    try {
+      setPreview(mapImport(parsed, fields, fieldMapping));
+      setError("");
+    } catch (error) {
+      setPreview(null);
+      setError((error as Error).message);
+    }
+  }
+  function loadRows(parsed: Record<string, unknown>[]) {
+    setRows(parsed);
+    const fieldMapping = Object.fromEntries(fields.map(field => [
+      field.name, parsed.some(row => Object.hasOwn(row, field.name)) ? field.name : "",
+    ]));
+    setMapping(fieldMapping);
+    validateRows(parsed, fieldMapping);
+  }
   return (
     <Modal
       title="Import dataset records"
-      description="Upload → map fields → validate → confirm. Existing rows are kept; valid rows are appended together."
+      description="Files are read and validated on upload. Check the field mapping and preview before appending records."
       onClose={onClose}
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Format">
           <Select
             value={format}
+            disabled={loading}
             onChange={(e) => {
-              setFormat(e.target.value as ImportFormat);
+              setFormat(e.target.value as ImportFormat | "xlsx");
               reset();
             }}
           >
             <option value="csv">CSV</option>
+            <option value="xlsx">Excel (.xlsx)</option>
             <option value="json">JSON array</option>
             <option value="jsonl">JSONL</option>
           </Select>
         </Field>
         <Field
           label="Upload file"
-          hint="Up to 2 MB and 1,000 records in this demo."
+          hint="Up to 2 MB and 1,000 records. Excel files need one worksheet with column headers."
         >
           <Input
             type="file"
-            accept=".csv,.json,.jsonl"
+            accept=".csv,.xlsx,.json,.jsonl"
             disabled={loading}
             onChange={async (e) => {
               const file = e.target.files?.[0];
               if (!file) return;
               reset();
+              e.target.value = "";
+              const extension = file.name.split(".").at(-1)?.toLowerCase();
+              if (extension === "xlsx") setFormat("xlsx");
               if (file.size > 2 * 1024 * 1024) {
-                setError("Demo import limit: 2 MB.");
+                setError("Import limit: 2 MB.");
                 return;
               }
               setLoading(true);
               try {
-                setRaw(await file.text());
-                const extension = file.name.split(".").at(-1);
+                if (extension === "xlsx") {
+                  const parsed = await executionApi<{rows: Record<string, unknown>[]}>(projectId, "datasets/actions/parse-xlsx", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/octet-stream" },
+                    body: file,
+                  });
+                  loadRows(parsed.rows);
+                  return;
+                }
                 if (
                   extension === "csv" ||
                   extension === "json" ||
                   extension === "jsonl"
-                )
+                ) {
+                  const source = extension === "csv"
+                    ? decodeCsv(await file.arrayBuffer())
+                    : await file.text();
+                  setRaw(source);
                   setFormat(extension);
-              } catch {
-                setError("Unable to read file.");
+                  loadRows(parseImport(source, extension));
+                } else {
+                  setError("Choose a CSV, XLSX, JSON, or JSONL file.");
+                }
+              } catch (error) {
+                setError(error instanceof Error ? error.message : "Unable to read file.");
               } finally {
                 setLoading(false);
               }
@@ -110,9 +150,13 @@ export function ImportDialog({
           />
         </Field>
       </div>
+      {format === "xlsx" ? (!rows && <p className="text-xs text-muted-foreground">
+        {loading ? "Reading workbook…" : "Upload an Excel workbook to map its columns."}
+      </p>) : <>
       <Field label="Source data">
         <Textarea
           className="min-h-36 font-mono text-xs"
+          disabled={loading}
           value={raw}
           onChange={(e) => {
             setRaw(e.target.value);
@@ -125,18 +169,7 @@ export function ImportDialog({
         variant="outline"
         onClick={() => {
           try {
-            const parsed = parseImport(raw, format);
-            setRows(parsed);
-            setMapping(
-              Object.fromEntries(
-                fields.map((f) => [
-                  f.name,
-                  Object.hasOwn(parsed[0]!, f.name) ? f.name : "",
-                ]),
-              ),
-            );
-            setPreview(null);
-            setError("");
+            loadRows(parseImport(raw, format));
           } catch (e) {
             setError((e as Error).message);
           }
@@ -144,6 +177,7 @@ export function ImportDialog({
       >
         Read source & map fields
       </Button>
+      </>}
       {rows && (
         <div className="space-y-4">
           <h3 className="font-medium">Field mapping · {rows.length} records</h3>
@@ -157,8 +191,9 @@ export function ImportDialog({
                 <Select
                   value={mapping[field.name] ?? ""}
                   onChange={(e) => {
-                    setMapping({ ...mapping, [field.name]: e.target.value });
-                    setPreview(null);
+                    const fieldMapping = { ...mapping, [field.name]: e.target.value };
+                    setMapping(fieldMapping);
+                    validateRows(rows, fieldMapping);
                   }}
                 >
                   <option value="">Do not map</option>
@@ -169,20 +204,6 @@ export function ImportDialog({
               </Field>
             ))}
           </div>
-          <Button
-            variant="outline"
-            onClick={() => {
-              try {
-                setPreview(mapImport(rows, fields, mapping));
-                setError("");
-              } catch (e) {
-                setPreview(null);
-                setError((e as Error).message);
-              }
-            }}
-          >
-            Validate import
-          </Button>
         </div>
       )}
       {preview && (

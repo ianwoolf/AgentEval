@@ -26,9 +26,14 @@ it('switches dataset score views and latency and compares saved report totals',a
  expect(screen.getByRole('img',{name:'Dataset score comparison'})).toBeTruthy();
  await user.selectOptions(screen.getByLabelText('Dataset score display'),'table');
  expect(screen.queryByRole('img',{name:'Dataset score comparison'})).toBeNull();
- expect(screen.queryByRole('img',{name:'Dataset latency comparison'})).toBeNull();
- expect(within(screen.getByRole('region',{name:'Dataset latency'})).getByText('Average')).toBeTruthy();
- expect(within(screen.getByRole('region',{name:'Dataset latency'})).getByText('P95')).toBeTruthy();
+ expect(screen.queryByRole('region',{name:'Dataset latency'})).toBeNull();
+ const table=within(within(screen.getByRole('region',{name:'Dataset scores'})).getByRole('table'));
+ expect(table.getAllByRole('columnheader').map(header=>header.textContent)).toEqual([
+  'Requests','Dataset','Precision','Recall','Accuracy','F1 score','P50','P95',
+ ]);
+ const cells=within(table.getByRole('row',{name:/Dataset A/})).getAllByRole('cell');
+ expect(cells[0].textContent).toBe('10');
+ expect(cells.slice(-2).map(cell=>cell.textContent)).toEqual(['10.0 ms','40.0 ms']);
  await user.click(screen.getByRole('button',{name:'Compare',exact:true}));
  await screen.findByRole('option',{name:/eval-other/});
  expect(api.mock.calls.some(c=>c[1]==='guardrail-reports?config_id=cfg&config_version=1')).toBeTruthy();
@@ -41,15 +46,36 @@ it('shows N/A for undefined metrics and preserves a true zero',()=>{
 });
 
 
-it('pairs matching dataset IDs and versions in one chart even when the order differs',async()=>{
- const selected={...report,overall:{...scores,precision:.4},dataset_results:[...report.dataset_results].reverse().map(d=>({...d,precision:.4}))};
+it('identifies both endpoints and pairs matching dataset versions with distinct bar styles',async()=>{
+ const selected={...report,guardrail:{...report.guardrail,provider:'nemo guardrail'},
+  overall:{...scores,precision:.4},dataset_results:[...report.dataset_results].reverse().map(d=>({...d,precision:.4,
+   latency:{...d.latency,p50_ms:15,p95_ms:30}}))};
  api.mockImplementation(async(_p,path)=>path.startsWith('guardrail-reports')?{items:[{id:'other',report_id:'eval-other',status:'COMPLETED'}]}:selected);
  render(<GuardrailScoreDashboard report={report} evaluationId="current"/>);
  await userEvent.click(screen.getByRole('button',{name:'Compare',exact:true}));await userEvent.click(await screen.findByRole('option',{name:/eval-other/}));
  await waitFor(()=>expect(screen.getByRole('img',{name:'Dataset score comparison'}).querySelectorAll('rect[data-report=Selected]')).toHaveLength(8));
  expect(screen.getAllByRole('img',{name:'Dataset score comparison'})).toHaveLength(1);
+ const endpoints=within(screen.getByRole('region',{name:'Guardrail endpoints'}));
+ expect(endpoints.getByRole('region',{name:'A · Current report'}).textContent).toContain('f5 / Snapshot Guardrail');
+ expect(endpoints.getByRole('region',{name:'B · Compared report'}).textContent).toContain('nemo guardrail / Snapshot Guardrail');
+ expect(endpoints.getAllByText('guard-1')).toHaveLength(2);
+ const chart=screen.getByRole('img',{name:'Dataset score comparison'});
+ expect(chart.querySelector('rect[data-report=Current]')?.getAttribute('fill')).toBe('#1d4ed8');
+ const pattern=chart.querySelector('pattern');
+ expect(pattern).toBeTruthy();
+ expect(chart.querySelector('rect[data-report=Selected]')?.getAttribute('fill')).toBe(`url(#${pattern?.id})`);
+ expect(chart.querySelectorAll('[data-dataset-label]')).toHaveLength(8);
  expect(screen.queryByText('Overall score comparison')).toBeNull();
  const totals=within(screen.getByRole('region',{name:'Overall scores'}));expect(totals.getByText('+20.0 pp').className).toContain('text-emerald-600');
+ const cells=within(screen.getByRole('row',{name:/Dataset A/})).getAllByRole('cell');
+ const p50=within(cells.at(-2)!);
+ expect(p50.getByText('10.0 ms')).toBeTruthy();
+ expect(p50.getByText('B · 15.0 ms')).toBeTruthy();
+ expect(p50.getByText('-5.0 ms').className).toContain('text-emerald-600');
+ const p95=within(cells.at(-1)!);
+ expect(p95.getByText('40.0 ms')).toBeTruthy();
+ expect(p95.getByText('B · 30.0 ms')).toBeTruthy();
+ expect(p95.getByText('+10.0 ms').className).toContain('text-red-600');
 });
 it('uses two charts when a dataset version does not match',async()=>{
  const selected={...report,dataset_results:[{...report.dataset_results[0],dataset_version:99},report.dataset_results[1]]};
@@ -58,6 +84,9 @@ it('uses two charts when a dataset version does not match',async()=>{
  await userEvent.click(screen.getByRole('button',{name:'Compare',exact:true}));await userEvent.click(await screen.findByRole('option',{name:/eval-other/}));
  await waitFor(()=>expect(screen.getAllByRole('img',{name:'Dataset score comparison'})).toHaveLength(2));
  expect(screen.getByLabelText('Separate dataset charts')).toBeTruthy();
+ const baseline=within(screen.getByRole('region',{name:'Selected dataset scores'}));
+ expect(baseline.getByRole('columnheader',{name:'P95'})).toBeTruthy();
+ expect(baseline.getAllByText('40.0 ms')).toHaveLength(2);
  expect(datasetsMatch(report.dataset_results,[{...report.dataset_results[0],dataset_id:'different'},report.dataset_results[1]])).toBe(false);
 });
 it('renders negative differences red and zero differences neutral',()=>{

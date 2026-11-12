@@ -93,7 +93,7 @@ export interface Target {
   guardrail_id?: string | null;
   revision?: string;
   id: string;
-  provider?: "f5" | "nemo guardrail";
+  provider?: string;
   name: string;
   kind: "PROMPT" | "GUARDRAIL";
   version: number;
@@ -121,7 +121,20 @@ export interface Score {
   passed: boolean;
   reason: string;
 }
+export interface GuardrailRequestResult {
+  request_id: string;
+  binding_ids: string[];
+  strategy: string;
+  status: string;
+  http_status?: number;
+  guardrail_latency_ms: number;
+  scorer_latency_ms: number;
+  cost: { amount: number };
+  classifications: { binding_id: string; outcome: string; reason: string }[];
+}
+
 export interface SampleResult {
+  guardrail_result?: GuardrailRequestResult | null;
   dataset_id?: string;
   dataset_version?: number;
   id: string;

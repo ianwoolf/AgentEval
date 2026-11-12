@@ -10,7 +10,7 @@ export function NewTargetDialog({ initial, onClose, onCreated }: { initial?: Tar
   const [name, setName] = useState(initial?.name ?? "");
   const [id, setId] = useState(initial?.id ?? crypto.randomUUID());
   const [guardrailId, setGuardrailId] = useState(initial?.guardrail_id ?? initial?.id ?? "");
-  const [provider, setProvider] = useState<"f5" | "nemo guardrail">(initial?.provider ?? "nemo guardrail");
+  const [provider, setProvider] = useState<string>(initial?.provider ?? "nemo guardrail");
   const [definition, setDefinition] = useState(initial?.definition ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -51,6 +51,7 @@ export function NewTargetDialog({ initial, onClose, onCreated }: { initial?: Tar
         <Field label="Target type"><Select value="GUARDRAIL" disabled><option value="GUARDRAIL">Guardrail</option></Select></Field>
         <Field label="Provider"><Select value={provider} disabled={busy} onChange={e=>setProvider(e.target.value as typeof provider)}>
           <option value="nemo guardrail">NeMo Guardrail</option><option value="f5">F5</option>
+          {initial?.provider && !["f5", "nemo guardrail"].includes(initial.provider) && <option value={initial.provider}>{initial.provider}</option>}
         </Select></Field>
       </div>
       <Field label="Description"><Textarea maxLength={4000} value={definition} disabled={busy} onChange={e=>setDefinition(e.target.value)} placeholder="Describe what this Guardrail evaluates." /></Field>

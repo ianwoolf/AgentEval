@@ -58,6 +58,7 @@ export function DatasetsPage() {
               id: uid("ds"),
               draft: {
                 name: "",
+                evaluation_type: "guardrail",
                 objective: "",
                 description: "",
                 tags: [],
@@ -72,11 +73,18 @@ export function DatasetsPage() {
                     description: "Test input",
                   },
                   {
-                    name: "expected",
+                    name: "label",
                     type: "string",
                     role: "reference",
-                    required: false,
-                    description: "Reference answer",
+                    required: true,
+                    description: "Expected classification",
+                  },
+                  {
+                    name: "strategy",
+                    type: "string",
+                    role: "metadata",
+                    required: true,
+                    description: "Test strategy",
                   },
                 ],
                 rows: [],
@@ -205,8 +213,7 @@ function DatasetEditor({
       const parsed = JSON.parse(metadata);
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
         throw new Error("Metadata must be a JSON object.");
-      if (!d.name.trim() || !d.objective.trim())
-        throw new Error("Name and objective are required.");
+      if (!d.name.trim()) throw new Error("Name is required.");
       validateFields(d.fields);
       parsed.evaluation??={};parsed.evaluation.scorers??={};
       for(const id of d.scorerIds??[]) {
@@ -276,17 +283,29 @@ function DatasetEditor({
         onChange={setTab}
       />
       {tab === "Configuration" && (
-        <div className="grid max-w-5xl gap-3 sm:grid-cols-2">
-          <Field label="Evaluation type" hint="Publish data first. Select scorers and aspects later in Evaluation Configure."><Select value={d.evaluation_type??'generic'} onChange={e=>update({evaluation_type:e.target.value as 'generic'|'guardrail',guardrail:undefined,scorerIds:[]})}><option value="generic">Generic</option><option value="guardrail">Guardrail classification</option></Select></Field>
-          {d.evaluation_type==='guardrail'&&<div className="self-end"><Button variant="outline" onClick={()=>update({fields:[{name:'input',role:'input',type:'string',required:true,description:''},{name:'label',role:'reference',type:'string',required:true,description:''},{name:'strategy',role:'metadata',type:'string',required:true,description:''}]})}>Use input / label / strategy fields</Button></div>}
+        <div className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2">
           <Field label="Name *">
             <Input
               value={d.name}
               onChange={(e) => update({ name: e.target.value })}
             />
           </Field>
-          <Field label="Tags" hint="Press Enter or comma to add. Paste comma-separated tags.">
-            <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5 focus-within:ring-2 focus-within:ring-primary/30">
+          <div className="grid gap-2 text-sm">
+            <span className="font-medium">Evaluation type</span>
+            <div className="flex h-9 items-center rounded-md border bg-muted/30 px-3">
+              {d.evaluation_type === "guardrail" ? "Guardrail classification" : "Generic"}
+            </div>
+          </div>
+          <Field label="Dataset objective">
+            <Textarea
+              rows={2}
+              className="min-h-14"
+              value={d.objective}
+              onChange={(e) => update({ objective: e.target.value })}
+            />
+          </Field>
+          <Field label="Tags" hint="Press Enter or comma to add tags.">
+            <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1 focus-within:ring-2 focus-within:ring-primary/30">
               <TagBadges tags={d.tags} onRemove={(tag) => update({tags: d.tags.filter(t => t !== tag)})} />
               <input aria-label="Add tag" className="min-w-24 flex-1 bg-transparent text-sm outline-none" placeholder="Add tag…" value={tagsText}
                 onChange={e => {setTagsText(e.target.value); setNotice("Unsaved draft changes");}}
@@ -295,34 +314,27 @@ function DatasetEditor({
               />
             </div>
           </Field>
-          <div className="sm:col-span-2">
-            <Field
-              label="Dataset objective *"
-              hint="What should this dataset measure? This does not bind the dataset to a target."
-            >
-              <Textarea
-                value={d.objective}
-                onChange={(e) => update({ objective: e.target.value })}
-              />
-            </Field>
-          </div>
-          <details className="sm:col-span-2 rounded border p-3"><summary className="cursor-pointer text-xs font-medium">Description & advanced metadata</summary>
-            <Field label="Description">
-              <Textarea
-                value={d.description}
-                onChange={(e) => update({ description: e.target.value })}
-              />
-            </Field>
-            <Field label="Custom metadata (JSON object)">
-              <Textarea
-                className="min-h-20 font-mono text-xs"
-                value={metadata}
-                onChange={(e) => {
-                  setMetadata(e.target.value);
-                  setNotice("Unsaved draft changes");
-                }}
-              />
-            </Field>
+          <details className="rounded-md border px-3 py-2 sm:col-span-2">
+            <summary className="cursor-pointer text-xs font-medium">Description & advanced metadata</summary>
+            <div className="mt-3 grid items-start gap-3 sm:grid-cols-2">
+              <Field label="Description">
+                <Textarea
+                  className="min-h-20"
+                  value={d.description}
+                  onChange={(e) => update({ description: e.target.value })}
+                />
+              </Field>
+              <Field label="Custom metadata (JSON object)">
+                <Textarea
+                  className="min-h-20 font-mono text-xs"
+                  value={metadata}
+                  onChange={(e) => {
+                    setMetadata(e.target.value);
+                    setNotice("Unsaved draft changes");
+                  }}
+                />
+              </Field>
+            </div>
           </details>
         </div>
       )}

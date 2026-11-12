@@ -1,6 +1,7 @@
 import {TraceViewer} from './trace-viewer';
 import {aspectLabels} from "./criteria";
-import {GuardrailReport} from './guardrail-report';
+import {GuardrailReport, type BindingResult} from './guardrail-report';
+import type {GuardrailSummary} from './guardrail-score-dashboard';
 import { ReportConfig } from "./report-config";
 import { useEffect, useState } from "react";
 import { useCurrentProjectId } from "@/hooks/use-project";
@@ -29,6 +30,7 @@ import {
   Input,
   JsonPreview,
   Metric,
+  Modal,
   Pill,
   Select,
   Table,
@@ -36,6 +38,12 @@ import {
   download,
   textValue,
 } from "./ui";
+
+function compareRunOrder(a: Evaluation, b: Evaluation) {
+  return (a.remote?.serial_index ?? a.remote?.concurrency ?? 0) -
+    (b.remote?.serial_index ?? b.remote?.concurrency ?? 0);
+}
+
 export function ReportsPage({
   evaluationId,
   onSelect,
@@ -46,8 +54,14 @@ export function ReportsPage({
   const { state } = useWorkbench();
   const [idQuery, setIdQuery] = useState("");
   const [targetId, setTargetId] = useState("ALL");
+  const [groupSelection, setGroupSelection] = useState<{source:string;reference:string}>();
   const run = state.evaluations.find((e) => e.id === evaluationId);
-  if (evaluationId && run?.remote) return <LiveReport key={run.id} run={run} onBack={() => onSelect("")} />;
+  if (evaluationId && run?.remote) {
+    const groupId = run.remote.concurrency_group;
+    return <LiveReport key={run.id} run={run} onBack={() => onSelect("")} onSelect={onSelect}
+      comparedReport={groupId === groupSelection?.source ? groupSelection?.reference ?? "" : ""}
+      onCompareReport={reference => { if (groupId) setGroupSelection({source:groupId,reference}); }} />;
+  }
   if (evaluationId)
     return run ? (
       <ReportDetail key={run.id} run={run} onBack={() => onSelect("")} />
@@ -64,10 +78,18 @@ export function ReportsPage({
         </Empty>
       </Frame>
     );
-  const reports = state.evaluations.filter(
-    (e) =>
-      (!idQuery.trim() || e.id === idQuery.trim()) &&
-      (targetId === "ALL" || e.snapshot.target.id === targetId),
+  const groups = new Map<string, Evaluation[]>();
+  for (const evaluation of state.evaluations) {
+    if (targetId !== "ALL" && evaluation.snapshot.target.id !== targetId) continue;
+    const groupId = evaluation.remote?.concurrency_group;
+    const key = groupId ? `group:${groupId}` : `run:${evaluation.id}`;
+    const members = groups.get(key);
+    if (members) members.push(evaluation);
+    else groups.set(key, [evaluation]);
+  }
+  const query = idQuery.trim();
+  const reports = Array.from(groups.values()).filter(members =>
+    !query || members[0].remote?.concurrency_group === query || members.some(member => member.id === query),
   );
   return (
     <Frame
@@ -77,7 +99,7 @@ export function ReportsPage({
       <div className="grid gap-4 rounded-xl border bg-card p-5 sm:grid-cols-2">
         <Field
           label="Evaluation ID"
-          hint="Exact match. Paste the full ID from Eval."
+          hint="Exact match by run ID or comparison group ID."
         >
           <Input
             value={idQuery}
@@ -106,64 +128,76 @@ export function ReportsPage({
               <th>Evaluation</th>
               <th>Target</th>
               <th>Status</th>
-              <th>Pass rate</th>
               <th>Samples</th>
               <th>Created</th>
               <th />
             </tr>
           </thead>
           <tbody>
-            {reports.map((e) => {
-              const passed = e.results.filter(
-                (r) => r.status === "PASS",
-              ).length;
-              return (
-                <tr key={e.id}>
-                  <td>
-                    <button
-                      className="flex items-center gap-2 text-left font-medium hover:underline"
-                      onClick={() => onSelect(e.id)}
-                    >
-                      <FileText className="size-4 text-primary" />
-                      {e.name}
-                    </button>
-                    <p
-                      className="mt-1 max-w-64 truncate font-mono text-xs text-muted-foreground"
-                      title={e.id}
-                    >
-                      {e.id}
-                    </p>
-                  </td>
-                  <td>
-                    {e.snapshot.target.name}
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {e.snapshot.target.kind} · v{e.snapshot.target.version}
-                    </p>
-                  </td>
-                  <td>
-                    <Pill tone={e.status === "COMPLETED" ? "good" : "neutral"}>
-                      {e.status}
-                    </Pill>
-                  </td>
-                  <td>
-                    {e.results.length
-                      ? `${Math.round((passed / e.results.length) * 100)}%`
-                      : "—"}
-                  </td>
-                  <td>
-                    {e.remote?.completed ?? e.results.length}/{e.remote?.sample_count ?? e.snapshot.dataset.rows.length}
-                  </td>
-                  <td className="text-xs text-muted-foreground">
-                    {new Date(e.createdAt).toLocaleString()}
-                  </td>
-                  <td>
-                    <Button variant="ghost" onClick={() => onSelect(e.id)}>
-                      Inspect
-                      <ArrowRight />
-                    </Button>
-                  </td>
-                </tr>
-              );
+            {reports.map((members) => {
+              const ordered = members.sort(compareRunOrder);
+              const e = ordered[0];
+              const groupId = e.remote?.concurrency_group;
+              const openId = ordered.find(member => member.id === query)?.id ?? e.id;
+              const finished = ordered.filter(member => member.status !== "RUNNING").length;
+              let status: Evaluation["status"] | "QUEUED" = e.status;
+              if (groupId) {
+                if (ordered.every(member => member.status === "RUNNING" && member.remote?.phase === "QUEUED")) status = "QUEUED";
+                else if (finished < ordered.length) status = "RUNNING";
+                else if (ordered.some(member => member.status === "FAILED")) status = "FAILED";
+                else if (ordered.some(member => member.status === "CANCELLED")) status = "CANCELLED";
+                else status = "COMPLETED";
+              }
+              const completed = ordered.reduce((sum, member) => sum + (member.remote?.completed ?? member.results.length), 0);
+              const total = ordered.reduce((sum, member) => sum + (member.remote?.sample_count ?? member.snapshot.dataset.rows.length), 0);
+              const rowId = groupId ?? e.id;
+              return <tr key={rowId}>
+                <td>
+                  <button
+                    className="flex items-center gap-2 text-left font-medium hover:underline"
+                    onClick={() => onSelect(openId)}
+                  >
+                    <FileText className="size-4 text-primary" />
+                    {e.name}
+                  </button>
+                  {groupId && <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                    <Pill>Concurrency group</Pill>
+                    <span>{ordered.length} runs · {ordered.map(member => member.remote?.concurrency ?? "—").join(
+                      ordered.every(member => member.remote?.serial_index !== undefined) ? " → " : ", ",
+                    )}</span>
+                  </p>}
+                  <p
+                    className="mt-1 max-w-64 truncate font-mono text-xs text-muted-foreground"
+                    title={rowId}
+                  >
+                    {rowId}
+                  </p>
+                </td>
+                <td>
+                  {e.snapshot.target.name}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {e.snapshot.target.kind} · v{e.snapshot.target.version}
+                  </p>
+                </td>
+                <td>
+                  <Pill tone={status === "COMPLETED" ? "good" : "neutral"}>
+                    {status}
+                  </Pill>
+                  {groupId && <p className="mt-1 whitespace-nowrap text-xs text-muted-foreground">{finished}/{ordered.length} runs finished</p>}
+                </td>
+                <td>
+                  {completed}/{total}
+                </td>
+                <td className="text-xs text-muted-foreground">
+                  {new Date(e.createdAt).toLocaleString()}
+                </td>
+                <td>
+                  <Button variant="ghost" onClick={() => onSelect(openId)}>
+                    {groupId ? "Inspect group" : "Inspect"}
+                    <ArrowRight />
+                  </Button>
+                </td>
+              </tr>;
             })}
           </tbody>
         </Table>
@@ -554,16 +588,81 @@ interface DatasetSummary {
   pass_rate: number | null; average_latency_ms: number | null;
   scores: Array<{scorer_id:string;scorer_version?:string;average:number;count:number}>;
 }
-function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
+type ReportLatency = {p50_ms: number | null; p95_ms: number | null; count: number};
+const latencyText = (value: number | null | undefined) => value == null ? '—' : `${value.toFixed(1)} ms`;
+
+function ConcurrencyComparison({runs, currentId, currentLatency, onSelect}: {runs: Evaluation[]; currentId: string; currentLatency: ReportLatency | null; onSelect(id: string): void}) {
+  const projectId = useCurrentProjectId();
+  const showEndpoint = runs.some(run=>run.remote?.execution_mode==='guardrail');
+  const [metrics, setMetrics] = useState<Record<string, ReportLatency | null>>({});
+  const inputs = JSON.stringify(runs.filter(run => run.id !== currentId).map(run => [run.remote!.experiment_id, run.status]));
+  useEffect(() => {
+    const members = JSON.parse(inputs) as Array<[string, Evaluation['status']]>;
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+    async function refresh() {
+      const entries = await Promise.all(members.map(async ([id]) => {
+        try {
+          const report = await executionApi<{latency?: ReportLatency}>(projectId, `reports/${encodeURIComponent(id)}?summary_only=true`);
+          return [id, report.latency??null] as const;
+        } catch {
+          return [id, null] as const;
+        }
+      }));
+      if (!active) return;
+      setMetrics(Object.fromEntries(entries));
+      if (members.some(([,status]) => status==='RUNNING')) timer = setTimeout(refresh, 5000);
+    }
+    void refresh();
+    return () => { active=false; clearTimeout(timer); };
+  }, [projectId, inputs]);
+  return <section className="space-y-2" aria-label="Run summary">
+    <h2 className="text-sm font-semibold">Run summary</h2>
+    <p className="text-xs text-muted-foreground">{runs.some(run=>run.remote?.serial_index!==undefined)
+      ?'Runs execute one at a time in the order shown.' : 'Jobs in the same group may overlap.'} Running results are provisional.</p>
+    <Table><thead><tr><th>Concurrency</th>{showEndpoint&&<th>Guardrail endpoint</th>}<th>Status</th><th>Measurements</th><th>Token usage</th><th>P50</th><th>P95</th><th>Report</th></tr></thead>
+      <tbody>{runs.map(run=>{
+        const values=run.id===currentId ? currentLatency : metrics[run.remote!.experiment_id];
+        const {provider,guardrail_id}=run.snapshot.target;
+        return <tr key={run.id}><td>{run.remote!.concurrency}</td>
+          {showEndpoint&&<td>{[provider,guardrail_id].filter(Boolean).join(' · ')||'—'}</td>}
+          <td>{run.status==='RUNNING'?run.remote!.phase:run.status}</td><td>{values?.count??'—'}</td>
+          <td className="tabular-nums" title="Simulated usage: 128 tokens per measured request.">{values ? (values.count * 128).toLocaleString() : '—'}</td>
+          <td>{latencyText(values?.p50_ms)}</td><td>{latencyText(values?.p95_ms)}</td>
+          <td>{run.id===currentId?'Current report':<Button variant="link" onClick={()=>onSelect(run.id)}>View report</Button>}</td></tr>;
+      })}</tbody>
+    </Table>
+  </section>;
+}
+
+function LiveReport({ run, onBack, onSelect, comparedReport, onCompareReport }: {
+  run: Evaluation; onBack(): void; onSelect(id: string): void; comparedReport:string; onCompareReport(id:string):void;
+}) {
   const remote = run.remote!;
   const {state:catalog}=useWorkbench();
   const projectId = useCurrentProjectId();
+  const isGuardrail = remote.execution_mode === 'guardrail';
+  const [guardrailReport, setGuardrailReport] = useState<GuardrailSummary & {binding_results?: BindingResult[]}>({});
+  const [binding, setBinding] = useState('ALL');
+  const [outcome, setOutcome] = useState('ALL');
+  const [strategy, setStrategy] = useState('ALL');
+  const [latency, setLatency] = useState<ReportLatency|null>(null);
+  const concurrency = remote.concurrency ?? run.snapshot.environment.runner?.concurrency;
+  const group = remote.concurrency_group ? catalog.evaluations
+    .filter(item=>item.remote?.concurrency_group===remote.concurrency_group)
+    .sort(compareRunOrder) : [];
   const [samples, setSamples] = useState<SampleResult[]>([]);
   const [aspectReport,setAspectReport]=useState<{bindings:Array<{id:string;name:string;aspect:string;version:string|null;dataset_id:string;provenance:string;definition:unknown}>;aspects:Array<{aspect:string;source:string;evaluated:number;passed:number;errors:number;missing:number;pending:number;pass_rate:number|null}>;dataset_aspects?:Array<{dataset_id:string;aspect:string;source:string;pass_rate:number|null;evaluated:number;passed:number;errors:number;missing:number}>}>({bindings:[],aspects:[]});
   const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
   const [reportTab,setReportTab]=useState('Overview');
+  const [configurationOpen, setConfigurationOpen] = useState(false);
   const [datasetFilter, setDatasetFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
+  const [samplesLoading, setSamplesLoading] = useState(false);
+  const [samplesError, setSamplesError] = useState("");
+  const [samplePage, setSamplePage] = useState(0);
+  const [exporting, setExporting] = useState(false);
+  const samplesPath = `experiments/${encodeURIComponent(remote.experiment_id)}/samples`;
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -571,25 +670,24 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
   useEffect(() => {
     let active = true;
     let timer: ReturnType<typeof setTimeout>;
-    setSamples([]);
-    setSelectedId(null);
     setLoading(true);
     setError("");
     async function refresh() {
       try {
-        const rows = await executionPages<SampleResult>(projectId, `experiments/${encodeURIComponent(remote.experiment_id)}/samples`);
         let summaries: DatasetSummary[] = [];
         {
           try {
-            const report = await executionApi<{datasets:DatasetSummary[]}&typeof aspectReport>(projectId, `reports/${encodeURIComponent(remote.experiment_id)}?limit=1`);
+            const report = await executionApi<{datasets:DatasetSummary[];latency?:ReportLatency}&typeof aspectReport&typeof guardrailReport>(projectId, `reports/${encodeURIComponent(remote.experiment_id)}?summary_only=true`);
             summaries = report.datasets ?? [];
+            if(active)setLatency(report.latency??null);
+            if(active)setGuardrailReport(report);
             if(active)setAspectReport({bindings:report.bindings??[],aspects:report.aspects??[],dataset_aspects:report.dataset_aspects??[]});
           } catch (e) {
             if ((e as {status?:number}).status !== 404 || run.status !== 'RUNNING') throw e;
             summaries = (remote.datasets??[]).map(d=>({...d,status:'QUEUED',completed:0,passed:0,failed:0,errors:0,pass_rate:null,average_latency_ms:null,scores:[]}));
           }
         }
-        if (active) { setSamples(rows); setDatasetSummaries(summaries); setError(""); }
+        if (active) { setDatasetSummaries(summaries); setError(""); }
       } catch (e) { if (active) setError((e as Error).message); }
       finally {
         if (active) {
@@ -601,19 +699,93 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
     void refresh();
     return () => { active = false; clearTimeout(timer); };
   }, [projectId, remote.experiment_id, run.status, retry]);
-  const visibleSamples = samples.filter(s=>datasetFilter==='ALL'||(s.dataset_id??run.snapshot.datasetId)===datasetFilter);
-  const scorerKeys = [...new Set(datasetSummaries.flatMap(d=>d.scores.map(s=>JSON.stringify([s.scorer_id,s.scorer_version]))))];
+  useEffect(() => {
+    if (reportTab !== 'Samples') return;
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+    setSamplesLoading(true);
+    setSamplesError("");
+    async function refreshSamples() {
+      try {
+        const rows = await executionPages<SampleResult>(projectId, samplesPath);
+        if (active) { setSamples(rows); setSamplesError(""); }
+      } catch (error) {
+        if (active) setSamplesError((error as Error).message);
+      } finally {
+        if (active) {
+          setSamplesLoading(false);
+          if (run.status === 'RUNNING') timer = setTimeout(refreshSamples, 5000);
+        }
+      }
+    }
+    void refreshSamples();
+    return () => { active = false; clearTimeout(timer); };
+  }, [projectId, samplesPath, reportTab, retry, run.status]);
+  useEffect(() => setSamplePage(0), [datasetFilter, binding, outcome, strategy]);
+
+  const visibleSamples = samples.filter(row => {
+    if (datasetFilter !== 'ALL' && (row.dataset_id ?? run.snapshot.datasetId) !== datasetFilter) return false;
+    if (!isGuardrail) return true;
+    const result = row.guardrail_result;
+    return (binding === 'ALL' || result?.binding_ids.includes(binding)) &&
+      (strategy === 'ALL' || result?.strategy === strategy) &&
+      (outcome === 'ALL' || (outcome === 'ERROR' ? (result?.status ?? row.status) === 'ERROR' :
+        result?.classifications.some(item => item.outcome === outcome && (binding === 'ALL' || item.binding_id === binding))));
+  });
+  const pageCount = Math.max(1, Math.ceil(visibleSamples.length / 100));
+  const currentPage = Math.min(samplePage, pageCount - 1);
+  const pageSamples = visibleSamples.slice(currentPage * 100, (currentPage + 1) * 100);
+  const strategies = [...new Set(samples.flatMap(row => row.guardrail_result?.strategy ? [row.guardrail_result.strategy] : []))];
+  const datasetNames = new Map(remote.datasets?.map(dataset => [dataset.dataset_id, dataset.name]));
+  for (const dataset of datasetSummaries) {
+    if (dataset.name) datasetNames.set(dataset.dataset_id, dataset.name);
+  }
+  const scorerGroups = new Map<string, {id:string; name:string; version:string|null; definition:unknown; datasets:Set<string>}>();
+  for (const binding of aspectReport.bindings) {
+    const key = JSON.stringify([binding.id, binding.version, binding.definition]);
+    let group = scorerGroups.get(key);
+    if (!group) {
+      group = {id:binding.id, name:binding.name, version:binding.version, definition:binding.definition, datasets:new Set()};
+      scorerGroups.set(key, group);
+    }
+    group.datasets.add(binding.dataset_id);
+  }
+  for (const dataset of datasetSummaries) {
+    for (const score of dataset.scores) {
+      const version = score.scorer_version == null ? null : String(score.scorer_version);
+      const existing = [...scorerGroups.values()].find(group => group.id === score.scorer_id
+        && (version === null || String(group.version) === version) && group.datasets.has(dataset.dataset_id));
+      if (existing) continue;
+      const key = JSON.stringify([score.scorer_id, version, null]);
+      let group = scorerGroups.get(key);
+      if (!group) {
+        group = {id:score.scorer_id, name:score.scorer_id, version, definition:null, datasets:new Set()};
+        scorerGroups.set(key, group);
+      }
+      group.datasets.add(dataset.dataset_id);
+    }
+  }
   return <Frame title={run.name} description="Live evaluation · Persisted sample results">
-    <div className="flex items-center justify-between"><Button variant="ghost" onClick={onBack}><ArrowLeft/>All reports</Button><div className="flex items-center gap-2"><div id="guardrail-report-controls"/><Pill>{run.status}</Pill></div></div>
-    <Tabs items={['Overview','Samples','Traces','Configuration']} active={reportTab} onChange={setReportTab}/>
+    <div className="flex items-center justify-between"><Button variant="ghost" onClick={onBack}><ArrowLeft/>All reports</Button><div className="flex items-center gap-2"><div id="guardrail-report-controls"/><Button variant="outline" onClick={()=>setConfigurationOpen(true)}>Configuration</Button><Pill>{run.status}</Pill></div></div>
+    <Tabs items={['Overview','Samples','Traces']} active={reportTab} onChange={setReportTab}/>
+    {reportTab==='Overview'&&<section aria-label="Run latency" className="flex flex-wrap gap-x-6 gap-y-2 rounded-lg border px-3 py-2 text-sm">
+      <span>Case concurrency <strong>{concurrency??'—'}</strong></span>
+      <span>P50 <strong>{latencyText(latency?.p50_ms)}</strong></span>
+      <span>P95 <strong>{latencyText(latency?.p95_ms)}</strong></span>
+      <span className="text-muted-foreground">{remote.execution_mode==='guardrail'?'Guardrail HTTP latency':'Sample execution latency'}</span>
+    </section>}
+    {reportTab==='Overview'&&group.length>0&&<ConcurrencyComparison runs={group} currentId={run.id} currentLatency={latency} onSelect={onSelect}/>}
     {reportTab==='Traces'&&<TraceViewer evaluationId={remote.experiment_id} running={run.status==='RUNNING'}/>}
-    {reportTab==='Overview'&&remote.execution_mode==='guardrail'&&<GuardrailReport evaluationId={remote.experiment_id} running={run.status==='RUNNING'}/>}
-    {error&&<div role="alert" className="text-sm text-destructive">Sample loading failed: {error} <Button variant="outline" onClick={()=>setRetry(v=>v+1)}>Retry</Button></div>}
+    {reportTab==='Overview'&&remote.execution_mode==='guardrail'&&<GuardrailReport evaluationId={remote.experiment_id} running={run.status==='RUNNING'}
+      report={guardrailReport} groupComparison={{
+        grouped:!!remote.concurrency_group, reportId:run.id, catalog:catalog.evaluations, concurrency,
+        selected:comparedReport, onSelect:onCompareReport,
+      }}/>}
+    {error&&<div role="alert" className="text-sm text-destructive">Report loading failed: {error} <Button variant="outline" onClick={()=>setRetry(v=>v+1)}>Retry</Button></div>}
     {reportTab==='Overview'&&remote.execution_mode!=='guardrail'&&<section className="space-y-2"><h2 className="font-semibold">Results by dataset and aspect</h2><p className="text-xs text-muted-foreground">Aspect score = sample pass rate across all required scorers. Scorer score = mean on a 0–1 scale. Errors count as not passed.</p>
     <Table><thead><tr><th>Dataset</th><th>Aspect</th><th>Aspect score</th><th>Scorer · version</th><th>Scorer score</th><th>Evidence</th></tr></thead><tbody>{aspectReport.bindings.map(b=>{const d=datasetSummaries.find(d=>d.dataset_id===b.dataset_id);const a=aspectReport.dataset_aspects?.find(a=>a.dataset_id===b.dataset_id&&a.aspect===b.aspect);const score=d?.scores.find(s=>s.scorer_id===b.id&&(!s.scorer_version||String(s.scorer_version)===String(b.version)));return <tr key={b.dataset_id+b.id}><td>{d?.name??remote.datasets?.find(d=>d.dataset_id===b.dataset_id)?.name??b.dataset_id}</td><td>{aspectLabels[b.aspect as keyof typeof aspectLabels]??'Unclassified'}</td><td>{a?.pass_rate==null?'—':`${(a.pass_rate*100).toFixed(1)}%`}<p className="text-xs text-muted-foreground">{a?`${a.passed}/${a.evaluated} passed · ${a.source}`:'Not evaluated'}</p></td><td>{b.name} · v{b.version??'?'}</td><td>{score?score.average.toFixed(3):'—'}</td><td><Button variant="link" onClick={()=>{setDatasetFilter(b.dataset_id);setReportTab('Samples');}}>View samples</Button></td></tr>;})}</tbody></Table>
     {!aspectReport.bindings.length&&<p className="text-sm text-muted-foreground">Historical scorer definitions unavailable. {remote.scorer_ids.join(', ')} — unclassified.</p>}
     </section>}
-    {reportTab==='Configuration'&&<details open className="rounded-lg border p-3"><summary className="cursor-pointer text-sm">Recorded scoring configuration</summary>{aspectReport.bindings.map(b=><details key={b.dataset_id+b.id} className="mt-2 text-xs"><summary>{b.name} · v{b.version??'?'} · {b.dataset_id}</summary><pre className="max-h-60 overflow-auto whitespace-pre-wrap">{JSON.stringify(b.definition,null,2)}</pre></details>)}</details>}
     {remote.feature_modes?.scoring_enabled === false && <p role="status" className="rounded-lg border border-amber-500/30 p-3 text-sm">Demo scores — illustrative only. These results do not measure evaluation quality.</p>}
     {reportTab==='Overview'&&remote.execution_mode!=='guardrail'&&remote.feature_modes?.effective_reflection_mode === 'mock' && <details aria-label="Reflection" className="rounded-lg border p-3 space-y-2"><summary className="cursor-pointer text-sm">Demo reflection</summary>
       <h2 className="font-medium">Reflection</h2>
@@ -638,31 +810,102 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
         <dl className="mt-3 grid gap-3 pb-1 sm:grid-cols-2"><div><dt className="text-muted-foreground">Experiment ID</dt><dd className="mt-1 break-all font-mono select-all">{remote.experiment_id}</dd></div><div><dt className="text-muted-foreground">{remote.runtime === 'docker'?'Docker container':'Kubernetes Job'}</dt><dd className="mt-1 break-all font-mono select-all">{remote.container_name??run.id}</dd></div></dl>
       </details>
     </section>}
-    {reportTab==='Configuration'&&datasetSummaries.length>0&&<details className="space-y-3" aria-label="Dataset comparison"><summary className="cursor-pointer text-sm">Dataset statistics</summary>
-      <h2 className="text-lg font-medium">Dataset comparison</h2>
-      <p className="text-sm text-muted-foreground">Pass rates include processed samples; errors count as not passed. Scores average the samples scored by each scorer. In-progress results are provisional.</p>
-      <Table><thead><tr><th>Dataset</th><th>Status</th><th>Progress</th><th>Pass rate</th><th>Failed / errors</th><th>Average duration</th>{scorerKeys.map(key=>{const [id,version]=JSON.parse(key);return <th key={key}>{id}{version?` · ${version}`:''}</th>;})}</tr></thead>
-      <tbody>{datasetSummaries.map(d=><tr key={d.dataset_id}>
-        <td><Button variant="link" onClick={()=>{setDatasetFilter(d.dataset_id);setSelectedId(null);}}>{d.name??d.dataset_id} · v{d.dataset_version}</Button></td>
-        <td><Pill>{d.status}</Pill></td><td>{d.completed} / {d.sample_count}</td>
-        <td>{d.pass_rate===null?'—':`${(d.pass_rate*100).toFixed(1)}%`}</td><td>{d.failed} / {d.errors}</td>
-        <td>{d.average_latency_ms===null?'—':`${Math.round(d.average_latency_ms)} ms`}</td>
-        {scorerKeys.map(key=>{const score=d.scores.find(s=>JSON.stringify([s.scorer_id,s.scorer_version])===key);return <td key={key}>{score?`${score.average.toFixed(3)} (n=${score.count})`:'—'}</td>;})}
-      </tr>)}</tbody></Table>
-    </details>}
+    {configurationOpen && <Modal title="Configuration" description="Datasets and scorers recorded for this run."
+      onClose={()=>setConfigurationOpen(false)}
+      footer={<div className="flex justify-end"><Button variant="outline" onClick={()=>setConfigurationOpen(false)}>Close configuration</Button></div>}>
+      <section aria-label="Datasets" className="space-y-2 rounded-lg border p-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold">Datasets</h2><Pill>{datasetSummaries.length}</Pill>
+        </div>
+        <p className="text-xs text-muted-foreground">Select a dataset to view its samples. Pass rates include errors as not passed.</p>
+        {datasetSummaries.length ? <Table>
+          <thead><tr><th>Dataset</th><th>Status</th><th>Progress</th><th>Pass rate</th><th>Failed / errors</th><th>Avg. duration</th></tr></thead>
+          <tbody>{datasetSummaries.map(dataset => <tr key={dataset.dataset_id}>
+            <td>
+              <Button variant="link" className="h-auto whitespace-normal p-0 text-left" onClick={()=>{
+                setDatasetFilter(dataset.dataset_id);setBinding('ALL');setOutcome('ALL');setStrategy('ALL');
+                setSelectedId(null);setReportTab("Samples");setConfigurationOpen(false);
+              }}>{dataset.name??datasetNames.get(dataset.dataset_id)??dataset.dataset_id} · v{dataset.dataset_version}</Button>
+              <div className="mt-1 break-all font-mono text-xs text-muted-foreground">{dataset.dataset_id}</div>
+            </td>
+            <td><Pill>{dataset.status}</Pill></td><td>{dataset.completed} / {dataset.sample_count}</td>
+            <td>{dataset.pass_rate===null?'—':`${(dataset.pass_rate*100).toFixed(1)}%`}</td>
+            <td>{dataset.failed} / {dataset.errors}</td>
+            <td>{dataset.average_latency_ms===null?'—':`${Math.round(dataset.average_latency_ms)} ms`}</td>
+          </tr>)}</tbody>
+        </Table> : <p className="text-sm text-muted-foreground">No dataset statistics available yet.</p>}
+      </section>
+      <section aria-label="Scorers" className="space-y-2 rounded-lg border p-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold">Scorers</h2><Pill>{scorerGroups.size}</Pill>
+        </div>
+        <p className="text-xs text-muted-foreground">Recorded scorer versions and their dataset assignments.</p>
+        {scorerGroups.size ? <ul className="divide-y rounded-md border">
+          {[...scorerGroups].map(([key, scorer]) => <li key={key} className="space-y-2 p-3 text-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-medium">{scorer.name}</span>
+              {scorer.version!=null&&<Pill>v{scorer.version}</Pill>}
+              {scorer.name!==scorer.id&&<span className="break-all font-mono text-xs text-muted-foreground">{scorer.id}</span>}
+            </div>
+            <ul className="space-y-1 text-xs">{[...scorer.datasets].map(id => {
+              const dataset = datasetSummaries.find(item=>item.dataset_id===id);
+              const score = dataset?.scores.find(item=>item.scorer_id===scorer.id &&
+                (item.scorer_version==null || String(item.scorer_version)===String(scorer.version)));
+              return <li key={id} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span>{datasetNames.get(id)??id}</span>
+                {datasetNames.get(id)&&datasetNames.get(id)!==id&&<span className="break-all font-mono text-muted-foreground">{id}</span>}
+                {score&&<span className="text-muted-foreground">Average {score.average.toFixed(3)} (n={score.count})</span>}
+              </li>;
+            })}</ul>
+            {scorer.definition!=null&&<details className="text-xs">
+              <summary className="cursor-pointer font-medium">View scorer configuration</summary>
+              <JsonPreview value={scorer.definition}/>
+            </details>}
+          </li>)}
+        </ul> : <p className="text-sm text-muted-foreground">No scorer configuration recorded.</p>}
+      </section>
+    </Modal>}
     {reportTab==='Samples'&&<section className="space-y-3" aria-label="Sample results">
       <h2 className="text-lg font-medium">Sample results</h2>
       {remote.datasets?.length&&<Select aria-label="Filter samples by dataset" value={datasetFilter} onChange={e=>{setDatasetFilter(e.target.value);setSelectedId(null);}}><option value="ALL">All datasets</option>{remote.datasets.map(d=><option key={d.dataset_id} value={d.dataset_id}>{d.name} · v{d.dataset_version}</option>)}</Select>}
+      {isGuardrail&&<div className="flex flex-wrap items-center gap-2">
+        <Select aria-label="Guardrail aspect" value={binding} onChange={e=>setBinding(e.target.value)}>
+          <option value="ALL">All aspects</option>
+          {guardrailReport.binding_results?.map(b=><option key={b.binding_id} value={b.binding_id}>{b.aspect_name} · {b.dataset_id}</option>)}
+        </Select>
+        <Select aria-label="Classification" value={outcome} onChange={e=>setOutcome(e.target.value)}>
+          <option value="ALL">All outcomes</option>
+          {['TP','FP','TN','FN','ERROR'].map(value=><option key={value} value={value}>{value}</option>)}
+        </Select>
+        <Select aria-label="Strategy" value={strategy} onChange={e=>setStrategy(e.target.value)}>
+          <option value="ALL">All strategies</option>
+          {strategies.map(value=><option key={value} value={value}>{value}</option>)}
+        </Select>
+        <span className="text-xs text-muted-foreground">{visibleSamples.length} / {samples.length} samples</span>
+      </div>}
       <p className="text-sm text-muted-foreground">Duration includes target execution and scoring. Select a sample to inspect full input, response and scorer feedback.</p>
 
-      {loading ? <p role="status">Loading samples…</p> : !samples.length && !error ? <Empty>No sample results have been stored yet.</Empty> : null}
-      {!loading&&samples.length>0&&!visibleSamples.length&&<Empty>No samples for this dataset yet.</Empty>}
+      {samplesError&&<div role="alert" className="text-sm text-destructive">{samplesError} <Button variant="outline" onClick={()=>setRetry(v=>v+1)}>Retry</Button></div>}
+      {pageCount > 1 && <div className="flex items-center gap-2 text-xs">
+        <Button variant="outline" size="xs" disabled={currentPage===0} onClick={()=>setSamplePage(currentPage-1)}>Previous</Button>
+        <span>Page {currentPage+1} of {pageCount}</span>
+        <Button variant="outline" size="xs" disabled={currentPage===pageCount-1} onClick={()=>setSamplePage(currentPage+1)}>Next</Button>
+      </div>}
+      {samplesLoading ? <p role="status">Loading samples…</p> : !samples.length && !samplesError ? <Empty>No sample results have been stored yet.</Empty> : null}
+      {!samplesLoading&&samples.length>0&&!visibleSamples.length&&<Empty>No samples match the current filters.</Empty>}
       {visibleSamples.length > 0 && <Table>
-        <thead><tr><th>Sample</th><th>Dataset</th><th>Status</th><th>Duration</th><th>Scores</th><th>Input</th><th>Response</th></tr></thead>
-        <tbody>{visibleSamples.map(row => <tr key={row.id}>
+        <thead><tr><th>Sample</th><th>Dataset</th><th>Status</th>{isGuardrail&&<><th>Strategy</th><th>Outcome</th><th>HTTP</th><th>Guardrail latency</th></>}<th>Duration</th><th>Scores</th><th>Input</th><th>Response</th></tr></thead>
+        <tbody>{pageSamples.map(row => <tr key={row.id}>
           <td><Button variant="link" onClick={() => setSelectedId(row.id)}>{row.id}<ChevronRight /></Button></td>
           <td>{remote.datasets?.find(d=>d.dataset_id===row.dataset_id)?.name??row.dataset_id??run.snapshot.dataset.name} · v{row.dataset_version??run.snapshot.dataset.version}</td>
           <td><Pill tone={row.status === "PASS" ? "good" : "bad"}>{row.status}</Pill>{row.error && <p className="text-destructive">{row.error}</p>}</td>
+          {isGuardrail&&<>
+            <td>{row.guardrail_result?.strategy || '—'}</td>
+            <td>{row.guardrail_result?.status === 'ERROR' ? 'ERROR' : row.guardrail_result?.classifications
+              .filter(item=>binding==='ALL'||item.binding_id===binding).map(item=>item.outcome).join(', ') || '—'}</td>
+            <td>{row.guardrail_result?.http_status ?? '—'}</td>
+            <td className="whitespace-nowrap">{latencyText(row.guardrail_result?.guardrail_latency_ms)}</td>
+          </>}
           <td className="whitespace-nowrap">{Math.round(row.latencyMs)} ms</td>
           <td>{row.scores.length ? row.scores.map(score => <div key={score.scorerId} className="whitespace-nowrap">{score.scorerId}: {score.value.toFixed(2)}</div>) : "—"}</td>
           <td className="max-w-72"><div className="line-clamp-3 break-words">{textValue(row.input)}</div></td>
@@ -677,11 +920,26 @@ function LiveReport({ run, onBack }: {run: Evaluation; onBack(): void}) {
           <div className="flex gap-3"><Pill>{sample.status}</Pill><Pill>{Math.round(sample.latencyMs)} ms</Pill></div>
           {sample.error && <p role="alert" className="text-destructive">{sample.error}</p>}
           {([['Input', sample.input], ['Response', sample.output], ['Reference', sample.reference]] as const).map(([label, value]) => <section key={label}><h3 className="mb-2 font-medium">{label}</h3><JsonPreview value={value} /></section>)}
+          {sample.guardrail_result&&<section>
+            <h3 className="mb-2 font-medium">Guardrail request details</h3>
+            <p className="mb-2 text-sm text-muted-foreground">HTTP {sample.guardrail_result.http_status ?? '—'} · Guardrail {latencyText(sample.guardrail_result.guardrail_latency_ms)} · Scorer {latencyText(sample.guardrail_result.scorer_latency_ms)} · Mock cost ${sample.guardrail_result.cost.amount.toFixed(4)}</p>
+            <JsonPreview value={sample.guardrail_result}/>
+          </section>}
           <section><h3 className="mb-2 font-medium">Scores</h3>{sample.scores.map(score => <div key={score.scorerId} className="mb-3 rounded-lg border p-4"><p>{score.scorerId}: {score.value.toFixed(2)} · {score.passed ? "PASS" : "FAIL"}</p><p className="mt-2 text-sm text-muted-foreground">{score.reason}</p></div>)}</section>
           <section><h3 className="mb-2 font-medium">Execution trace</h3>{sample.trace.map((span, i) => <div key={i} className="mb-3"><p>{span.name} · {Math.round(span.durationMs)} ms</p><p className="text-sm text-muted-foreground">{span.detail}</p></div>)}</section>
         </div>}
       </SheetContent>
     </Sheet>
-    <Button disabled={loading || !!error} variant="outline" onClick={() => download(`${run.id}.json`, {...run, simulated: false, datasetSummaries, results: samples})}><Download />Export run</Button>
+    <Button disabled={loading || !!error || exporting} variant="outline" onClick={async () => {
+      setExporting(true);
+      try {
+        const results = await executionPages<SampleResult>(projectId, samplesPath);
+        download(`${run.id}.json`, {...run, simulated: false, datasetSummaries, results});
+      } catch (error) {
+        setError((error as Error).message);
+      } finally {
+        setExporting(false);
+      }
+    }}><Download />{exporting ? 'Exporting…' : 'Export run'}</Button>
   </Frame>;
 }
