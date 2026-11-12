@@ -164,6 +164,7 @@ function DatasetScoreTable({rows,baselineRows=[],running=false}:{
 type ComparisonReport = {id:string;name:string;status:string;guardrail_id?:string;provider?:string;report_id?:string;created_at?:string};
 export interface GroupComparison {
  grouped:boolean;
+ managed?:boolean;
  reportId:string;
  catalog:Evaluation[];
  concurrency:number|undefined;
@@ -185,8 +186,8 @@ export function GuardrailScoreDashboard({report,evaluationId,running=report.stat
  const project=useCurrentProjectId();const [mode,setMode]=useState('grouped'),[metric,setMetric]=useState<Metric>('f1');
  const [choices,setChoices]=useState<ComparisonReport[]>([]),[singleOther,setSingleOther]=useState('');
  const [compareOpen,setCompareOpen]=useState(false);
- const [comparison,setComparison]=useState<GuardrailSummary|null>(null),[error,setError]=useState(''),[listError,setListError]=useState(''),[loading,setLoading]=useState(false);
- useEffect(()=>{let active=true;setChoices([]);setSingleOther('');setComparison(null);if(!report.evaluation_config?.id||report.evaluation_config.version==null)return;executionApi<{items:ComparisonReport[]}>(project,`guardrail-reports?config_id=${encodeURIComponent(report.evaluation_config.id)}&config_version=${report.evaluation_config.version}`).then(r=>{if(active)setChoices(r.items.filter(i=>i.id!==evaluationId));}).catch(e=>{if(active)setListError(e.message);});return()=>{active=false;};},[project,evaluationId,report.evaluation_config?.id,report.evaluation_config?.version]);
+ const [loadedComparison,setComparison]=useState<GuardrailSummary|null>(null),[error,setError]=useState(''),[listError,setListError]=useState(''),[loading,setLoading]=useState(false);
+ useEffect(()=>{let active=true;setChoices([]);setSingleOther('');setComparison(null);if(groupComparison?.managed||!report.evaluation_config?.id||report.evaluation_config.version==null)return;executionApi<{items:ComparisonReport[]}>(project,`guardrail-reports?config_id=${encodeURIComponent(report.evaluation_config.id)}&config_version=${report.evaluation_config.version}`).then(r=>{if(active)setChoices(r.items.filter(i=>i.id!==evaluationId));}).catch(e=>{if(active)setListError(e.message);});return()=>{active=false;};},[project,evaluationId,report.evaluation_config?.id,report.evaluation_config?.version,groupComparison?.managed]);
  const options=comparisonOptions(choices,groupComparison);
  const selectedKey=groupComparison?.grouped?groupComparison.selected:singleOther;
  const referenceGroup=groupComparison?.catalog.find(run=>run.remote?.experiment_id===selectedKey)?.remote?.concurrency_group;
@@ -194,7 +195,7 @@ export function GuardrailScoreDashboard({report,evaluationId,running=report.stat
   run.remote?.concurrency_group===referenceGroup&&run.remote?.concurrency===groupComparison?.concurrency);
  const choice=options.find(option=>option.id===selectedKey) ??
   options.find(option=>option.id===(peer&&peer.remote?.experiment_id));
- const other=choice?.id??'';
+ const other=groupComparison?.managed ? groupComparison.selected : choice?.id??'';
  const runsByExperiment=new Map(groupComparison?.catalog.map(run=>[run.remote?.experiment_id,run]));
  const reportConcurrency=(id:string)=>{
   const run=runsByExperiment.get(id);
@@ -208,6 +209,13 @@ export function GuardrailScoreDashboard({report,evaluationId,running=report.stat
  useEffect(()=>{let active=true;let timer:ReturnType<typeof setTimeout>;setComparison(null);setError('');setLoading(!!other);async function refresh(){try{const r=await executionApi<GuardrailSummary>(project,`reports/${encodeURIComponent(other)}?summary_only=true`);if(active){setComparison(r);setLoading(false);if(r.status==='RUNNING')timer=setTimeout(refresh,3000);}}catch(e){if(active){setError((e as Error).message);setLoading(false);}}}if(other)void refresh();return()=>{active=false;clearTimeout(timer);};},[project,other,evaluationId]);
  if(!report.overall)return null;
  const total=report.overall,rows=report.dataset_results??[],identity=report.guardrail;
+ const referenceRows=loadedComparison?.dataset_results??[];
+ const incompatible=!!(groupComparison?.managed && loadedComparison && (
+  !report.evaluation_config || report.evaluation_config.id!==loadedComparison.evaluation_config?.id ||
+  report.evaluation_config.version!==loadedComparison.evaluation_config?.version ||
+  !rows.length || !datasetsMatch(rows,referenceRows)
+ ));
+ const comparison=incompatible ? null : loadedComparison;
  const baselineRows=comparison?.dataset_results??[];
  const matched=!!comparison&&datasetsMatch(rows,baselineRows);
  const chartRows:ChartDataset[]=matched?rows.flatMap(d=>[{...d,reportRole:'Current' as const},{...baselineRows.find(b=>b.dataset_id===d.dataset_id&&b.dataset_version===d.dataset_version)!,reportRole:'Selected' as const}]):rows;
@@ -239,18 +247,52 @@ export function GuardrailScoreDashboard({report,evaluationId,running=report.stat
  </div>;
  const header=document.getElementById('guardrail-report-controls');
  return <div className="space-y-3">
- {header?createPortal(controls,header):<div className="flex justify-end">{controls}</div>}
+ {!groupComparison?.managed&&(header?createPortal(controls,header):<div className="flex justify-end">{controls}</div>)}
  {other?<section aria-label="Guardrail endpoints" className="space-y-2">
   <h3 className="text-sm font-semibold">Guardrail endpoints</h3>
   <div className="grid gap-2 sm:grid-cols-2">
    <EndpointCard role="Current" endpoint={identity} concurrency={groupComparison?.concurrency} detail={groupComparison?.reportId}/>
-   <EndpointCard role="Selected" endpoint={comparison?.guardrail??{provider:choice?.provider,id:choice?.guardrail_id}}
+   <EndpointCard role="Selected" endpoint={loadedComparison?.guardrail??{provider:choice?.provider,id:choice?.guardrail_id}}
     concurrency={reportConcurrency(other)}
-    detail={loading?'Loading comparison…':`${choice?.report_id??other}${comparison?.status==='RUNNING'?' · provisional':''}`}/>
+    detail={loading?'Loading comparison…':`${choice?.report_id??runsByExperiment.get(other)?.id??other}${comparison?.status==='RUNNING'?' · provisional':''}`}/>
   </div>
   <ErrorText message={error}/>
- </section>:<div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/20 px-3 py-2 text-xs"><p><strong>Guardrail</strong> · {identity?.type??'GUARDRAIL'} · {identity?.provider??'Unknown provider'} · <strong>{identity?.name||identity?.id||'Unknown'}</strong>{identity?.name!==identity?.id&&identity?.id?` (${identity.id})`:''}</p>{identity?.registry_revision&&<span className="font-mono text-muted-foreground">Config {identity.registry_revision}</span>}</div>}
- <section aria-label="Overall scores" className="space-y-2"><div className="flex items-center justify-between"><h2 className="text-sm font-semibold">Overall scores</h2><span className="text-xs text-muted-foreground">{total.processed} processed · {total.errors} errors · {total.pending} pending</span></div><div className="grid grid-cols-2 gap-3 md:grid-cols-4">{metrics.map(m=><div key={m} className="rounded-lg border px-3 py-2"><p className="text-xs text-muted-foreground">{labels[m]}</p><div className="mt-1 flex items-baseline justify-between gap-2"><p className="text-lg font-semibold tabular-nums">{scoreText(total[m])}</p>{comparison?.overall&&<ScoreDiff current={total[m]} reference={comparison.overall[m]}/>}</div>{comparison?.overall&&<p className="mt-1 text-[10px] text-muted-foreground">B · {scoreText(comparison.overall[m])}</p>}</div>)}</div><div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground"><span>TP {total.TP} · FP {total.FP} · TN {total.TN} · FN {total.FN}</span><details><summary className="cursor-pointer">Metric definitions</summary><p className="mt-1">Precision = TP/(TP+FP) · Recall = TP/(TP+FN) · Accuracy = (TP+TN)/classified · F1 = 2TP/(2TP+FP+FN). Micro-average; errors excluded and reported separately. Zero denominator = N/A.</p></details></div></section>
+  {incompatible&&<p role="status" className="text-xs text-muted-foreground">Comparison requires the same evaluation version and the same published dataset versions. Choose another report.</p>}
+ </section>:!groupComparison?.managed&&<div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/20 px-3 py-2 text-xs"><p><strong>Guardrail</strong> · {identity?.type??'GUARDRAIL'} · {identity?.provider??'Unknown provider'} · <strong>{identity?.name||identity?.id||'Unknown'}</strong>{identity?.name!==identity?.id&&identity?.id?` (${identity.id})`:''}</p>{identity?.registry_revision&&<span className="font-mono text-muted-foreground">Config {identity.registry_revision}</span>}</div>}
+ <section aria-label="Evaluation results" className="space-y-2">
+  <Table>
+   <thead><tr><th>Run</th>{metrics.map(metric=><th key={metric}>{labels[metric]}</th>)}<th>P50</th><th>P95</th><th>Token usage</th></tr></thead>
+   <tbody>{[
+    {role:'Current' as const, scores:total},
+    ...(comparison?.overall ? [{role:'Selected' as const, scores:comparison.overall}] : []),
+   ].map(({role,scores})=><tr key={role}>
+    <th scope="row">
+     {other ? <ComparisonKey role={role}/> : 'Current report'}
+     <p className="mt-1 whitespace-nowrap text-xs font-normal text-muted-foreground">
+      {scores.processed} processed · {scores.errors} errors · {scores.pending} pending
+     </p>
+    </th>
+    {metrics.map(metric=><td key={metric} className="whitespace-nowrap tabular-nums">
+     <span className="font-semibold">{scoreText(scores[metric])}</span>
+     {role==='Current' && comparison?.overall && <div className="text-xs">
+      <ScoreDiff current={scores[metric]} reference={comparison.overall[metric]}/>
+     </div>}
+    </td>)}
+    <td className="whitespace-nowrap tabular-nums">{ms(scores.latency?.p50_ms??null)}</td>
+    <td className="whitespace-nowrap tabular-nums">{ms(scores.latency?.p95_ms??null)}</td>
+    <td className="tabular-nums" title="Simulated usage: 128 tokens per measured request.">
+     {scores.latency ? (scores.latency.count*128).toLocaleString() : '—'}
+    </td>
+   </tr>)}</tbody>
+  </Table>
+  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+   <span>{other && 'A · '}TP {total.TP} · FP {total.FP} · TN {total.TN} · FN {total.FN}</span>
+   {comparison?.overall && <span>B · TP {comparison.overall.TP} · FP {comparison.overall.FP} · TN {comparison.overall.TN} · FN {comparison.overall.FN}</span>}
+   <details><summary className="cursor-pointer">Metric definitions</summary>
+    <p className="mt-1">Precision = TP/(TP+FP) · Recall = TP/(TP+FN) · Accuracy = (TP+TN)/classified · F1 = 2TP/(2TP+FP+FN). Scores are micro-averaged and exclude errors. A zero denominator displays N/A.</p>
+   </details>
+  </div>
+ </section>
  <section aria-label="Dataset scores" className="space-y-3"><div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-semibold">Scores by dataset</h2><div className="flex gap-2"><Select aria-label="Dataset score display" value={mode} onChange={e=>setMode(e.target.value)}><option value="grouped">Grouped columns · all scores</option><option value="metric">Compare one score</option><option value="table">Table</option></Select>{mode==='metric'&&<Select aria-label="Score metric" value={metric} onChange={e=>setMetric(e.target.value as Metric)}>{metrics.map(m=><option key={m} value={m}>{labels[m]}</option>)}</Select>}</div></div>
  {mode!=='table'&&(comparison&&!matched?<div className="space-y-3" aria-label="Separate dataset charts">
   <p className="text-xs text-muted-foreground">Reports use different dataset versions or uploaded rows, so dataset scores are shown separately.</p>

@@ -1,9 +1,9 @@
 import {TraceViewer} from './trace-viewer';
 import {aspectLabels} from "./criteria";
 import {GuardrailReport, type BindingResult} from './guardrail-report';
-import type {GuardrailSummary} from './guardrail-score-dashboard';
+import {scoreText, type GuardrailSummary} from './guardrail-score-dashboard';
 import { ReportConfig } from "./report-config";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useCurrentProjectId } from "@/hooks/use-project";
 import { executionApi, executionPages } from "./remote";
 import {
@@ -40,8 +40,8 @@ import {
 } from "./ui";
 
 function compareRunOrder(a: Evaluation, b: Evaluation) {
-  return (a.remote?.serial_index ?? a.remote?.concurrency ?? 0) -
-    (b.remote?.serial_index ?? b.remote?.concurrency ?? 0);
+  return (a.remote?.group_index ?? a.remote?.serial_index ?? a.remote?.concurrency ?? 0) -
+    (b.remote?.group_index ?? b.remote?.serial_index ?? b.remote?.concurrency ?? 0);
 }
 
 export function ReportsPage({
@@ -54,13 +54,28 @@ export function ReportsPage({
   const { state } = useWorkbench();
   const [idQuery, setIdQuery] = useState("");
   const [targetId, setTargetId] = useState("ALL");
-  const [groupSelection, setGroupSelection] = useState<{source:string;reference:string}>();
+  const [comparison, setComparison] = useState<{source:string;reference:string}>();
   const run = state.evaluations.find((e) => e.id === evaluationId);
+  const groupId = run?.remote?.concurrency_group ?? evaluationId;
+  const group = groupId ? state.evaluations.filter(e => e.remote?.concurrency_group === groupId).sort(compareRunOrder) : [];
+  const applyComparison = (source: Evaluation, reference: Evaluation) => {
+    setComparison({source:source.id,reference:reference.remote!.experiment_id});
+    onSelect(source.id);
+  };
+  if (!run && group.length) {
+    const first = group[0];
+    const finished = group.filter(member => member.status !== 'RUNNING').length;
+    return <Frame title={first.snapshot.target.name} description={`Evaluation group · ${new Date(first.createdAt).toLocaleString()} · ${finished}/${group.length} runs finished`}
+      action={<CompareRuns sources={group} current={first} catalog={state.evaluations} onApply={applyComparison}/>}>
+      <Button variant="ghost" onClick={()=>onSelect("")}><ArrowLeft/>All reports</Button>
+      <RunSummary runs={group} onSelect={id=>{setComparison(undefined);onSelect(id);}}/>
+    </Frame>;
+  }
   if (evaluationId && run?.remote) {
-    const groupId = run.remote.concurrency_group;
-    return <LiveReport key={run.id} run={run} onBack={() => onSelect("")} onSelect={onSelect}
-      comparedReport={groupId === groupSelection?.source ? groupSelection?.reference ?? "" : ""}
-      onCompareReport={reference => { if (groupId) setGroupSelection({source:groupId,reference}); }} />;
+    return <LiveReport key={run.id} run={run} onBack={() => onSelect(run.remote?.concurrency_group ?? "")}
+      comparedReport={comparison?.source === run.id ? comparison.reference : ""}
+      compareControl={<CompareRuns sources={group.length ? group : [run]} current={run} catalog={state.evaluations}
+        active={comparison?.source === run.id} onClear={()=>setComparison(undefined)} onApply={applyComparison}/>}/>;
   }
   if (evaluationId)
     return run ? (
@@ -138,7 +153,7 @@ export function ReportsPage({
               const ordered = members.sort(compareRunOrder);
               const e = ordered[0];
               const groupId = e.remote?.concurrency_group;
-              const openId = ordered.find(member => member.id === query)?.id ?? e.id;
+              const openId = ordered.find(member => member.id === query)?.id ?? groupId ?? e.id;
               const finished = ordered.filter(member => member.status !== "RUNNING").length;
               let status: Evaluation["status"] | "QUEUED" = e.status;
               if (groupId) {
@@ -591,11 +606,82 @@ interface DatasetSummary {
 type ReportLatency = {p50_ms: number | null; p95_ms: number | null; count: number};
 const latencyText = (value: number | null | undefined) => value == null ? '—' : `${value.toFixed(1)} ms`;
 
-function ConcurrencyComparison({runs, currentId, currentLatency, onSelect}: {runs: Evaluation[]; currentId: string; currentLatency: ReportLatency | null; onSelect(id: string): void}) {
+function runConcurrency(run:Evaluation) {
+  return run.remote?.concurrency ?? run.snapshot.environment.runner?.concurrency;
+}
+
+function runLabel(run:Evaluation) {
+  const {provider,guardrail_id}=run.snapshot.target;
+  return [`Concurrency ${runConcurrency(run) ?? '—'}`,provider,guardrail_id].filter(Boolean).join(' · ');
+}
+
+function CompareRuns({sources,current,catalog,active,onClear,onApply}: {
+  sources:Evaluation[]; current:Evaluation; catalog:Evaluation[]; active?:boolean;
+  onClear?():void; onApply(source:Evaluation,reference:Evaluation):void;
+}) {
+  const [open,setOpen]=useState(false);
+  const [sourceId,setSourceId]=useState(current.id);
+  const [referenceId,setReferenceId]=useState('');
+  const source=sources.find(run=>run.id===sourceId) ?? current;
+  const sourceTarget=source.snapshot.target;
+  const usesUploadedRows=(run:Evaluation)=>run.remote?.datasets?.some(dataset=>dataset.input_source==='upload');
+  const datasetKeys=(run:Evaluation)=>run.remote?.datasets?.map(dataset=>`${dataset.dataset_id}:${dataset.dataset_version}`).sort().join('|');
+  const sourceDatasets=datasetKeys(source);
+  const candidates=catalog.filter(run=>run.remote?.execution_mode==='guardrail' && run.id!==source.id &&
+    run.snapshot.target.id===sourceTarget.id && run.snapshot.target.version===sourceTarget.version &&
+    !usesUploadedRows(source) && !usesUploadedRows(run) &&
+    (!sourceDatasets || !datasetKeys(run) || sourceDatasets===datasetKeys(run)) &&
+    (!source.remote?.concurrency_group || run.remote.concurrency_group!==source.remote.concurrency_group));
+  const choices=new Map<string,Evaluation[]>();
+  for(const run of candidates) {
+    const key=run.remote?.concurrency_group ?? run.id;
+    choices.set(key,[...(choices.get(key) ?? []),run]);
+  }
+  const reference=candidates.find(run=>run.id===referenceId);
+  if(current.remote?.execution_mode!=='guardrail') return null;
+  return <div className="flex gap-2">
+    {active&&<Button variant="ghost" onClick={onClear}>Clear comparison</Button>}
+    <Button variant="outline" onClick={()=>{setSourceId(current.id);setReferenceId('');setOpen(true);}}>Compare</Button>
+    {open&&<Modal title="Compare runs" description={`Compare runs from ${sourceTarget.name} · v${sourceTarget.version} using the same published datasets.`} onClose={()=>setOpen(false)}
+      footer={<Button disabled={!reference} onClick={()=>{if(reference){setOpen(false);onApply(source,reference);}}}>Apply comparison</Button>}>
+      <Field label="A · Current evaluation run">
+        <Select value={source.id} onChange={e=>{setSourceId(e.target.value);setReferenceId('');}}>
+          {sources.map(run=><option key={run.id} value={run.id}>{runLabel(run)}</option>)}
+        </Select>
+      </Field>
+      {!choices.size&&<p className="text-xs text-muted-foreground">{usesUploadedRows(source)
+        ? 'This run uses uploaded cases. Choose a run using published datasets.'
+        : 'No other runs match this evaluation version and dataset selection.'}</p>}
+      <Field label="B · Comparison run">
+        <Select value={referenceId} onChange={e=>setReferenceId(e.target.value)}>
+          <option value="">Select a run</option>
+          {[...choices].map(([id,runs])=>{
+            const first=runs[0]!;
+            const date=new Date(first.createdAt).toLocaleString();
+            return first.remote?.concurrency_group
+              ? <optgroup key={id} label={`Run group · ${date}`}>
+                  {runs.slice().sort(compareRunOrder).map(run=><option key={run.id} value={run.id}>{runLabel(run)} · {run.status}</option>)}
+                </optgroup>
+              : <option key={id} value={first.id}>{runLabel(first)} · {date} · {first.status}</option>;
+          })}
+        </Select>
+      </Field>
+    </Modal>}
+  </div>;
+}
+
+const runColors = ['#4338ca', '#0f766e', '#b45309', '#be185d', '#0369a1', '#7e22ce', '#4d7c0f', '#b91c1c'];
+const runScoreColumns = [
+  ['precision', 'Precision'], ['recall', 'Recall'], ['accuracy', 'Accuracy'], ['f1', 'F1'],
+] as const;
+const runLatencyColumns = [['p50_ms', 'P50'], ['p95_ms', 'P95']] as const;
+
+function RunSummary({runs, onSelect}: {runs: Evaluation[]; onSelect(id: string): void}) {
   const projectId = useCurrentProjectId();
   const showEndpoint = runs.some(run=>run.remote?.execution_mode==='guardrail');
-  const [metrics, setMetrics] = useState<Record<string, ReportLatency | null>>({});
-  const inputs = JSON.stringify(runs.filter(run => run.id !== currentId).map(run => [run.remote!.experiment_id, run.status]));
+  const [metrics, setMetrics] = useState<Record<string, (GuardrailSummary & {latency?:ReportLatency}) | null>>({});
+  const [chartMode, setChartMode] = useState<'scores'|'latency'>('scores');
+  const inputs = JSON.stringify(runs.map(run => [run.remote!.experiment_id, run.status]));
   useEffect(() => {
     const members = JSON.parse(inputs) as Array<[string, Evaluation['status']]>;
     let active = true;
@@ -603,8 +689,8 @@ function ConcurrencyComparison({runs, currentId, currentLatency, onSelect}: {run
     async function refresh() {
       const entries = await Promise.all(members.map(async ([id]) => {
         try {
-          const report = await executionApi<{latency?: ReportLatency}>(projectId, `reports/${encodeURIComponent(id)}?summary_only=true`);
-          return [id, report.latency??null] as const;
+          const report = await executionApi<GuardrailSummary & {latency?:ReportLatency}>(projectId, `reports/${encodeURIComponent(id)}?summary_only=true`);
+          return [id, report] as const;
         } catch {
           return [id, null] as const;
         }
@@ -616,27 +702,83 @@ function ConcurrencyComparison({runs, currentId, currentLatency, onSelect}: {run
     void refresh();
     return () => { active=false; clearTimeout(timer); };
   }, [projectId, inputs]);
+  const rows = runs.map((run, index) => ({
+    run,
+    color: runColors[index % runColors.length]!,
+    report: metrics[run.remote!.experiment_id],
+  }));
+  const isLatency = !showEndpoint || chartMode === 'latency';
+  const groups = isLatency
+    ? runLatencyColumns.map(([key, label]) => ({label, values: rows.map(({report}) => report?.latency?.[key])}))
+    : runScoreColumns.map(([key, label]) => ({label, values: rows.map(({report}) => report?.overall?.[key])}));
+  const max = isLatency ? Math.max(1, ...groups.flatMap(group => group.values.map(value => value ?? 0))) : 1;
+  const hasValues = groups.some(group => group.values.some(value => value != null));
   return <section className="space-y-2" aria-label="Run summary">
     <h2 className="text-sm font-semibold">Run summary</h2>
     <p className="text-xs text-muted-foreground">{runs.some(run=>run.remote?.serial_index!==undefined)
-      ?'Runs execute one at a time in the order shown.' : 'Jobs in the same group may overlap.'} Running results are provisional.</p>
-    <Table><thead><tr><th>Concurrency</th>{showEndpoint&&<th>Guardrail endpoint</th>}<th>Status</th><th>Measurements</th><th>Token usage</th><th>P50</th><th>P95</th><th>Report</th></tr></thead>
-      <tbody>{runs.map(run=>{
-        const values=run.id===currentId ? currentLatency : metrics[run.remote!.experiment_id];
+      ?'This group was configured to run sequentially.' : 'Runs can execute concurrently.'} Running results are provisional.</p>
+    <Table><thead><tr><th>Concurrency</th>{showEndpoint&&<><th>Provider</th><th>Endpoint</th></>}<th>Status</th><th>Progress</th><th>Token usage</th>{showEndpoint&&runScoreColumns.map(([key,label])=><th key={key}>{label}</th>)}<th>P50</th><th>P95</th><th>Report</th></tr></thead>
+      <tbody>{rows.map(({run,color,report})=>{
+        const values=report?.latency;
         const {provider,guardrail_id}=run.snapshot.target;
-        return <tr key={run.id}><td>{run.remote!.concurrency}</td>
-          {showEndpoint&&<td>{[provider,guardrail_id].filter(Boolean).join(' · ')||'—'}</td>}
-          <td>{run.status==='RUNNING'?run.remote!.phase:run.status}</td><td>{values?.count??'—'}</td>
+        return <tr key={run.id}><td><span className="inline-flex items-center gap-2 tabular-nums">
+          <span aria-hidden="true" className="size-2.5 rounded-full" style={{backgroundColor:color}}/>{runConcurrency(run)??'—'}
+        </span></td>
+          {showEndpoint&&<><td>{provider||'—'}</td><td>{guardrail_id||'—'}</td></>}
+          <td>{run.status==='RUNNING'?run.remote!.phase:run.status}</td><td>{run.remote!.completed ?? 0} / {run.remote!.sample_count ?? '—'}</td>
           <td className="tabular-nums" title="Simulated usage: 128 tokens per measured request.">{values ? (values.count * 128).toLocaleString() : '—'}</td>
+          {showEndpoint&&runScoreColumns.map(([key])=><td key={key} className="tabular-nums">{scoreText(report?.overall?.[key])}</td>)}
           <td>{latencyText(values?.p50_ms)}</td><td>{latencyText(values?.p95_ms)}</td>
-          <td>{run.id===currentId?'Current report':<Button variant="link" onClick={()=>onSelect(run.id)}>View report</Button>}</td></tr>;
+          <td><Button variant="link" onClick={()=>onSelect(run.id)}>View report</Button></td></tr>;
       })}</tbody>
     </Table>
+    <section className="space-y-3 rounded-lg border bg-card p-3" aria-label="Run comparison">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold">Run comparison</h2>
+        {showEndpoint&&<Select aria-label="Run comparison metric" className="h-8 w-auto" value={chartMode}
+          onChange={event=>setChartMode(event.target.value==='latency' ? 'latency' : 'scores')}>
+          <option value="scores">Scores</option>
+          <option value="latency">Latency</option>
+        </Select>}
+      </div>
+      {hasValues ? <>
+        <div className="overflow-x-auto">
+          <div className="flex min-w-[26rem] gap-2">
+            <div aria-hidden="true" className="flex h-36 flex-col justify-between whitespace-nowrap text-right text-[10px] tabular-nums text-muted-foreground">
+              {[1,.5,0].map(tick=><span key={tick}>{isLatency ? `${Number((max*tick).toFixed(1))} ms` : `${tick*100}%`}</span>)}
+            </div>
+            <div className="flex min-w-0 flex-1 gap-3" aria-label={isLatency ? 'Guardrail latency by run' : 'Scores by run'}>
+              {groups.map(({label,values})=><div key={label} className="min-w-0 flex-1 text-center">
+                <div className="relative flex h-36 items-end justify-center gap-1 border-y px-1">
+                  <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-1/2 border-t border-dashed"/>
+                  {values.map((value,index)=>{
+                    const {run,color}=rows[index]!;
+                    const description=`${label} · ${runLabel(run)} · ${isLatency ? latencyText(value) : scoreText(value)}`;
+                    return <div key={run.id} role="img" aria-label={description} title={description}
+                      className="relative flex h-full w-full max-w-7 items-end justify-center">
+                      {value == null ? <span aria-hidden="true" className="text-xs text-muted-foreground">—</span> :
+                        <span aria-hidden="true" className="w-full rounded-t-sm" style={{height:`${value/max*100}%`,minHeight:2,backgroundColor:color}}/>}
+                    </div>;
+                  })}
+                </div>
+                <p className="mt-1 text-xs font-medium">{label}</p>
+              </div>)}
+            </div>
+          </div>
+        </div>
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          {rows.map(({run,color})=><li key={run.id} title={runLabel(run)} className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="size-2.5 rounded-full" style={{backgroundColor:color}}/>
+            {runConcurrency(run) ?? '—'}{run.snapshot.target.provider && ` · ${run.snapshot.target.provider}`}
+          </li>)}
+        </ul>
+      </> : <p className="py-4 text-xs text-muted-foreground">{Object.keys(metrics).length ? 'No measurements available yet.' : 'Loading run results…'}</p>}
+    </section>
   </section>;
 }
 
-function LiveReport({ run, onBack, onSelect, comparedReport, onCompareReport }: {
-  run: Evaluation; onBack(): void; onSelect(id: string): void; comparedReport:string; onCompareReport(id:string):void;
+function LiveReport({ run, onBack, comparedReport, compareControl }: {
+  run: Evaluation; onBack(): void; comparedReport:string; compareControl:ReactNode;
 }) {
   const remote = run.remote!;
   const {state:catalog}=useWorkbench();
@@ -648,9 +790,6 @@ function LiveReport({ run, onBack, onSelect, comparedReport, onCompareReport }: 
   const [strategy, setStrategy] = useState('ALL');
   const [latency, setLatency] = useState<ReportLatency|null>(null);
   const concurrency = remote.concurrency ?? run.snapshot.environment.runner?.concurrency;
-  const group = remote.concurrency_group ? catalog.evaluations
-    .filter(item=>item.remote?.concurrency_group===remote.concurrency_group)
-    .sort(compareRunOrder) : [];
   const [samples, setSamples] = useState<SampleResult[]>([]);
   const [aspectReport,setAspectReport]=useState<{bindings:Array<{id:string;name:string;aspect:string;version:string|null;dataset_id:string;provenance:string;definition:unknown}>;aspects:Array<{aspect:string;source:string;evaluated:number;passed:number;errors:number;missing:number;pending:number;pass_rate:number|null}>;dataset_aspects?:Array<{dataset_id:string;aspect:string;source:string;pass_rate:number|null;evaluated:number;passed:number;errors:number;missing:number}>}>({bindings:[],aspects:[]});
   const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
@@ -765,21 +904,19 @@ function LiveReport({ run, onBack, onSelect, comparedReport, onCompareReport }: 
       group.datasets.add(dataset.dataset_id);
     }
   }
-  return <Frame title={run.name} description="Live evaluation · Persisted sample results">
-    <div className="flex items-center justify-between"><Button variant="ghost" onClick={onBack}><ArrowLeft/>All reports</Button><div className="flex items-center gap-2"><div id="guardrail-report-controls"/><Button variant="outline" onClick={()=>setConfigurationOpen(true)}>Configuration</Button><Pill>{run.status}</Pill></div></div>
+  return <Frame title={run.name} description={runLabel(run)}>
+    <div className="flex items-center justify-between"><Button variant="ghost" onClick={onBack}><ArrowLeft/>{remote.concurrency_group ? "Back to run group" : "All reports"}</Button><div className="flex items-center gap-2">{compareControl}<Button variant="outline" onClick={()=>setConfigurationOpen(true)}>Configuration</Button><Pill>{run.status}</Pill></div></div>
     <Tabs items={['Overview','Samples','Traces']} active={reportTab} onChange={setReportTab}/>
-    {reportTab==='Overview'&&<section aria-label="Run latency" className="flex flex-wrap gap-x-6 gap-y-2 rounded-lg border px-3 py-2 text-sm">
-      <span>Case concurrency <strong>{concurrency??'—'}</strong></span>
+    {reportTab==='Overview'&&!isGuardrail&&<section aria-label="Run latency" className="flex flex-wrap gap-x-6 gap-y-2 rounded-lg border px-3 py-2 text-sm">
       <span>P50 <strong>{latencyText(latency?.p50_ms)}</strong></span>
       <span>P95 <strong>{latencyText(latency?.p95_ms)}</strong></span>
-      <span className="text-muted-foreground">{remote.execution_mode==='guardrail'?'Guardrail HTTP latency':'Sample execution latency'}</span>
+      <span className="text-muted-foreground">Sample execution latency</span>
     </section>}
-    {reportTab==='Overview'&&group.length>0&&<ConcurrencyComparison runs={group} currentId={run.id} currentLatency={latency} onSelect={onSelect}/>}
     {reportTab==='Traces'&&<TraceViewer evaluationId={remote.experiment_id} running={run.status==='RUNNING'}/>}
     {reportTab==='Overview'&&remote.execution_mode==='guardrail'&&<GuardrailReport evaluationId={remote.experiment_id} running={run.status==='RUNNING'}
       report={guardrailReport} groupComparison={{
         grouped:!!remote.concurrency_group, reportId:run.id, catalog:catalog.evaluations, concurrency,
-        selected:comparedReport, onSelect:onCompareReport,
+        selected:comparedReport, onSelect:()=>{}, managed:true,
       }}/>}
     {error&&<div role="alert" className="text-sm text-destructive">Report loading failed: {error} <Button variant="outline" onClick={()=>setRetry(v=>v+1)}>Retry</Button></div>}
     {reportTab==='Overview'&&remote.execution_mode!=='guardrail'&&<section className="space-y-2"><h2 className="font-semibold">Results by dataset and aspect</h2><p className="text-xs text-muted-foreground">Aspect score = sample pass rate across all required scorers. Scorer score = mean on a 0–1 scale. Errors count as not passed.</p>

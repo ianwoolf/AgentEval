@@ -31,57 +31,44 @@ it('lists a concurrency group once and finds it by any member run ID', async () 
  expect(group.getByText('1/2 runs finished')).toBeTruthy();
  expect(group.getByText('5/8')).toBeTruthy();
  await user.click(group.getByRole('button',{name:'Inspect group'}));
- expect(select).toHaveBeenLastCalledWith('eval-first');
+ expect(select).toHaveBeenLastCalledWith(groupId);
  await user.type(screen.getByLabelText('Evaluation ID'),'eval-second');
  expect(screen.getAllByRole('row')).toHaveLength(2);
  expect(screen.getByText('2 runs · 8 → 2')).toBeTruthy();
  await user.click(screen.getByRole('button',{name:'Inspect group'}));
  expect(select).toHaveBeenLastCalledWith('eval-second');
 });
-it('compares reports at the active concurrency and follows it when opening another member', async () => {
+it('opens the whole group and compares two explicitly selected runs', async () => {
  setup();
  const original=store.evaluations[0]!;
  function member(id:string, group:string|null, concurrency:number):Evaluation {
-  return {...original,id,remote:{...original.remote!,id,experiment_id:`exp-${id}`,
+  return {...original,id,name:id,remote:{...original.remote!,id,experiment_id:`exp-${id}`,
    execution_mode:'guardrail',concurrency_group:group,concurrency}};
  }
- store.evaluations=[
-  member('a8','group-a',8),member('a2','group-a',2),
-  member('b2','group-b',2),member('b8','group-b',8),
-  member('c8','group-c',8),member('c1','group-c',1),member('single',null,8),
- ];
+ store.evaluations=[member('a8','group-a',8),member('a2','group-a',2),member('b2','group-b',2),member('b8','group-b',8),member('single',null,8)];
  const overall={TP:1,FP:0,TN:0,FN:0,processed:1,errors:0,pending:0,precision:1,recall:1,accuracy:1,f1:1};
  vi.stubGlobal('fetch',vi.fn(async (url:string)=>{
-  if(url.includes('guardrail-reports?'))return Response.json({items:store.evaluations.map(run=>({
-   id:run.remote!.experiment_id,report_id:run.id,status:'COMPLETED',provider:'f5',guardrail_id:'endpoint-b',
-  }))});
-  if(url.includes('/reports/'))return Response.json({overall,evaluation_config:{id:'cfg',version:8},
+  if(url.includes('/reports/'))return Response.json({overall,dataset_results:[{...overall,dataset_id:'d',dataset_version:1,name:'Dataset',input_source:'published',latency:{count:1,p50_ms:1,p95_ms:1}}],evaluation_config:{id:'cfg',version:8},
    guardrail:{provider:'nemo',id:'endpoint-a',name:'Endpoint A'}});
   return Response.json({items:[],total:0});
  }));
  function Reports(){
-  const [id,setId]=useState('a8');
+  const [id,setId]=useState('group-a');
   return <ReportsPage evaluationId={id} onSelect={setId}/>;
  }
  const user=userEvent.setup();
  render(<Reports/>);
- await user.click(await screen.findByRole('button',{name:'Compare',exact:true}));
- const list=screen.getByRole('listbox',{name:'Comparison reports'});
- expect(screen.getByText('A · Concurrency 8 · nemo / endpoint-a')).toBeTruthy();
- const option=await within(list).findByRole('option',{name:/Concurrency 8.*f5 \/ endpoint-b.*b8/});
- expect(within(list).getByRole('option',{name:/c8/})).toBeTruthy();
- expect(within(list).getByRole('option',{name:/single/})).toBeTruthy();
- expect(within(list).queryByRole('option',{name:/b2|c1|a2/})).toBeNull();
- await user.click(option);
+ expect(within(screen.getByRole('region',{name:'Run summary'})).getAllByRole('button',{name:'View report'})).toHaveLength(2);
+ expect(screen.queryByRole('region',{name:'Dataset scores'})).toBeNull();
+ await user.click(screen.getByRole('button',{name:'Compare',exact:true}));
+ await user.selectOptions(screen.getByLabelText('A · Current evaluation run'),'a2');
+ await user.selectOptions(screen.getByLabelText('B · Comparison run'),'b8');
+ await user.click(screen.getByRole('button',{name:'Apply comparison'}));
  expect(await screen.findByText('b8')).toBeTruthy();
- for(const name of ['A · Current report','B · Compared report']){
-  expect(within(screen.getByRole('region',{name})).getByText('8',{exact:true})).toBeTruthy();
- }
- await user.click(screen.getByRole('button',{name:'View report'}));
- expect(await screen.findByText('b2')).toBeTruthy();
- for(const name of ['A · Current report','B · Compared report']){
-  expect(within(screen.getByRole('region',{name})).getByText('2',{exact:true})).toBeTruthy();
- }
+ expect(within(screen.getByRole('region',{name:'A · Current report'})).getByText('2',{exact:true})).toBeTruthy();
+ expect(within(screen.getByRole('region',{name:'B · Compared report'})).getByText('8',{exact:true})).toBeTruthy();
+ await user.click(screen.getByRole('button',{name:'Back to run group'}));
+ expect(screen.getByRole('region',{name:'Run summary'})).toBeTruthy();
 });
 it('loads persisted samples with duration, score and expandable full input/response', async () => {
  setup();

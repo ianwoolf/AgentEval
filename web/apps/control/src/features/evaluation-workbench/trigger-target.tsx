@@ -9,7 +9,7 @@ import {Button,ErrorText,Field,Input,Modal,Select} from './ui';
 
 type Selection = {dataset_id:string;dataset_version:number;upload_id?:string|undefined};
 type RunSettings = {concurrency:string;provider:string;guardrail:string};
-type ComparisonRow = {id:string;concurrency:string};
+type ComparisonRow = RunSettings & {id:string};
 function DatasetUpload({projectId,selection,schema,config,labelMapping,onReady}:{
  projectId:string;selection:Selection;schema:DatasetVersion;config:{targetId:string;revision:string};
  labelMapping?:Record<string,string>;onReady(id:string,value:RunUpload|null):void;
@@ -58,7 +58,7 @@ function LegacyTriggerTargetDialog({targetId,onClose,onStarted}:{targetId:string
  const settings=groupMode?comparison:[single];
  const concurrencies=settings.map(s=>Number(s.concurrency));
  const endpointFor=(row:RunSettings)=>registry.providers.find(p=>p.id===row.provider)?.instances.find(i=>i.id===row.guardrail&&i.enabled);
- const canReview=!!config&&(!isGuardrail||endpointFor(single))&&settings.every(s=>/^\d+$/.test(s.concurrency)&&Number(s.concurrency)>=1&&Number(s.concurrency)<=32)&&
+ const canReview=!!config&&settings.every(s=>(!isGuardrail||endpointFor(s))&&/^\d+$/.test(s.concurrency)&&Number.isSafeInteger(Number(s.concurrency))&&Number(s.concurrency)>=1)&&
   (!groupMode||(comparison.length>=2&&new Set(concurrencies).size===comparison.length));
  const canRun=canReview&&sampleCount<=10000&&datasets.length>0&&datasets.every(row=>
   row.usingUpload ? row.version&&row.upload : row.version?.rows.length);
@@ -68,47 +68,53 @@ function LegacyTriggerTargetDialog({targetId,onClose,onStarted}:{targetId:string
    try{
     const targetPath=`targets/${encodeURIComponent(targetId)}`;
     const shared={config_revision:config.revision,datasets:datasets.map(({selection,upload})=>
-     upload?{...selection,upload_id:upload.id}:selection),
-     ...(isGuardrail?{provider:single.provider,guardrail_id:single.guardrail}:{})};
+     upload?{...selection,upload_id:upload.id}:selection)};
+    const connection=(row:RunSettings)=>({provider:row.provider,guardrail_id:row.guardrail});
     const headers={'Content-Type':'application/json','Idempotency-Key':runKey};
     const started=groupMode
      ?(await executionApi<{items:RemoteRun[]}>(projectId,`${targetPath}/run-comparison`,{
-       method:'POST',headers,body:JSON.stringify({...shared,group_id:runKey,levels:concurrencies}),
+       method:'POST',headers,body:JSON.stringify({...shared,group_id:runKey,levels:concurrencies,...(isGuardrail?{endpoints:comparison.map(connection)}:{})}),
       })).items
      :[await executionApi<RemoteRun>(projectId,`${targetPath}/runs`,{
-       method:'POST',headers,body:JSON.stringify({...shared,concurrency:concurrencies[0]}),
+       method:'POST',headers,body:JSON.stringify({...shared,concurrency:concurrencies[0],...(isGuardrail?connection(single):{})}),
       })];
     setState(s=>({...s,evaluations:[...started.map(fromRemote),...s.evaluations.filter(e=>!started.some(run=>run.id===e.id))]}));
-    onClose();onStarted?.(started[0].id);
+    onClose();onStarted?.(groupMode?runKey:started[0].id);
    }catch(e){setError((e as Error).message);submitted.current=false;}finally{setBusy(false);}
  }
  function setComparisonMode(enabled:boolean) {
   if(enabled&&!comparison.length){
    setComparison([
-    {id:crypto.randomUUID(),concurrency:single.concurrency},
-    {id:crypto.randomUUID(),concurrency:Number(single.concurrency)===1?'4':'1'},
+    {...single,id:crypto.randomUUID()},
+    {...single,id:crypto.randomUUID(),concurrency:Number(single.concurrency)===1?'4':'1'},
    ]);
   }
   setGroupMode(enabled);
   key.current=crypto.randomUUID();
  }
- const provider=registry.providers.find(p=>p.id===single.provider);
- const endpoint=endpointFor(single);
  function updateSettings(patch:Partial<RunSettings>){
   setSingle(s=>({...s,...patch}));
   key.current=crypto.randomUUID();
  }
- const endpointFields=isGuardrail&&<>
-    <Field label="Provider *"><Select className="!h-8" value={single.provider} onChange={e=>updateSettings({provider:e.target.value,guardrail:''})}>
+ function updateComparison(id:string, patch:Partial<RunSettings>) {
+  setComparison(rows=>rows.map(row=>row.id===id?{...row,...patch}:row));
+  key.current=crypto.randomUUID();
+ }
+ function endpointFields(row:RunSettings, update:(patch:Partial<RunSettings>)=>void) {
+  if (!isGuardrail) return null;
+  const provider=registry.providers.find(p=>p.id===row.provider);
+  return <>
+    <Field label="Provider *"><Select className="!h-8" value={row.provider} onChange={e=>update({provider:e.target.value,guardrail:''})}>
      <option value="">Select provider</option>
      {registry.providers.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
     </Select></Field>
-    <Field label="Guardrail endpoint *"><Select className="!h-8" disabled={!provider} value={single.guardrail}
-     title={endpoint?.address} onChange={e=>updateSettings({guardrail:e.target.value})}>
+    <Field label="Guardrail endpoint *"><Select className="!h-8" disabled={!provider} value={row.guardrail}
+     title={endpointFor(row)?.address} onChange={e=>update({guardrail:e.target.value})}>
      <option value="">Select endpoint</option>
      {provider?.instances.map(i=><option key={i.id} value={i.id} disabled={!i.enabled}>{i.name||i.id} · {i.id}{!i.enabled?' (disabled)':''}</option>)}
     </Select></Field>
  </>;
+ }
  return <Modal title="Trigger evaluation" description={`Set run options for ${target?.name??targetId}, then confirm its configured datasets.`} onClose={onClose} footer={<>
   <ErrorText message={error}/>
   <div className="flex justify-end gap-2">
@@ -130,22 +136,21 @@ function LegacyTriggerTargetDialog({targetId,onClose,onStarted}:{targetId:string
     <label className="flex items-center gap-2 text-sm font-medium">
      <input type="checkbox" checked={groupMode} onChange={e=>setComparisonMode(e.target.checked)}/> Compare concurrency levels
     </label>
-    <span className="text-xs text-muted-foreground">{groupMode?'2–8 runs · unique levels from 1–32':`Default ${config.concurrency??1} · range 1–32`}</span>
+    <span className="text-xs text-muted-foreground">{groupMode?'2–8 runs · distinct positive levels':`Default ${config.concurrency??1} · minimum 1`}</span>
    </div>
    {groupMode?<div className="space-y-2">
-    {isGuardrail&&<div className="grid gap-3 sm:grid-cols-2">{endpointFields}</div>}
     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
      <span className="text-sm font-medium">Case concurrency</span>
-     <span className="text-xs text-muted-foreground">Runs execute in numbered order.</span>
+     <span className="text-xs text-muted-foreground">Runs execute concurrently.</span>
     </div>
-    <ol className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <ol className="space-y-2">
      {comparison.map((row,index)=><li key={row.id}>
-      <div role="group" aria-label={`Run ${index+1}`} className="flex items-center gap-2 rounded-md border bg-muted/20 px-2 py-1.5">
-       <label htmlFor={row.id} className="shrink-0 whitespace-nowrap text-xs font-medium text-muted-foreground">Run {index+1}</label>
-       <Input id={row.id} aria-label="Case concurrency" className="h-7 min-w-0 flex-1 px-2 tabular-nums" value={row.concurrency} inputMode="numeric" onChange={e=>{
-        setComparison(rows=>rows.map(r=>r.id===row.id?{...r,concurrency:e.target.value}:r));
-        key.current=crypto.randomUUID();
-       }}/>
+      <div role="group" aria-label={`Run ${index+1}`} className="grid items-end gap-2 rounded-md border bg-muted/20 px-3 py-2 sm:grid-cols-[minmax(6rem,1fr)_minmax(0,2fr)_minmax(0,2fr)_auto]">
+       <Field label={`Run ${index+1} concurrency`}>
+        <Input aria-label="Case concurrency" className="h-8" value={row.concurrency} inputMode="numeric"
+         onChange={e=>updateComparison(row.id,{concurrency:e.target.value})}/>
+       </Field>
+       {endpointFields(row,patch=>updateComparison(row.id,patch))}
        {comparison.length>2&&<Button variant="ghost" size="icon-xs" className="text-muted-foreground hover:text-destructive"
         aria-label={`Remove run ${index+1}`} title={`Remove run ${index+1}`}
         onClick={()=>{
@@ -155,15 +160,18 @@ function LegacyTriggerTargetDialog({targetId,onClose,onStarted}:{targetId:string
       </div>
      </li>)}
     </ol>
+    {isGuardrail && new Set(comparison.filter(row=>endpointFor(row)).map(row=>endpointFor(row)?.address)).size <
+      comparison.filter(row=>endpointFor(row)).length &&
+      <p className="text-xs text-muted-foreground">Runs sharing an endpoint send requests at the same time. Latency reflects the combined load.</p>}
     <Button variant="outline" size="xs" disabled={comparison.length>=8} onClick={()=>{
-     setComparison(rows=>[...rows,{id:crypto.randomUUID(),concurrency:''}]);
+     setComparison(rows=>[...rows,{...single,id:crypto.randomUUID(),concurrency:''}]);
      key.current=crypto.randomUUID();
     }}><Plus aria-hidden="true"/> Add run</Button>
    </div>:<>
     <div className={`grid items-end gap-3 ${isGuardrail?'sm:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)]':'sm:grid-cols-[7rem]'}`}>
      <Field label="Case concurrency"><Input className="h-8" value={single.concurrency} inputMode="numeric"
       onChange={e=>updateSettings({concurrency:e.target.value})}/></Field>
-     {endpointFields}
+     {endpointFields(single,updateSettings)}
     </div>
     {endpointFor(single)&&<p className="break-all text-xs text-muted-foreground">{endpointFor(single)?.address}</p>}
    </>}

@@ -190,7 +190,6 @@ function EnvironmentEditor({
             <Input
               type="number"
               min={1}
-              max={32}
               value={Number.isFinite(config.runner.concurrency) ? config.runner.concurrency : ""}
               onChange={(e) => patch({ runner: { ...config.runner, concurrency: e.target.valueAsNumber } })}
             />

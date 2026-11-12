@@ -65,7 +65,7 @@ it('clears the instance when provider changes and requires a configured selectio
  expect(screen.getByRole('button',{name:'Review datasets'})).toHaveProperty('disabled',true);
 });
 
-it('submits one ordered comparison with a shared endpoint and validated upload',async()=>{
+it('submits one ordered comparison with per-run endpoints and validated upload',async()=>{
  mock.api.mockImplementation(async(_p,path,options)=>path==='guardrail-instances'
   ?{providers:[
    {id:'f5',name:'F5',instances:[{id:'gr',name:'Guardrail',enabled:true,address:'https://guard.test/scans'}]},
@@ -82,8 +82,11 @@ it('submits one ordered comparison with a shared endpoint and validated upload',
  await user.click(await screen.findByLabelText('Compare concurrency levels'));
  const second=within(screen.getByRole('group',{name:'Run 2'}));
  const review=screen.getByRole('button',{name:'Review datasets'});
- expect(screen.getAllByLabelText('Guardrail endpoint *')).toHaveLength(1);
- expect(screen.getByLabelText('Guardrail endpoint *')).toHaveProperty('value','gr');
+ expect(screen.getAllByLabelText('Guardrail endpoint *')).toHaveLength(2);
+ expect(second.getByLabelText('Guardrail endpoint *')).toHaveProperty('value','gr');
+ await user.selectOptions(second.getByLabelText('Provider *'),'nemo');
+ expect(review).toHaveProperty('disabled',true);
+ await user.selectOptions(second.getByLabelText('Guardrail endpoint *'),'other');
  expect(review).toHaveProperty('disabled',false);
  await user.clear(second.getByLabelText('Case concurrency'));
  await user.type(second.getByLabelText('Case concurrency'),'3');
@@ -100,11 +103,11 @@ it('submits one ordered comparison with a shared endpoint and validated upload',
  await user.upload(screen.getByLabelText('Upload CSV or Excel'),new File(['input\nhello'],'cases.csv'));
  await screen.findByText('Validated 1 samples');
  await user.click(screen.getByRole('button',{name:'Run comparison group'}));
- await waitFor(()=>expect(started).toHaveBeenCalledWith('3'));
+ await waitFor(()=>expect(started).toHaveBeenCalledWith(JSON.parse(mock.api.mock.calls.find(c=>c[1].endsWith('/run-comparison'))![2].body).group_id));
  const requests=mock.api.mock.calls.filter(c=>c[1].endsWith('/run-comparison')).map(c=>c[2]);
  expect(requests).toHaveLength(1);
  expect(JSON.parse(requests[0].body)).toMatchObject({
-  levels:[3,6],provider:'f5',guardrail_id:'gr',
+  levels:[3,6],endpoints:[{provider:'f5',guardrail_id:'gr'},{provider:'nemo',guardrail_id:'other'}],
   datasets:[{dataset_id:'selected',dataset_version:1,upload_id:'upload-shared'}],
  });
  expect(mock.api.mock.calls.filter(c=>c[1].startsWith('uploads?'))).toHaveLength(1);

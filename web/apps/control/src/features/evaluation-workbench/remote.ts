@@ -5,9 +5,10 @@ export interface RemoteRun {
   concurrency?: number;
   concurrency_group?: string | null;
   serial_index?: number;
+  group_index?: number;
   execution_mode?: 'legacy' | 'guardrail';
   feature_modes?: {scoring_enabled:boolean;reflection_enabled:boolean;effective_reflection_mode:'real'|'mock'};
-  datasets?: Array<{dataset_id:string;dataset_version:number;name:string;sample_count:number;objective?:string;scorer_ids?:string[]}>;
+  datasets?: Array<{dataset_id:string;dataset_version:number;name:string;sample_count:number;objective?:string;scorer_ids?:string[];input_source?:'published'|'upload'}>;
   scorer_selection?: 'shared'|'dataset';
   runtime?: 'docker' | 'kubernetes';
   container_name?: string | null;

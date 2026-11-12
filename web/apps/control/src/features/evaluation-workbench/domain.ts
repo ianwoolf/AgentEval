@@ -48,11 +48,10 @@ export function validateEnvironment(config: EnvironmentConfig) {
   )
     throw new Error("Model ID, Guardrail ID and execution environment are required.");
   if (
-    !Number.isInteger(config.runner.concurrency) ||
-    config.runner.concurrency < 1 ||
-    config.runner.concurrency > 32
+    !Number.isSafeInteger(config.runner.concurrency) ||
+    config.runner.concurrency < 1
   )
-    throw new Error("Runner concurrency must be an integer from 1 to 32.");
+    throw new Error("Runner concurrency must be a positive integer.");
   if (!config.name.trim()) throw new Error("Environment name is required.");
   if (
     !Number.isFinite(config.cpuMillicores) ||
@@ -60,7 +59,7 @@ export function validateEnvironment(config: EnvironmentConfig) {
     config.cpuMillicores > 32000 ||
     !Number.isInteger(config.cpuMillicores)
   )
-    throw new Error("CPU must be an integer from 1 to 32,000 m (1000m = 1 core).");
+    throw new Error("CPU must be a positive integer,000 m (1000m = 1 core).");
   if (
     !Number.isInteger(config.memoryMiB) ||
     config.memoryMiB < 128 ||

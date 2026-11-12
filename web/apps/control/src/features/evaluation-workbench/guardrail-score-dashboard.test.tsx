@@ -13,7 +13,7 @@ it('switches dataset score views and latency and compares saved report totals',a
  api.mockImplementation(async(_p,path)=>path.startsWith('guardrail-reports')?{items:[{id:'current',name:'Current'},{id:'other',name:'Previous report',report_id:'eval-other',created_at:'2026-11-04T00:00:00Z',status:'COMPLETED',guardrail_id:'guard-2'}]}:{overall:{...scores,precision:.4,recall:.4,accuracy:.4,f1:.4},guardrail:{type:'GUARDRAIL',provider:'f5',id:'guard-2',name:'Previous Guardrail'}});
  render(<GuardrailScoreDashboard report={report} evaluationId="current"/>);const user=userEvent.setup();
  expect(screen.getByText(/Snapshot Guardrail/)).toBeTruthy();
- expect(within(screen.getByRole('region',{name:'Overall scores'})).getAllByText('60.0%')).toHaveLength(4);
+ expect(within(screen.getByRole('region',{name:'Evaluation results'})).getAllByText('60.0%')).toHaveLength(4);
  const chart=screen.getByRole('img',{name:'Dataset score comparison'});
  expect(chart.querySelectorAll('[data-score-group]')).toHaveLength(4);
  expect(chart.querySelector('[data-score-group=precision] > text')?.getAttribute('y')).toBe('16');
@@ -66,7 +66,7 @@ it('identifies both endpoints and pairs matching dataset versions with distinct 
  expect(chart.querySelector('rect[data-report=Selected]')?.getAttribute('fill')).toBe(`url(#${pattern?.id})`);
  expect(chart.querySelectorAll('[data-dataset-label]')).toHaveLength(8);
  expect(screen.queryByText('Overall score comparison')).toBeNull();
- const totals=within(screen.getByRole('region',{name:'Overall scores'}));expect(totals.getByText('+20.0 pp').className).toContain('text-emerald-600');
+ const totals=within(screen.getByRole('region',{name:'Evaluation results'}));expect(totals.getByText('+20.0 pp').className).toContain('text-emerald-600');
  const cells=within(screen.getByRole('row',{name:/Dataset A/})).getAllByRole('cell');
  const p50=within(cells.at(-2)!);
  expect(p50.getByText('10.0 ms')).toBeTruthy();
